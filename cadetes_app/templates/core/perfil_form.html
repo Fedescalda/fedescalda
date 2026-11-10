@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Mi perfil{% endblock %}
+{% block contenido %}
+<div class="row justify-content-center"><div class="col-lg-7">
+  <div class="card shadow-sm"><div class="card-body p-4">
+    <h3>{% if nuevo %}Completá tu perfil{% else %}Editar perfil{% endif %}
+      <small class="text-muted fs-6">({{ user.get_rol_display }})</small></h3>
+    <p class="text-muted small">Tu teléfono sólo se muestra a quienes acepten trabajar con vos.</p>
+    <form method="post">{% csrf_token %}
+      {% include "_campos.html" %}
+      <button class="btn btn-success">Guardar</button>
+    </form>
+  </div></div>
+</div></div>
+{% endblock %}

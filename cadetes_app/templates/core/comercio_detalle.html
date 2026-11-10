@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titulo %}{{ comercio.nombre }}{% endblock %}
+{% block contenido %}
+<div class="card shadow-sm mb-4"><div class="card-body p-4">
+  <h2>{{ comercio.nombre }}</h2>
+  <p class="text-muted">{{ comercio.rubro }} · <i class="bi bi-geo-alt"></i> {{ comercio.zona }}</p>
+  {% if comercio.descripcion %}<p style="white-space: pre-line">{{ comercio.descripcion }}</p>{% endif %}
+  {% if contacto_visible %}
+    <p class="mb-0"><i class="bi bi-telephone"></i> {{ comercio.telefono }} · <i class="bi bi-house"></i> {{ comercio.direccion }}</p>
+  {% else %}
+    <p class="small text-muted mb-0">El teléfono y la dirección se muestran cuando acepten trabajar juntos.</p>
+  {% endif %}
+</div></div>
+<h4>Ofertas activas</h4>
+<div class="row row-cols-1 row-cols-md-2 g-3">
+  {% for oferta in ofertas %}<div class="col">{% include "core/_oferta_card.html" %}</div>
+  {% empty %}<p class="text-muted">Este comercio no tiene ofertas activas.</p>{% endfor %}
+</div>
+{% endblock %}

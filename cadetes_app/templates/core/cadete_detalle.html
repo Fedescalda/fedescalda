@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titulo %}{{ cadete.nombre }}{% endblock %}
+{% block contenido %}
+<div class="row g-4">
+  <div class="col-lg-7"><div class="card shadow-sm"><div class="card-body p-4">
+    <h2>{{ cadete.nombre }} {% if not cadete.disponible %}<span class="badge text-bg-secondary fs-6">No disponible</span>{% endif %}</h2>
+    <ul class="list-unstyled">
+      <li><i class="bi bi-geo-alt"></i> <strong>Zona:</strong> {{ cadete.zona }}</li>
+      <li><i class="bi bi-truck"></i> <strong>Vehículo:</strong> {{ cadete.get_vehiculo_display }}</li>
+      <li><i class="bi bi-clock"></i> <strong>Horarios:</strong> {{ cadete.horarios }}</li>
+      <li><i class="bi bi-telephone"></i> <strong>Teléfono:</strong>
+        {% if contacto_visible %}{{ cadete.telefono }}{% else %}<span class="text-muted">visible cuando acepten trabajar juntos</span>{% endif %}</li>
+    </ul>
+    {% if cadete.experiencia %}<h6>Experiencia</h6><p style="white-space: pre-line">{{ cadete.experiencia }}</p>{% endif %}
+  </div></div></div>
+  <div class="col-lg-5">
+    {% if vinculos %}
+      <h5>Vínculos con tu comercio</h5>
+      {% for p in vinculos %}
+        <div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between">
+          <div>{{ p.oferta.titulo }}<div class="small text-muted">{{ p.get_origen_display }}</div></div>
+          <div class="text-end">{% include "_estado.html" %}
+            {% if p.estado == 'pendiente' and p.origen == 'cadete' %}<div class="mt-1">{% include "_responder.html" %}</div>{% endif %}</div>
+        </div></div>
+      {% endfor %}
+    {% endif %}
+    <div class="card card-body mt-3">
+      <h5>Invitar a una oferta</h5>
+      {% if form.fields.oferta.queryset.exists %}
+        <form method="post">{% csrf_token %}
+          {% include "_campos.html" %}
+          <button class="btn btn-success w-100">Enviar invitación</button>
+        </form>
+      {% else %}
+        <p class="text-muted mb-2">Necesitás una oferta activa para invitar cadetes.</p>
+        <a href="{% url 'oferta_nueva' %}" class="btn btn-outline-success">Publicar oferta</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

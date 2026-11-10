@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block titulo %}{{ oferta.titulo }}{% endblock %}
+{% block contenido %}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card shadow-sm"><div class="card-body p-4">
+      <h2>{{ oferta.titulo }} {% if not oferta.activa %}<span class="badge text-bg-secondary fs-6">Pausada</span>{% endif %}</h2>
+      <p class="text-muted">
+        {% if user.is_authenticated and user.es_cadete %}<a href="{{ oferta.comercio.get_absolute_url }}">{{ oferta.comercio.nombre }}</a>{% else %}{{ oferta.comercio.nombre }}{% endif %}
+        · {{ oferta.comercio.rubro }} · publicada {{ oferta.creada|timesince }} atrás</p>
+      <p style="white-space: pre-line">{{ oferta.descripcion }}</p>
+      <ul class="list-unstyled">
+        <li><i class="bi bi-geo-alt"></i> <strong>Zona:</strong> {{ oferta.zona }}</li>
+        <li><i class="bi bi-clock"></i> <strong>Horario:</strong> {{ oferta.horario }}</li>
+        <li><i class="bi bi-cash"></i> <strong>Pago:</strong> {% if oferta.monto %}${{ oferta.monto|floatformat:0 }} {% endif %}{{ oferta.get_modalidad_pago_display|lower }}</li>
+        <li><i class="bi bi-truck"></i> <strong>Vehículo:</strong> {{ oferta.get_vehiculo_display|default:"Cualquiera" }}</li>
+      </ul>
+      {% if es_duenio %}
+        <div class="d-flex gap-2">
+          <a href="{% url 'oferta_editar' oferta.pk %}" class="btn btn-outline-success">Editar</a>
+          <form method="post" action="{% url 'oferta_alternar' oferta.pk %}">{% csrf_token %}
+            <button class="btn btn-outline-secondary">{% if oferta.activa %}Pausar{% else %}Volver a publicar{% endif %}</button>
+          </form>
+        </div>
+      {% endif %}
+    </div></div>
+  </div>
+  <div class="col-lg-5">
+    {% if es_duenio %}
+      <h5>Cadetes vinculados</h5>
+      {% for p in postulaciones %}
+        <div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between">
+          <div><a href="{{ p.cadete.get_absolute_url }}">{{ p.cadete.nombre }}</a>
+            <div class="small text-muted">{{ p.get_origen_display }}</div></div>
+          <div class="text-end">{% include "_estado.html" %}
+            {% if p.estado == 'pendiente' and p.origen == 'cadete' %}<div class="mt-1">{% include "_responder.html" %}</div>{% endif %}</div>
+        </div></div>
+      {% empty %}<p class="text-muted">Nadie se postuló todavía. <a href="{% url 'cadetes_lista' %}?zona={{ oferta.zona|urlencode }}">Buscá cadetes en la zona</a>.</p>{% endfor %}
+    {% elif mi_postulacion %}
+      <div class="card card-body">
+        <p class="mb-1">Ya estás vinculado a esta oferta: {% include "_estado.html" with p=mi_postulacion %}</p>
+        {% if mi_postulacion.estado == 'aceptada' %}<p class="mb-0"><i class="bi bi-telephone"></i> {{ oferta.comercio.telefono }}<br><i class="bi bi-geo-alt"></i> {{ oferta.comercio.direccion }}</p>{% endif %}
+        <a href="{% url 'panel' %}" class="small">Ver en mi panel</a>
+      </div>
+    {% elif form %}
+      <div class="card card-body">
+        <h5>Postularme</h5>
+        <form method="post" action="{% url 'postularse' oferta.pk %}">{% csrf_token %}
+          {{ form.mensaje }}
+          <button class="btn btn-success mt-2 w-100">Enviar postulación</button>
+        </form>
+      </div>
+    {% elif not user.is_authenticated %}
+      <div class="card card-body text-center">
+        <p>¿Te interesa? Creá tu cuenta de cadete para postularte.</p>
+        <a href="{% url 'registro' %}?rol=cadete" class="btn btn-success">Registrarme como cadete</a>
+        <a href="{% url 'login' %}?next={{ request.path|urlencode }}" class="small mt-2">Ya tengo cuenta</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

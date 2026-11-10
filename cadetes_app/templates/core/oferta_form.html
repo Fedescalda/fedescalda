@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}{% if oferta %}Editar oferta{% else %}Nueva oferta{% endif %}{% endblock %}
+{% block contenido %}
+<div class="row justify-content-center"><div class="col-lg-7">
+  <div class="card shadow-sm"><div class="card-body p-4">
+    <h3>{% if oferta %}Editar oferta{% else %}Publicar oferta para cadetes{% endif %}</h3>
+    <form method="post">{% csrf_token %}
+      {% include "_campos.html" %}
+      <button class="btn btn-success">Guardar</button>
+      <a href="{% if oferta %}{{ oferta.get_absolute_url }}{% else %}{% url 'panel' %}{% endif %}" class="btn btn-link">Cancelar</a>
+    </form>
+  </div></div>
+</div></div>
+{% endblock %}

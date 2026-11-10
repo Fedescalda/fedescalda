@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block titulo %}Mi panel{% endblock %}
+{% block contenido %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h2 class="mb-0"><i class="bi bi-bicycle"></i> Hola, {{ cadete.nombre }}</h2>
+  <div>
+    {% if cadete.disponible %}<span class="badge text-bg-success">Visible para comercios</span>
+    {% else %}<span class="badge text-bg-secondary">No visible</span> <a href="{% url 'perfil_editar' %}" class="small">cambiar</a>{% endif %}
+  </div>
+</div>
+<div class="row g-4">
+  <div class="col-lg-7">
+    <h5>Mis postulaciones e invitaciones</h5>
+    {% for p in postulaciones %}
+      <div class="card mb-2"><div class="card-body py-2">
+        <div class="d-flex justify-content-between flex-wrap gap-2">
+          <div>
+            <a href="{{ p.oferta.get_absolute_url }}" class="fw-semibold">{{ p.oferta.titulo }}</a>
+            <span class="text-muted small">· {{ p.oferta.comercio.nombre }} · {{ p.get_origen_display }}</span>
+            {% if p.mensaje and p.origen == 'comercio' %}<div class="small fst-italic">“{{ p.mensaje }}”</div>{% endif %}
+            {% if p.estado == 'aceptada' %}<div class="small"><i class="bi bi-telephone"></i> {{ p.oferta.comercio.telefono }} · <i class="bi bi-geo-alt"></i> {{ p.oferta.comercio.direccion }}</div>{% endif %}
+          </div>
+          <div class="text-end">
+            {% include "_estado.html" %}
+            {% if p.estado == 'pendiente' and p.origen == 'comercio' %}<div class="mt-1">{% include "_responder.html" %}</div>{% endif %}
+          </div>
+        </div>
+      </div></div>
+    {% empty %}
+      <p class="text-muted">Todavía no te postulaste. <a href="{% url 'ofertas_lista' %}">Mirá las ofertas</a>.</p>
+    {% endfor %}
+  </div>
+  <div class="col-lg-5">
+    <h5>Ofertas para vos <small class="text-muted fs-6">({{ cadete.zona }})</small></h5>
+    {% for oferta in sugeridas %}
+      <div class="mb-2">{% include "core/_oferta_card.html" %}</div>
+    {% empty %}
+      <p class="text-muted small">No hay ofertas nuevas en tu zona. <a href="{% url 'ofertas_lista' %}">Ver todas</a>.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

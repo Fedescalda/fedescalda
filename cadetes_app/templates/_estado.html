@@ -1,0 +1,3 @@
+{% if p.estado == 'aceptada' %}<span class="badge text-bg-success">Aceptada</span>
+{% elif p.estado == 'rechazada' %}<span class="badge text-bg-secondary">Rechazada</span>
+{% else %}<span class="badge text-bg-warning">Pendiente</span>{% endif %}

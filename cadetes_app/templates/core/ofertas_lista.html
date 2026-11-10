@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titulo %}Ofertas{% endblock %}
+{% block contenido %}
+<h2 class="mb-3">Ofertas de trabajo para cadetes</h2>
+{% include "_filtro.html" %}
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+  {% for oferta in ofertas %}
+    <div class="col">{% include "core/_oferta_card.html" %}</div>
+  {% empty %}
+    <p class="text-muted">No encontramos ofertas con esos filtros.</p>
+  {% endfor %}
+</div>
+{% endblock %}
