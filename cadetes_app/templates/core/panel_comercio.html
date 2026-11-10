@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block titulo %}Mi panel{% endblock %}
+{% block contenido %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h2 class="mb-0"><i class="bi bi-shop"></i> {{ comercio.nombre }}</h2>
+  <div class="d-flex gap-2">
+    <a href="{% url 'cadetes_lista' %}?zona={{ comercio.zona|urlencode }}" class="btn btn-outline-success"><i class="bi bi-search"></i> Cadetes en mi zona</a>
+    <a href="{% url 'oferta_nueva' %}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nueva oferta</a>
+  </div>
+</div>
+<div class="row g-4">
+  <div class="col-lg-5">
+    <h5>Mis ofertas</h5>
+    <div class="list-group">
+      {% for o in ofertas %}
+        <a href="{{ o.get_absolute_url }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+          <span>{{ o.titulo }} {% if not o.activa %}<span class="badge text-bg-secondary">Pausada</span>{% endif %}</span>
+          {% if o.pendientes %}<span class="badge text-bg-warning rounded-pill">{{ o.pendientes }} pendiente{{ o.pendientes|pluralize }}</span>{% endif %}
+        </a>
+      {% empty %}
+        <div class="list-group-item text-muted">Todavía no publicaste ofertas.</div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <h5>Postulaciones e invitaciones</h5>
+    {% for p in postulaciones %}
+      <div class="card mb-2"><div class="card-body py-2">
+        <div class="d-flex justify-content-between flex-wrap gap-2">
+          <div>
+            <a href="{{ p.cadete.get_absolute_url }}" class="fw-semibold">{{ p.cadete.nombre }}</a>
+            <span class="text-muted small">· {{ p.oferta.titulo }} · {{ p.get_origen_display }}</span>
+            {% if p.mensaje %}<div class="small fst-italic">“{{ p.mensaje }}”</div>{% endif %}
+            {% if p.estado == 'aceptada' %}<div class="small"><i class="bi bi-telephone"></i> {{ p.cadete.telefono }}</div>{% endif %}
+          </div>
+          <div class="text-end">
+            {% include "_estado.html" %}
+            {% if p.estado == 'pendiente' and p.origen == 'cadete' %}<div class="mt-1">{% include "_responder.html" %}</div>{% endif %}
+          </div>
+        </div>
+      </div></div>
+    {% empty %}
+      <p class="text-muted">No hay postulaciones todavía.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

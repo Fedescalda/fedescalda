@@ -1,0 +1,13 @@
+<div class="card h-100 shadow-sm">
+  <div class="card-body">
+    <h5 class="card-title mb-1"><a href="{{ oferta.get_absolute_url }}" class="text-decoration-none">{{ oferta.titulo }}</a></h5>
+    <div class="text-muted small mb-2">{{ oferta.comercio.nombre }} · {{ oferta.comercio.rubro }}</div>
+    <p class="card-text small">{{ oferta.descripcion|truncatewords:25 }}</p>
+  </div>
+  <div class="card-footer bg-transparent small d-flex flex-wrap gap-2">
+    <span><i class="bi bi-geo-alt"></i> {{ oferta.zona }}</span>
+    <span><i class="bi bi-clock"></i> {{ oferta.horario }}</span>
+    <span><i class="bi bi-cash"></i> {% if oferta.monto %}${{ oferta.monto|floatformat:0 }} {% endif %}{{ oferta.get_modalidad_pago_display|lower }}</span>
+    {% if oferta.vehiculo %}<span class="badge text-bg-light">{{ oferta.get_vehiculo_display }}</span>{% endif %}
+  </div>
+</div>

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titulo %}Inicio{% endblock %}
+{% block contenido %}
+<div class="p-5 mb-4 bg-white rounded-3 shadow-sm text-center">
+  <h1 class="display-5 fw-bold">Comercios y cadetes, en un solo lugar</h1>
+  <p class="lead col-lg-8 mx-auto">¿Tenés un comercio y no tenés cadete? Publicá tu oferta y encontrá cadetes de tu zona.
+    ¿Sos cadete? Encontrá comercios donde trabajar.</p>
+  <div class="d-flex flex-wrap gap-2 justify-content-center">
+    <a href="{% url 'registro' %}?rol=comercio" class="btn btn-success btn-lg"><i class="bi bi-shop"></i> Soy comercio</a>
+    <a href="{% url 'registro' %}?rol=cadete" class="btn btn-outline-success btn-lg"><i class="bi bi-bicycle"></i> Soy cadete</a>
+  </div>
+</div>
+<div class="row text-center g-3">
+  <div class="col-md-4"><div class="card card-body"><div class="fs-2 fw-bold">{{ total_ofertas }}</div>ofertas activas</div></div>
+  <div class="col-md-4"><div class="card card-body"><div class="fs-2 fw-bold">{{ total_cadetes }}</div>cadetes buscando trabajo</div></div>
+  <div class="col-md-4"><div class="card card-body"><div class="fs-2 fw-bold">{{ total_comercios }}</div>comercios registrados</div></div>
+</div>
+<div class="row mt-5 g-4">
+  <div class="col-md-6">
+    <h4><i class="bi bi-shop"></i> Para comercios</h4>
+    <ol><li>Creá tu cuenta y perfil.</li><li>Publicá una oferta con zona, horario y pago.</li>
+      <li>Recibí postulaciones o invitá cadetes disponibles.</li><li>Al aceptar, se comparten los teléfonos.</li></ol>
+  </div>
+  <div class="col-md-6">
+    <h4><i class="bi bi-bicycle"></i> Para cadetes</h4>
+    <ol><li>Creá tu cuenta y contá tu zona, vehículo y horarios.</li><li>Mirá las ofertas y postulate.</li>
+      <li>Los comercios también pueden invitarte.</li><li>Al aceptar, se comparten los teléfonos.</li></ol>
+  </div>
+</div>
+{% endblock %}

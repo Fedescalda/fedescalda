@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block titulo %}Comercios{% endblock %}
+{% block contenido %}
+<h2 class="mb-3">Comercios</h2>
+<form method="get" class="row g-2 mb-4">
+  <div class="col-md-6">{{ form.q }}</div>
+  <div class="col-md-4">{{ form.zona }}</div>
+  <div class="col-md-2 d-grid"><button class="btn btn-success"><i class="bi bi-search"></i> Filtrar</button></div>
+</form>
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+  {% for c in comercios %}
+    <div class="col"><div class="card h-100 shadow-sm"><div class="card-body">
+      <h5 class="card-title"><a href="{{ c.get_absolute_url }}" class="text-decoration-none">{{ c.nombre }}</a></h5>
+      <div class="small mb-2">{{ c.rubro }} · <i class="bi bi-geo-alt"></i> {{ c.zona }}</div>
+      {% if c.ofertas_activas %}<span class="badge text-bg-success">{{ c.ofertas_activas }} oferta{{ c.ofertas_activas|pluralize }} activa{{ c.ofertas_activas|pluralize }}</span>
+      {% else %}<span class="badge text-bg-light">Sin ofertas por ahora</span>{% endif %}
+    </div></div></div>
+  {% empty %}
+    <p class="text-muted">No encontramos comercios con esos filtros.</p>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}Registro{% endblock %}
+{% block contenido %}
+<div class="row justify-content-center"><div class="col-md-6 col-lg-5">
+  <div class="card shadow-sm"><div class="card-body p-4">
+    <h3 class="mb-3">Crear cuenta</h3>
+    <form method="post">{% csrf_token %}
+      {% include "_campos.html" %}
+      <button class="btn btn-success w-100">Registrarme</button>
+    </form>
+    <p class="mt-3 mb-0 small text-center">¿Ya tenés cuenta? <a href="{% url 'login' %}">Ingresá</a></p>
+  </div></div>
+</div></div>
+{% endblock %}
