@@ -69,6 +69,8 @@
     $("#cart-count").textContent = items.reduce((n, [, q]) => n + q, 0);
     $("#cart-empty").hidden = items.length > 0;
     $("#cart-send").disabled = items.length === 0;
+    const total = items.reduce((t, [i, q]) => t + (PRODUCTOS[i].precio || 0) * q, 0);
+    $("#cart-total").textContent = total ? `Total: ${pesos.format(total)}` : "";
     $("#cart-items").innerHTML = items
       .map(
         ([i, q]) => `
@@ -114,8 +116,9 @@
 
   $("#cart-send").addEventListener("click", () => {
     const nombre = $("#cart-name").value.trim();
-    const lineas = Object.entries(carrito).map(([i, q]) => `• ${q} x ${PRODUCTOS[i].nombre}`);
-    const texto = `¡Hola Amantes del Fuego! 🔥${nombre ? ` Soy ${nombre}.` : ""}\nQuiero consultar por este pedido:\n${lineas.join("\n")}`;
+    const lineas = Object.entries(carrito).map(([i, q]) => `• ${q} x ${PRODUCTOS[i].nombre}${PRODUCTOS[i].precio ? ` (${pesos.format(PRODUCTOS[i].precio)} c/u)` : ""}`);
+    const total = Object.entries(carrito).reduce((t, [i, q]) => t + (PRODUCTOS[i].precio || 0) * q, 0);
+    const texto = `¡Hola Amantes del Fuego! 🔥${nombre ? ` Soy ${nombre}.` : ""}\nQuiero consultar por este pedido:\n${lineas.join("\n")}${total ? `\n\nTotal aprox.: ${pesos.format(total)}` : ""}`;
     window.open(waUrl(texto), "_blank", "noopener");
   });
 

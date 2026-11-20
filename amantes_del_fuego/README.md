@@ -39,7 +39,7 @@ amantes_del_fuego/
 
 Con `precio: null` se muestra "Consultar precio". Las categorías de los filtros se arman solas.
 
-> ⚠️ Los productos que vienen cargados son **ejemplos**. Hay que reemplazarlos por los del catálogo real.
+> Precios cargados desde el catálogo de WhatsApp (noviembre 2026). Actualizarlos en `js/productos.js` cuando cambien.
 
 ## Verlo en local
 
