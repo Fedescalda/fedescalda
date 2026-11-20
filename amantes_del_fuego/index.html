@@ -3,17 +3,73 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Amantes del Fuego | Discos, mecheros y accesorios para el asado</title>
-  <meta name="description" content="Discos de arado, mecheros, estacas cruz y leñeros. Productos seleccionados y atención personalizada para los verdaderos amantes del fuego. Pedidos por WhatsApp.">
+  <title>Amantes del Fuego | Discos de arado y mecheros en Arroyo Seco</title>
+  <meta name="description" content="Discos de arado, mecheros, estacas cruz y leñeros en Arroyo Seco, Santa Fe. Mirá precios y hacé tu pedido por WhatsApp. Atención personalizada todos los días.">
   <meta name="theme-color" content="#000000">
-  <meta property="og:title" content="Amantes del Fuego">
-  <meta property="og:description" content="Todo lo que necesitás para vivir tu pasión por el fuego.">
-  <meta property="og:image" content="img/logo.jpg">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:site_name" content="Amantes del Fuego">
+  <meta property="og:title" content="Amantes del Fuego | Artículos para el asado en Arroyo Seco">
+  <meta property="og:description" content="Discos de arado, mecheros, estacas cruz y leñeros. Mirá precios y pedí por WhatsApp.">
+  <meta property="og:image" content="img/video/reel-poster.jpg">
   <link rel="icon" href="img/logo.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="img/logo.webp" type="image/webp" imagesrcset="img/logo-sm.webp 483w, img/logo.webp 966w" imagesizes="(max-width: 600px) 80vw, 500px">
   <link rel="stylesheet" href="css/styles.css">
+  <!-- Datos para Google. js/main.js completa las URLs absolutas, los horarios y el catálogo desde js/productos.js -->
+  <script type="application/ld+json" id="schema-negocio">
+{
+  "@context": "https://schema.org",
+  "@type": "Store",
+  "@id": "#negocio",
+  "name": "Amantes del Fuego",
+  "description": "Discos de arado, mecheros, estacas cruz, leñeros y accesorios para el asado.",
+  "slogan": "El fuego nos une. La pasión nos identifica.",
+  "image": "img/logo.png",
+  "logo": "img/logo.png",
+  "telephone": "+54 9 3402 48-7788",
+  "priceRange": "$ 15.200 - $ 402.370",
+  "currenciesAccepted": "ARS",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Arroyo Seco",
+    "addressRegion": "Santa Fe",
+    "addressCountry": "AR"
+  },
+  "areaServed": {
+    "@type": "City",
+    "name": "Arroyo Seco"
+  },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ],
+      "opens": "07:00",
+      "closes": "23:00"
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Saturday",
+        "Sunday"
+      ],
+      "opens": "10:00",
+      "closes": "23:00"
+    }
+  ],
+  "sameAs": [
+    "https://www.instagram.com/amantesdelfuego.as/"
+  ]
+}
+  </script>
 </head>
 <body>
   <a href="#catalogo" class="skip">Ir al catálogo</a>
@@ -40,9 +96,11 @@
     <section id="inicio" class="hero">
       <div class="hero__glow" aria-hidden="true"></div>
       <canvas class="hero__sparks" id="chispas" aria-hidden="true"></canvas>
-      <h1 class="hero__title">
+      <picture>
+        <source type="image/webp" srcset="img/logo-sm.webp 483w, img/logo.webp 966w" sizes="(max-width: 600px) 80vw, 500px">
         <img src="img/logo.png" alt="Amantes del Fuego" class="hero__logo" width="966" height="604" fetchpriority="high">
-      </h1>
+      </picture>
+      <h1 class="hero__title">Discos, mecheros y accesorios para el asado en Arroyo Seco</h1>
       <p class="hero__tagline">Mucho más que parrillas, una pasión que nos une.</p>
       <div class="hero__actions">
         <a href="#catalogo" class="btn btn--primary">Ver catálogo</a>
@@ -92,7 +150,8 @@
       <div class="container contact__grid">
         <div>
           <h2>Todo lo que necesitás para vivir tu pasión por el fuego.</h2>
-          <p class="contact__text">Consultanos por productos, medidas, envíos y formas de pago.</p>
+          <p class="contact__text">Estamos en Arroyo Seco, Santa Fe. Consultanos por productos, medidas, envíos y formas de pago.</p>
+          <p class="contact__tel">WhatsApp: <a href="#" class="js-wa-link">+54 9 3402 48-7788</a></p>
           <div class="contact__actions">
             <a href="#" class="btn btn--primary js-wa-link">Escribir por WhatsApp</a>
             <a href="https://www.instagram.com/amantesdelfuego.as/" target="_blank" rel="noopener" class="btn btn--ghost">Instagram @amantesdelfuego.as</a>
@@ -110,7 +169,7 @@
   </main>
 
   <footer class="footer">
-    <p>© <span id="year"></span> <span translate="no">Amantes del Fuego</span>. El fuego nos une.</p>
+    <p>© <span id="year"></span> <span translate="no">Amantes del Fuego</span>. Arroyo Seco, Santa Fe. WhatsApp +54&nbsp;9&nbsp;3402&nbsp;48-7788.</p>
   </footer>
 
   <a href="#" class="wa-float js-wa-link" aria-label="Escribir por WhatsApp">

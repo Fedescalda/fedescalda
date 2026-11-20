@@ -289,6 +289,37 @@
     requestAnimationFrame(cuadro);
   }
 
+  // Datos estructurados (schema.org): URLs absolutas, horarios y catálogo desde productos.js
+  try {
+    const nodo = $("#schema-negocio");
+    const datos = JSON.parse(nodo.textContent);
+    const base = location.href.split(/[?#]/)[0];
+    const abs = (r) => new URL(r, base).href;
+    const dias = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    Object.assign(datos, {
+      "@id": base + "#negocio",
+      url: base,
+      image: abs(datos.image),
+      priceRange: (() => { const v = PRODUCTOS.map((p) => p.precio).filter(Boolean); return `${pesos.format(Math.min(...v))} - ${pesos.format(Math.max(...v))}`; })(),
+      logo: abs(datos.logo),
+      openingHoursSpecification: HORARIOS.map((h) => ({ "@type": "OpeningHoursSpecification", dayOfWeek: h.dias.map((d) => dias[d]), opens: h.desde, closes: h.hasta })),
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: "Catálogo",
+        itemListElement: categorias.map((c) => ({
+          "@type": "OfferCatalog",
+          name: c,
+          itemListElement: PRODUCTOS.filter((p) => p.categoria === c).map((p) => ({
+            "@type": "Offer",
+            itemOffered: { "@type": "Product", name: p.nombre, description: p.descripcion, image: abs(p.imagen) },
+            ...(p.precio ? { price: p.precio, priceCurrency: "ARS" } : {}),
+          })),
+        })),
+      },
+    });
+    nodo.textContent = JSON.stringify(datos);
+  } catch (_) {}
+
   renderFiltros();
   renderProductos();
   renderCarrito();
