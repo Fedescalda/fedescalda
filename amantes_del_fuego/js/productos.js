@@ -11,6 +11,12 @@
  */
 const NUMERO_WHATSAPP = "5493402487788";
 
+// HORARIOS DE ATENCIÓN (formato 24 hs). 0 = domingo ... 6 = sábado
+const HORARIOS = [
+  { dias: [1, 2, 3, 4, 5], etiqueta: "Lunes a viernes", desde: "07:00", hasta: "23:00" },
+  { dias: [6, 0], etiqueta: "Sábados y domingos", desde: "10:00", hasta: "23:00" },
+];
+
 const img = (nombre) => `img/productos/${nombre}.jpg`;
 
 const PRODUCTOS = [

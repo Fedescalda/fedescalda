@@ -9,6 +9,26 @@
     a.target = "_blank";
     a.rel = "noopener";
   });
+  // Horarios + estado abierto/cerrado (hora de Argentina)
+  $("#hours-list").innerHTML = HORARIOS.map(
+    (h) => `<li><span>${h.etiqueta}</span><strong>${h.desde} - ${h.hasta} hs</strong></li>`
+  ).join("");
+  function estadoHorario() {
+    const partes = Object.fromEntries(
+      new Intl.DateTimeFormat("en-US", { timeZone: "America/Argentina/Buenos_Aires", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+        .formatToParts(new Date()).map((p) => [p.type, p.value])
+    );
+    const dia = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(partes.weekday);
+    const ahora = `${partes.hour}:${partes.minute}`;
+    const hoy = HORARIOS.find((h) => h.dias.includes(dia));
+    const abierto = hoy && ahora >= hoy.desde && ahora < hoy.hasta;
+    const el = $("#hours-status");
+    el.textContent = abierto ? `● Abierto ahora · hasta las ${hoy.hasta}` : "● Cerrado ahora";
+    el.classList.toggle("is-open", Boolean(abierto));
+  }
+  estadoHorario();
+  setInterval(estadoHorario, 60000);
+
   $("#year").textContent = new Date().getFullYear();
 
   // Menú mobile
