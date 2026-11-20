@@ -41,6 +41,17 @@ Con `precio: null` se muestra "Consultar precio". Las categorías de los filtros
 
 > Precios cargados desde el catálogo de WhatsApp (noviembre 2026). Actualizarlos en `js/productos.js` cuando cambien.
 
+## Video del catálogo
+
+`img/video/reel.mp4` (web, 1280x720) y `img/video/reel-vertical.mp4` (Reels/Historias, 1080x1920) se generan solos a partir de `video-src/reel.html`, que toma los productos, fotos y precios de `js/productos.js`.
+Cuando cambies precios o productos, regeneralos (necesita Node, Playwright y ffmpeg):
+
+```bash
+cd amantes_del_fuego
+node video-src/render.js            # video de la web + poster
+node video-src/render.js vertical   # video para Instagram
+```
+
 ## Verlo en local
 
 Abrí `index.html` en el navegador, o:

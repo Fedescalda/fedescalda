@@ -39,8 +39,9 @@
   <main>
     <section id="inicio" class="hero">
       <div class="hero__glow" aria-hidden="true"></div>
+      <canvas class="hero__sparks" id="chispas" aria-hidden="true"></canvas>
       <h1 class="hero__title">
-        <img src="img/logo.jpg" alt="Amantes del Fuego" class="hero__logo" width="1206" height="1031" fetchpriority="high">
+        <img src="img/logo.png" alt="Amantes del Fuego" class="hero__logo" width="966" height="604" fetchpriority="high">
       </h1>
       <p class="hero__tagline">Mucho más que parrillas, una pasión que nos une.</p>
       <div class="hero__actions">
@@ -53,6 +54,24 @@
       <div class="container">
         <h2 class="about__statement">Discos, mecheros, estacas y leñeros para los verdaderos amantes del fuego.</h2>
         <p class="about__text">Productos seleccionados, calidad y atención personalizada para acompañarte en cada momento: desde elegir el disco justo hasta encender el primer fuego.</p>
+      </div>
+    </section>
+
+    <section class="reel" aria-labelledby="reel-titulo">
+      <div class="container">
+        <div class="reel__head">
+          <h2 id="reel-titulo">El catálogo en 15 segundos</h2>
+          <p>Discos, mecheros, estacas y leñeros, con sus precios.</p>
+        </div>
+        <div class="reel__frame">
+          <video class="reel__video" id="reel-video" muted loop playsinline preload="none" poster="img/video/reel-poster.jpg" width="1280" height="720" aria-label="Video del catálogo de Amantes del Fuego: discos, mecheros, estacas y leñeros con sus precios.">
+            <source src="img/video/reel.mp4" type="video/mp4">
+          </video>
+          <button class="reel__toggle" id="reel-toggle" type="button" aria-label="Reproducir video">
+            <svg class="i-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+            <svg class="i-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg>
+          </button>
+        </div>
       </div>
     </section>
 

@@ -57,12 +57,12 @@
       .join("");
   }
 
-  function tarjeta(p, i) {
+  function tarjeta(p, i, n) {
     const precio = p.precio
       ? `<span class="item__price">${pesos.format(p.precio)}</span>`
       : `<span class="item__price item__price--consultar">Consultar precio</span>`;
     return `
-      <li class="item">
+      <li class="item" style="--n:${n}">
         <div class="item__media"><img src="${escapar(p.imagen)}" alt="${escapar(p.nombre)}" width="480" height="480" loading="lazy" decoding="async"></div>
         <h4>${escapar(p.nombre)}</h4>
         <p>${escapar(p.descripcion)}</p>
@@ -78,10 +78,23 @@
         return `
         <section class="group" aria-labelledby="g-${slug(c)}">
           <h3 class="group__title" id="g-${slug(c)}">${escapar(c)} <small>${items.length} ${items.length === 1 ? "producto" : "productos"}</small></h3>
-          <ul class="grid">${items.map(([p, i]) => tarjeta(p, i)).join("")}</ul>
+          <ul class="grid">${items.map(([p, i], n) => tarjeta(p, i, n)).join("")}</ul>
         </section>`;
       })
       .join("");
+    observarGrupos();
+  }
+
+  // Aparición escalonada de productos (solo si el visitante no desactivó las animaciones)
+  const sinMovimiento = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const observador = !sinMovimiento && "IntersectionObserver" in window
+    ? new IntersectionObserver((entradas) => entradas.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add("is-visible"); observador.unobserve(e.target); }
+      }), { rootMargin: "0px 0px -10% 0px" })
+    : null;
+  if (observador) document.documentElement.classList.add("js-reveal");
+  function observarGrupos() {
+    if (observador) document.querySelectorAll(".group").forEach((g) => observador.observe(g));
   }
 
   $("#filters").addEventListener("click", (e) => {
@@ -151,6 +164,10 @@
     guardar();
     renderCarrito();
     avisar(`${p.nombre} agregado al pedido`);
+    const btnCarrito = $(".cart-btn");
+    btnCarrito.classList.remove("bump");
+    void btnCarrito.offsetWidth;
+    btnCarrito.classList.add("bump");
     b.textContent = "Agregado";
     b.classList.add("is-added");
     setTimeout(() => { b.textContent = "Agregar al pedido"; b.classList.remove("is-added"); }, 1200);
@@ -193,6 +210,84 @@
     const texto = `¡Hola Amantes del Fuego!${nombre ? ` Soy ${nombre}.` : ""}\nQuiero hacer este pedido:\n${lineas.join("\n")}${total ? `\n\nTotal aprox.: ${pesos.format(total)}` : ""}`;
     window.open(waUrl(texto), "_blank", "noopener");
   });
+
+  // Video del catálogo: se reproduce solo cuando está en pantalla; siempre se puede pausar
+  const video = $("#reel-video");
+  const btnVideo = $("#reel-toggle");
+  let pausadoPorUsuario = sinMovimiento;
+  const marcarVideo = () => {
+    const sonando = !video.paused;
+    btnVideo.classList.toggle("is-playing", sonando);
+    btnVideo.setAttribute("aria-label", sonando ? "Pausar video" : "Reproducir video");
+  };
+  video.addEventListener("play", marcarVideo);
+  video.addEventListener("pause", marcarVideo);
+  btnVideo.addEventListener("click", () => {
+    if (video.paused) { pausadoPorUsuario = false; video.play().catch(() => {}); }
+    else { pausadoPorUsuario = true; video.pause(); }
+  });
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && !pausadoPorUsuario) video.play().catch(() => {});
+      else if (!e.isIntersecting) video.pause();
+    }, { threshold: 0.4 }).observe(video);
+  }
+
+  // Chispas que suben desde la brasa de la portada
+  const canvas = $("#chispas");
+  if (canvas && !sinMovimiento) {
+    const ctx = canvas.getContext("2d");
+    let w = 0, h = 0, chispas = [], activo = true, corriendo = true, ultimo = 0;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const medir = () => {
+      w = canvas.clientWidth; h = canvas.clientHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    const nueva = (alAzar) => ({
+      x: w / 2 + (Math.random() - 0.5) * w * 0.6,
+      y: alAzar ? h * (0.4 + Math.random() * 0.6) : h + 10,
+      r: 0.8 + Math.random() * 1.8,
+      vy: 25 + Math.random() * 55,
+      vx: (Math.random() - 0.5) * 18,
+      fase: Math.random() * Math.PI * 2,
+      vida: 0.55 + Math.random() * 0.4,
+    });
+    const cantidad = () => Math.round(Math.min(70, w / 18));
+    medir();
+    chispas = Array.from({ length: cantidad() }, () => nueva(true));
+    addEventListener("resize", () => { medir(); chispas.length = Math.min(chispas.length, cantidad()); });
+
+    function cuadro(t) {
+      if (!activo) { corriendo = false; return; }
+      const dt = Math.min((t - ultimo) / 1000 || 0, 0.05);
+      ultimo = t;
+      ctx.clearRect(0, 0, w, h);
+      ctx.globalCompositeOperation = "lighter";
+      while (chispas.length < cantidad()) chispas.push(nueva(false));
+      chispas.forEach((c, i) => {
+        c.y -= c.vy * dt;
+        c.x += (c.vx + Math.sin(t / 600 + c.fase) * 12) * dt;
+        const altura = 1 - c.y / h; // 0 abajo, 1 arriba
+        if (altura > c.vida || c.y < -10) { chispas[i] = nueva(false); return; }
+        const alfa = Math.max(0, 1 - altura / c.vida) * (0.7 + 0.3 * Math.sin(t / 90 + c.fase));
+        const g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r * 4);
+        g.addColorStop(0, `rgba(255, 210, 140, ${alfa})`);
+        g.addColorStop(0.35, `rgba(255, 120, 40, ${alfa * 0.8})`);
+        g.addColorStop(1, "rgba(203, 49, 39, 0)");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.r * 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      requestAnimationFrame(cuadro);
+    }
+    // Pausar cuando la portada no se ve o la pestaña está oculta
+    const reanudar = () => { activo = true; if (!corriendo) { corriendo = true; ultimo = performance.now(); requestAnimationFrame(cuadro); } };
+    new IntersectionObserver(([e]) => (e.isIntersecting ? reanudar() : (activo = false))).observe(canvas);
+    document.addEventListener("visibilitychange", () => (document.hidden ? (activo = false) : reanudar()));
+    requestAnimationFrame(cuadro);
+  }
 
   renderFiltros();
   renderProductos();

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<title>Reel Amantes del Fuego</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<!--
+  Fuente del video del sitio. Se arma solo con los datos de js/productos.js.
+  Para regenerar el video: node video-src/render.js  (ver README)
+  ?formato=vertical  → 1080x1920 para Reels/Historias
+-->
+<style>
+  :root { --brasa: #cb3127; --blanco: #f4f2ef; --ceniza: #a39c95; --D: 15000ms; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: #000; overflow: hidden; }
+  body { font-family: "Archivo", sans-serif; color: var(--blanco); position: relative; }
+  .wide { font-stretch: 125%; font-variation-settings: "wdth" 125; font-weight: 800; line-height: 1; }
+
+  /* Fondo: brasa y chispas (todo el video) */
+  .glow {
+    position: absolute; inset: auto 0 0 0; height: 70%;
+    background:
+      radial-gradient(ellipse 45% 55% at 50% 100%, rgba(255, 130, 50, .5), transparent 70%),
+      radial-gradient(ellipse 80% 85% at 50% 100%, rgba(203, 49, 39, .6), transparent 72%);
+    transform-origin: 50% 100%;
+    animation: respirar 3000ms ease-in-out infinite;
+  }
+  .spark {
+    position: absolute; bottom: -2vmin; width: .7vmin; height: .7vmin; border-radius: 50%;
+    background: #ffb36b; box-shadow: 0 0 1.2vmin 0.3vmin rgba(255, 110, 40, .9);
+    animation: subir linear infinite;
+  }
+  @keyframes respirar { 0%, 100% { opacity: 1; transform: scaleY(1); } 50% { opacity: .8; transform: scaleY(.92); } }
+  @keyframes subir {
+    0% { transform: translate(0, 0) scale(1); opacity: 0; }
+    10% { opacity: 1; }
+    100% { transform: translate(var(--dx), -95vh) scale(.3); opacity: 0; }
+  }
+
+  /* Escenas */
+  .scene { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; animation: escena linear both; }
+  @keyframes escena { 0% { opacity: 0; } 7% { opacity: 1; } 93% { opacity: 1; } 100% { opacity: 0; } }
+  .in { animation: entrar 700ms cubic-bezier(.2, .8, .2, 1) both; }
+  .in-left { animation: izquierda 800ms cubic-bezier(.2, .8, .2, 1) both; }
+  .pop { animation: pop 600ms cubic-bezier(.3, 1.4, .5, 1) both; }
+  @keyframes entrar { from { opacity: 0; transform: translateY(4vmin); } }
+  @keyframes izquierda { from { opacity: 0; transform: translateX(-12vmin); } }
+  @keyframes pop { from { opacity: 0; transform: translateY(6vmin) scale(.85); } }
+
+  .logo { width: 56vmin; }
+  .s-logo .logo { animation: logo 1600ms cubic-bezier(.2, .8, .2, 1) both; }
+  @keyframes logo { from { opacity: 0; transform: scale(.9); filter: blur(8px); } }
+
+  .cat { width: 86%; display: grid; grid-template-columns: 1fr 1.25fr; align-items: center; gap: 5vmin; }
+  .cat h2 { font-size: 13vmin; }
+  .cat .desde { margin-top: 2.5vmin; font-size: 4.2vmin; color: var(--ceniza); font-weight: 600; }
+  .cat .desde b { color: var(--blanco); font-weight: 800; font-variant-numeric: tabular-nums; }
+  .cat .bar { width: 14vmin; height: 1.2vmin; background: var(--brasa); margin-bottom: 3vmin; transform-origin: left; animation: barra 700ms cubic-bezier(.2, .8, .2, 1) both; }
+  @keyframes barra { from { transform: scaleX(0); } }
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5vmin; }
+  .tile { background: #fff; border-radius: 1.2vmin; aspect-ratio: 1; display: grid; place-items: center; box-shadow: 0 2vmin 5vmin rgba(0, 0, 0, .6); }
+  .tile img { width: 88%; height: 88%; object-fit: contain; }
+  .tile:nth-child(2) { transform: translateY(-3vmin); }
+
+  .final h2 { font-size: 8.4vmin; text-align: center; text-transform: uppercase; }
+  .final h2 span { display: block; }
+  .final .cta { margin-top: 5vmin; background: var(--brasa); color: #fff; font-weight: 800; font-size: 4.4vmin; padding: 2.2vmin 5vmin; border-radius: 1vmin; }
+  .final .redes { margin-top: 3vmin; font-size: 3.4vmin; color: var(--ceniza); font-weight: 600; }
+
+  .fade { position: absolute; inset: 0; background: #000; pointer-events: none; animation: negro var(--D) linear both; }
+  @keyframes negro { 0% { opacity: 1; } 3% { opacity: 0; } 97% { opacity: 0; } 100% { opacity: 1; } }
+
+  /* Vertical (Reels / Historias) */
+  body.vertical .cat { width: 88%; grid-template-columns: 1fr; text-align: center; gap: 8vmin; }
+  body.vertical .cat .bar { margin-inline: auto; transform-origin: center; width: 18vmin; }
+  body.vertical .cat h2 { font-size: 17vmin; }
+  body.vertical .cat .desde { font-size: 6vmin; }
+  body.vertical .tiles { gap: 3.5vmin; }
+  body.vertical .logo { width: 74vmin; }
+  body.vertical .final h2 { font-size: 11vmin; line-height: 1.05; }
+  body.vertical .final h2 span { text-wrap: balance; margin-bottom: 2vmin; }
+  body.vertical .final .cta { font-size: 5.6vmin; }
+  body.vertical .final .redes { font-size: 4.6vmin; }
+</style>
+</head>
+<body>
+  <div class="glow"></div>
+  <div id="sparks"></div>
+  <div id="scenes"></div>
+  <div class="fade"></div>
+
+  <script src="../js/productos.js"></script>
+  <script>
+    if (new URLSearchParams(location.search).get("formato") === "vertical") document.body.classList.add("vertical");
+
+    const pesos = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+    const ms = (n) => `${Math.round(n)}ms`;
+
+    // Chispas: posiciones y tiempos fijos (pseudoaleatorios) para que el video sea siempre igual
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    document.getElementById("sparks").innerHTML = Array.from({ length: 34 }, () => {
+      const dur = 2600 + rnd() * 2600;
+      return `<i class="spark" style="left:${20 + rnd() * 60}%;--dx:${(rnd() - .5) * 30}vmin;animation-duration:${ms(dur)};animation-delay:${ms(-rnd() * dur)};transform:scale(${.6 + rnd()})"></i>`;
+    }).join("");
+
+    // Escenas armadas con el catálogo
+    const categorias = [...new Set(PRODUCTOS.map((p) => p.categoria))];
+    const LOGO = 2200, CAT = 2300, FINAL = 15000 - LOGO - CAT * categorias.length;
+    let t = 0;
+    const escenas = [];
+    const escena = (dur, clase, html) => { escenas.push(`<section class="scene ${clase}" style="animation-duration:${ms(dur)};animation-delay:${ms(t)}">${html(t)}</section>`); t += dur; };
+    const d = (base, extra) => `animation-delay:${ms(base + extra)}`;
+
+    escena(LOGO, "s-logo", (b) => `<img class="logo" src="../img/logo.png" alt="" style="${d(b, 150)}">`);
+
+    categorias.forEach((c) => {
+      const items = PRODUCTOS.filter((p) => p.categoria === c);
+      // "Desde" solo con los productos principales (ej.: en Discos, solo discos; no la espumadera)
+      const raiz = c.slice(0, 3).toLowerCase();
+      const principales = items.filter((p) => p.nombre.toLowerCase().startsWith(raiz));
+      const precios = (principales.length ? principales : items).map((p) => p.precio).filter(Boolean);
+      const fotos = items.filter((p) => p.imagen).slice(0, 3);
+      escena(CAT, "", (b) => `
+        <div class="cat">
+          <div>
+            <div class="bar" style="${d(b, 100)}"></div>
+            <h2 class="wide in-left" style="${d(b, 120)}">${c.replace(" / ", "<br>")}</h2>
+            ${precios.length ? `<p class="desde in" style="${d(b, 380)}">Desde <b>${pesos.format(Math.min(...precios))}</b></p>` : ""}
+          </div>
+          <div class="tiles">${fotos.map((p, i) => `<div class="tile pop" style="${d(b, 300 + i * 160)}"><img src="../${p.imagen}" alt=""></div>`).join("")}</div>
+        </div>`);
+    });
+
+    escena(FINAL, "final", (b) => `
+      <h2 class="wide"><span class="in" style="${d(b, 100)}">El fuego nos une</span><span class="in" style="${d(b, 350)};color:var(--brasa)">La pasión nos identifica</span></h2>
+      <p class="cta pop" style="${d(b, 800)}">Hacé tu pedido por WhatsApp</p>
+      <p class="redes in" style="${d(b, 1050)}">@amantesdelfuego.as</p>`);
+
+    document.getElementById("scenes").innerHTML = escenas.join("");
+
+    // Control de tiempo para el render cuadro por cuadro
+    window.setTiempo = (msT) => document.getAnimations().forEach((a) => { a.pause(); a.currentTime = msT; });
+    window.listo = Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.decode().catch(() => {}))]);
+  </script>
+</body>
+</html>
