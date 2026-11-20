@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Amantes del Fuego | Parrillas y accesorios para el asado</title>
+  <meta name="description" content="Mucho más que parrillas, una pasión que nos une. Parrillas, accesorios y utensilios para los verdaderos amantes del fuego.">
+  <meta property="og:title" content="Amantes del Fuego">
+  <meta property="og:description" content="Todo lo que necesitás para vivir tu pasión por el fuego.">
+  <meta property="og:image" content="img/logo.jpg">
+  <link rel="icon" href="img/logo.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="nav">
+    <a href="#inicio" class="nav__brand">AMANTES <span>DEL</span> FUEGO</a>
+    <button class="nav__toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+    <nav class="nav__links">
+      <a href="#nosotros">Nosotros</a>
+      <a href="#catalogo">Catálogo</a>
+      <a href="#contacto">Contacto</a>
+      <button class="cart-btn" type="button" aria-label="Ver pedido">🛒 <span id="cart-count">0</span></button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="inicio" class="hero">
+      <img src="img/logo.jpg" alt="Logo Amantes del Fuego" class="hero__logo">
+      <p class="hero__tagline">Mucho más que parrillas, una pasión que nos une.</p>
+      <div class="hero__actions">
+        <a href="#catalogo" class="btn btn--primary">Ver catálogo</a>
+        <a href="#" class="btn btn--ghost js-wa-link">Escribinos por WhatsApp</a>
+      </div>
+    </section>
+
+    <section id="nosotros" class="about">
+      <div class="container">
+        <h2>🔥 Nuestra pasión</h2>
+        <p>Contamos con una amplia variedad de productos para los verdaderos amantes del fuego: <strong>parrillas, accesorios, utensilios y mucho más</strong>.</p>
+        <div class="features">
+          <article class="feature"><span>🥩</span><h3>Productos seleccionados</h3><p>Elegimos cada artículo pensando en el asador exigente.</p></article>
+          <article class="feature"><span>🏆</span><h3>Calidad</h3><p>Materiales que aguantan el fuego, asado tras asado.</p></article>
+          <article class="feature"><span>🤝</span><h3>Atención personalizada</h3><p>Te acompañamos en cada momento para que elijas lo justo.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <div class="motto">EL FUEGO NOS UNE <span>•</span> LA PASIÓN NOS IDENTIFICA</div>
+
+    <section id="catalogo" class="catalog">
+      <div class="container">
+        <h2>Catálogo</h2>
+        <p class="catalog__intro">Armá tu pedido y envialo por WhatsApp. Te respondemos con precio y disponibilidad.</p>
+        <div class="filters" role="tablist" id="filters"></div>
+        <div class="grid" id="products"></div>
+      </div>
+    </section>
+
+    <section id="contacto" class="contact">
+      <div class="container">
+        <h2>¡Todo lo que necesitás para vivir tu pasión por el fuego!</h2>
+        <p>Consultanos por productos, medidas, envíos y formas de pago.</p>
+        <div class="contact__actions">
+          <a href="#" class="btn btn--primary js-wa-link">💬 WhatsApp</a>
+          <a href="https://www.instagram.com/amantesdelfuego.as/" target="_blank" rel="noopener" class="btn btn--ghost">📷 @amantesdelfuego.as</a>
+          <a href="https://wa.me/c/5493402487788" target="_blank" rel="noopener" class="btn btn--ghost">🛍️ Catálogo de WhatsApp</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© <span id="year"></span> Amantes del Fuego · El fuego nos une</p>
+  </footer>
+
+  <a href="#" class="wa-float js-wa-link" aria-label="WhatsApp">💬</a>
+
+  <aside class="cart" id="cart" aria-hidden="true">
+    <div class="cart__panel">
+      <div class="cart__head">
+        <h3>Tu pedido</h3>
+        <button class="cart__close" type="button" aria-label="Cerrar">✕</button>
+      </div>
+      <ul class="cart__items" id="cart-items"></ul>
+      <p class="cart__empty" id="cart-empty">Todavía no agregaste productos.</p>
+      <label class="cart__label" for="cart-name">Tu nombre (opcional)</label>
+      <input id="cart-name" class="cart__input" type="text" placeholder="Ej: Juan">
+      <button class="btn btn--primary cart__send" id="cart-send" type="button">Enviar pedido por WhatsApp</button>
+    </div>
+  </aside>
+
+  <script src="js/productos.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
