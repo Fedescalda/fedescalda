@@ -4,13 +4,14 @@ export default defineConfig({
   testDir: "./tests",
   reporter: "list",
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: process.env.BASE_URL || "http://localhost:3000",
     trace: "off",
     launchOptions: {
       executablePath: process.env.PW_CHROMIUM || undefined,
     },
   },
-  webServer: {
+  // Con BASE_URL se prueba un sitio ya publicado (ej. BASE_URL=https://visualgraf.vercel.app npm test)
+  webServer: process.env.BASE_URL ? undefined : {
     command: "npm run build && RATE_LIMIT_OFF=1 npm run start",
     url: "http://localhost:3000",
     reuseExistingServer: true,
