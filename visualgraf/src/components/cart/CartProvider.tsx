@@ -10,8 +10,11 @@ export type CartItem = {
   size: string;
   bagColor: string;
   inkColor: string;
-  sides: 1 | 2;
+  /** Cantidad de packs */
   quantity: number;
+  /** Unidades por pack */
+  packSize: number;
+  /** Precio por pack (ARS) */
   unitPrice: number;
 };
 
@@ -27,10 +30,10 @@ type CartCtx = {
 };
 
 const Ctx = createContext<CartCtx | null>(null);
-const STORAGE = "vg-cart-v1";
+const STORAGE = "vg-cart-v2";
 
-export function itemKey(i: Omit<CartItem, "key" | "quantity" | "unitPrice">) {
-  return [i.productId, i.size, i.bagColor, i.inkColor, i.sides].join("|");
+export function itemKey(i: Pick<CartItem, "productId" | "size" | "bagColor" | "inkColor">) {
+  return [i.productId, i.size, i.bagColor, i.inkColor].join("|");
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {

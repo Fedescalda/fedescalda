@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "playwright test --trace off"
+    "test": "playwright test --trace off",
+    "seed:sql": "tsx scripts/seed-sql.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -29,6 +30,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.29",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

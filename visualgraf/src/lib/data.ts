@@ -11,9 +11,9 @@ type ProductRow = {
   description: string;
   category: Product["category"];
   images: Product["images"];
-  sizes: string[];
+  pack_size: number;
+  variants: Product["variants"];
   colors: Product["colors"];
-  tiers: Product["tiers"];
   features: string[];
   featured: boolean;
   active: boolean;
@@ -24,22 +24,46 @@ type PromotionRow = {
   title: string;
   description: string;
   badge: string;
+  price: number | null;
+  price_note: string | null;
+  details: Promotion["details"] | null;
   code: string | null;
   discount_percent: number | null;
   ends_at: string | null;
   image: string | null;
+  cta: string | null;
   active: boolean;
 };
+
+export const mapProduct = (r: ProductRow): Product => ({
+  id: r.id,
+  slug: r.slug,
+  name: r.name,
+  short: r.short,
+  description: r.description,
+  category: r.category,
+  images: r.images ?? [],
+  packSize: r.pack_size,
+  variants: r.variants ?? [],
+  colors: r.colors ?? [],
+  features: r.features ?? [],
+  featured: r.featured,
+  active: r.active,
+});
 
 export const mapPromotion = (r: PromotionRow): Promotion => ({
   id: r.id,
   title: r.title,
   description: r.description,
   badge: r.badge,
+  price: r.price != null ? Number(r.price) : null,
+  priceNote: r.price_note,
+  details: r.details ?? undefined,
   code: r.code,
   discountPercent: r.discount_percent,
   endsAt: r.ends_at,
   image: r.image,
+  cta: r.cta,
   active: r.active,
 });
 
@@ -52,7 +76,7 @@ export async function getProducts(): Promise<Product[]> {
     .eq("active", true)
     .order("sort", { ascending: true });
   if (error || !data?.length) return sampleProducts;
-  return data as ProductRow[];
+  return (data as ProductRow[]).map(mapProduct);
 }
 
 export async function getProduct(slug: string) {

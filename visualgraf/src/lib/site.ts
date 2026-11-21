@@ -6,12 +6,13 @@ export const site = {
   displayName: "Visual Graf",
   tagline: "Tu bolsa impresa",
   description:
-    "Bolsas personalizadas con tu logo para comercios y emprendimientos. Impresión en serigrafía, bolsas troqueladas y para hielo. Envíos a toda la Argentina.",
+    "Bolsas personalizadas con tu logo para comercios y emprendimientos. Bolsas manija riñón, para hielo y para ecommerce, impresas en serigrafía. Comprá online con envíos a toda la Argentina.",
   url: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, ""),
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || "5493364622890",
-  whatsappDisplay: "336 462-2890",
-  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "",
-  instagram: process.env.NEXT_PUBLIC_INSTAGRAM || "",
+  whatsappDisplay: "+54 9 3364 62-2890",
+  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@vgtubolsaimpresa.store",
+  instagram: process.env.NEXT_PUBLIC_INSTAGRAM || "visualgraf.tubolsaimpresa",
+  facebook: process.env.NEXT_PUBLIC_FACEBOOK || "visualgraf.tubolsaimpresa",
   city: process.env.NEXT_PUBLIC_CITY || "",
   locale: "es_AR",
 };

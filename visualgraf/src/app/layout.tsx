@@ -22,7 +22,8 @@ export const metadata: Metadata = {
     "bolsas personalizadas",
     "bolsas con logo",
     "bolsas impresas",
-    "bolsas troqueladas",
+    "bolsas manija riñón",
+    "bolsas para ecommerce",
     "bolsas para hielo",
     "serigrafía",
     "packaging",
@@ -67,7 +68,7 @@ const jsonLd = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es-AR" className={`${display.variable} ${body.variable}`}>
-      <body className="min-h-dvh overflow-x-hidden">
+      <body className="min-h-dvh overflow-x-clip">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <CartProvider>
           <Header />

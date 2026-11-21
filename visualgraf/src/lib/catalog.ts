@@ -1,14 +1,15 @@
-// Tipos y datos de ejemplo del catálogo.
+// Tipos y datos base del catálogo (tomados de vgtubolsaimpresa.store).
 // Si Supabase está configurado, los productos y promociones se leen de la base
 // (ver src/lib/data.ts). Estos datos se usan como respaldo y como semilla.
 
-export type BagColorId = "blanco" | "negro" | "cristal" | "lila";
+export type BagColorId = "blanco" | "negro" | "cristal" | "lila" | "rosa";
 
 export const bagColors: { id: BagColorId; name: string; hex: string }[] = [
   { id: "blanco", name: "Blanco", hex: "#f5f5f2" },
   { id: "negro", name: "Negro", hex: "#141416" },
   { id: "cristal", name: "Cristal", hex: "#dfe7ee" },
   { id: "lila", name: "Lila pastel", hex: "#c9a7f3" },
+  { id: "rosa", name: "Rosa", hex: "#ec3f97" },
 ];
 
 export const inkColors: { id: string; name: string; hex: string }[] = [
@@ -25,7 +26,14 @@ export const inkColors: { id: string; name: string; hex: string }[] = [
   { id: "rosa", name: "Rosa", hex: "#f39bc4" },
 ];
 
-export type PriceTier = { min: number; unitPrice: number };
+export type Variant = {
+  /** Medida visible, ej. "20 × 30 cm" */
+  size: string;
+  /** Precio del pack en ARS. null = a cotizar */
+  price: number | null;
+  image?: string;
+  detail?: string;
+};
 
 export type Product = {
   id: string;
@@ -33,12 +41,12 @@ export type Product = {
   name: string;
   short: string;
   description: string;
-  category: "troquelada" | "hielo";
+  category: "manija-rinon" | "hielo" | "ecommerce";
   images: { src: string; alt: string }[];
-  sizes: string[];
+  /** Unidades por pack (el precio de cada variante es por pack) */
+  packSize: number;
+  variants: Variant[];
   colors: BagColorId[];
-  /** Precio por unidad (ARS) según cantidad mínima. Ordenado de menor a mayor cantidad. */
-  tiers: PriceTier[];
   features: string[];
   featured?: boolean;
   active?: boolean;
@@ -49,128 +57,143 @@ export type Promotion = {
   title: string;
   description: string;
   badge: string;
+  price?: number | null;
+  priceNote?: string | null;
+  details?: { label: string; value: string }[];
   code?: string | null;
   discountPercent?: number | null;
   endsAt?: string | null;
   image?: string | null;
+  cta?: string | null;
   active?: boolean;
 };
 
-// ⚠️ PRECIOS DE EJEMPLO: reemplazar por los reales desde el panel admin o Supabase.
+export const categoryLabel: Record<Product["category"], string> = {
+  "manija-rinon": "Manija riñón",
+  hielo: "Bolsas para hielo",
+  ecommerce: "Ecommerce",
+};
+
 export const sampleProducts: Product[] = [
   {
-    id: "troquelada",
-    slug: "bolsa-troquelada-personalizada",
-    name: "Bolsa troquelada personalizada",
-    short: "La clásica para locales y emprendimientos. Manija troquelada y tu logo impreso.",
+    id: "manija-rinon-ad",
+    slug: "bolsa-manija-rinon-personalizada",
+    name: "Bolsa manija riñón personalizada",
+    short: "Alta densidad, impresa 1 cara 1 color. Pack de 100 unidades en 5 medidas.",
     description:
-      "Bolsa de polietileno con manija troquelada, ideal para indumentaria, regalería, cosmética y comercios en general. Elegí el color de bolsa y el color de impresión que mejor representen a tu marca. Impresión en serigrafía, nítida y resistente.",
-    category: "troquelada",
+      "La bolsa que lleva tu marca a cada lugar. Bolsas manija riñón de alta densidad, personalizadas con el logo, nombre o diseño de tu marca e impresas en serigrafía a 1 cara 1 color. Una presentación profesional para comercios, emprendimientos, tiendas online y marcas que quieren estar presentes en cada compra.",
+    category: "manija-rinon",
     images: [
-      { src: "/img/bolsa-blanca.webp", alt: "Bolsa troquelada blanca con logo marrón impreso" },
-      { src: "/img/bolsa-negra.webp", alt: "Bolsa troquelada negra con logo blanco impreso" },
-      { src: "/img/bolsa-cristal.webp", alt: "Bolsa troquelada cristal con logo blanco impreso" },
-      { src: "/img/bolsa-lila.webp", alt: "Bolsa troquelada lila pastel con logo negro impreso" },
+      { src: "/img/productos/manija-rinon-20x30.webp", alt: "Bolsa manija riñón blanca 20 × 30 cm con la leyenda Tu logo aquí" },
+      { src: "/img/productos/manija-rinon-25x35.webp", alt: "Bolsa manija riñón negra 25 × 35 cm con la leyenda Tu logo aquí" },
+      { src: "/img/productos/manija-rinon-30x40.webp", alt: "Bolsa manija riñón cristal 30 × 40 cm con la leyenda Tu logo aquí" },
+      { src: "/img/productos/manija-rinon-35x45.webp", alt: "Bolsa manija riñón negra 35 × 45 cm con impresión naranja" },
+      { src: "/img/productos/manija-rinon-40x50.webp", alt: "Bolsa manija riñón lila 40 × 50 cm con la leyenda Tu logo aquí" },
     ],
-    sizes: ["20 × 30 cm", "30 × 40 cm", "40 × 50 cm"],
+    packSize: 100,
+    variants: [
+      { size: "20 × 30 cm", price: 44000, image: "/img/productos/manija-rinon-20x30.webp" },
+      { size: "25 × 35 cm", price: 47500, image: "/img/productos/manija-rinon-25x35.webp" },
+      { size: "30 × 40 cm", price: 52000, image: "/img/productos/manija-rinon-30x40.webp" },
+      { size: "35 × 45 cm", price: 57000, image: "/img/productos/manija-rinon-35x45.webp" },
+      { size: "40 × 50 cm", price: 67000, image: "/img/productos/manija-rinon-40x50.webp" },
+    ],
     colors: ["blanco", "negro", "cristal", "lila"],
-    tiers: [
-      { min: 100, unitPrice: 320 },
-      { min: 500, unitPrice: 240 },
-      { min: 1000, unitPrice: 190 },
-    ],
-    features: ["4 colores de bolsa", "11 colores de impresión", "Impresión en serigrafía", "1 o 2 caras"],
+    features: ["Alta densidad", "Impresión serigráfica 1 cara 1 color", "4 colores de bolsa", "Mínimo 100 unidades"],
     featured: true,
     active: true,
   },
   {
-    id: "hielo-rinon",
+    id: "hielo-pack-1500",
+    slug: "pack-bolsas-para-hielo-personalizadas",
+    name: "Pack bolsas para hielo personalizadas ×1500",
+    short: "Tres medidas, tu marca en todas. 1.500 bolsas impresas a una cara y un color.",
+    description:
+      "Un pack de 1.500 bolsas para hielo personalizadas, con impresión a una cara y un color: 500 de 26 × 40 cm (40 mic), 500 de 28 × 50 cm (50 mic) y 500 de 35 × 75 cm (60 mic). Material de baja densidad virgen, apto para contacto con alimentos. Ideal para fábricas de hielo, distribuidoras y almacenes.",
+    category: "hielo",
+    images: [
+      { src: "/img/clientes/thomas.webp", alt: "Bolsa transparente para hielo impresa para Thomas Hielo" },
+      { src: "/img/promo-hielo.webp", alt: "Promoción de 1.500 bolsas para hielo personalizadas por 610.000 pesos" },
+      { src: "/img/clientes/thomas-grande.webp", alt: "Bolsa grande para hielo de Thomas Hielo, 8 y 10 kg" },
+    ],
+    packSize: 1500,
+    variants: [{ size: "Pack 3 medidas (26×40 · 28×50 · 35×75)", price: 610000, detail: "500 + 500 + 500 unidades" }],
+    colors: ["cristal"],
+    features: ["Baja densidad virgen", "Apto alimentos", "3 medidas", "1 cara 1 color"],
+    featured: true,
+    active: true,
+  },
+  {
+    id: "hielo-manija-rinon",
     slug: "bolsa-para-hielo-manija-rinon",
     name: "Bolsa para hielo con manija riñón",
-    short: "26 × 50 cm · 60 micrones. Para llevar el hielo con una mano.",
+    short: "Nuevo ingreso. 26 × 50 cm · 60 micrones. Para llevar el hielo con una mano.",
     description:
-      "Nuevo ingreso. Bolsa cristal para hielo con manija riñón, pensada para fábricas de hielo, distribuidoras, almacenes y estaciones de servicio. 26 × 50 cm en 60 micrones, resistente al peso y al frío. Tu marca bien visible en cada bolsa.",
+      "Bolsa cristal para hielo con manija riñón, pensada para fábricas de hielo, distribuidoras, almacenes y estaciones de servicio. 26 × 50 cm en 60 micrones, resistente al peso y al frío, con tu marca bien visible en cada bolsa. Consultanos cantidades y precio.",
     category: "hielo",
     images: [
       { src: "/img/bolsa-hielo.webp", alt: "Bolsa cristal para hielo con manija riñón y logo azul impreso" },
       { src: "/img/manija-rinon.webp", alt: "Detalle de la manija riñón de la bolsa para hielo" },
       { src: "/img/tu-logo-aca.webp", alt: "Bolsa para hielo con la leyenda Tu logo acá impresa en azul" },
     ],
-    sizes: ["26 × 50 cm · 60 micrones"],
+    packSize: 1,
+    variants: [{ size: "26 × 50 cm · 60 micrones", price: null }],
     colors: ["cristal"],
-    tiers: [
-      { min: 500, unitPrice: 210 },
-      { min: 1000, unitPrice: 170 },
-      { min: 3000, unitPrice: 140 },
-    ],
-    features: ["Manija riñón", "60 micrones", "Resistente al frío", "Ideal 2 a 3 kg"],
-    featured: true,
+    features: ["Manija riñón", "60 micrones", "Resistente al frío", "Impresión personalizada"],
+    featured: false,
     active: true,
   },
   {
-    id: "hielo-clasica",
-    slug: "bolsa-para-hielo-clasica",
-    name: "Bolsa para hielo clásica",
-    short: "Cristal, para cerrar con precinto o nudo. Tu marca en cada bolsa.",
+    id: "ecommerce",
+    slug: "bolsas-para-ecommerce",
+    name: "Bolsas para ecommerce",
+    short: "Novedad. Rosa o negro, resistentes y seguras. Tu marca llega más lejos.",
     description:
-      "¿Vendés hielo? Poné tu marca en cada bolsa. Bolsa cristal para hielo, para cerrar con precinto o nudo, con impresión de tu logo, teléfono y peso aproximado. Ideal para hielo en rolitos o cubos.",
-    category: "hielo",
+      "Dale a cada envío una presentación que se recuerde. Bolsas para ecommerce resistentes y seguras, ideales para envíos, disponibles en rosa y negro. Consultá medidas disponibles y la impresión de tu logo.",
+    category: "ecommerce",
     images: [
-      { src: "/img/bolsa-hielo-rolito.webp", alt: "Bolsa de hielo cristal cerrada con precinto y logo Tu Rolito impreso en azul" },
+      { src: "/img/ecommerce-rosa.webp", alt: "Bolsa rosa para ecommerce impresa con la marca Visual Graf" },
+      { src: "/img/promo-ecommerce.webp", alt: "Nuevas bolsas para ecommerce en rosa y negro" },
     ],
-    sizes: ["2 kg aprox.", "4 kg aprox."],
-    colors: ["cristal"],
-    tiers: [
-      { min: 1000, unitPrice: 95 },
-      { min: 3000, unitPrice: 80 },
-      { min: 5000, unitPrice: 68 },
-    ],
-    features: ["Cristal", "Cierre con precinto", "Impresión 1 color", "Alta producción"],
+    packSize: 1,
+    variants: [{ size: "Consultar medidas", price: null }],
+    colors: ["rosa", "negro"],
+    features: ["Resistentes y seguras", "Ideales para envíos", "Rosa o negro", "Presentación profesional"],
     featured: true,
     active: true,
   },
 ];
 
-// ⚠️ PROMOCIONES DE EJEMPLO: revisarlas o reemplazarlas antes de publicar.
 export const samplePromotions: Promotion[] = [
   {
-    id: "primer-pedido",
-    title: "10% off en tu primer pedido",
-    description: "Si es la primera vez que imprimís tus bolsas con nosotros, usá el código al finalizar tu pedido.",
-    badge: "Nuevos clientes",
-    code: "PRIMERA10",
-    discountPercent: 10,
+    id: "pack-hielo-1500",
+    title: "Tres medidas. Tu marca en todas.",
+    description: "Un pack de 1.500 bolsas para hielo personalizadas, con impresión a una cara y un color.",
+    badge: "Promoción destacada",
+    price: 610000,
+    priceNote: "Pack completo · 1.500 unidades en total",
+    details: [
+      { label: "26 × 40 cm", value: "500 u. · 40 mic" },
+      { label: "28 × 50 cm", value: "500 u. · 50 mic" },
+      { label: "35 × 75 cm", value: "500 u. · 60 mic" },
+    ],
+    image: "/img/promo-hielo.webp",
+    cta: "/productos/pack-bolsas-para-hielo-personalizadas",
     active: true,
   },
   {
-    id: "hielo",
-    title: "Bolsas para hielo: precio de temporada",
-    description: "Preparate para el verano. Llevando 3000 unidades o más accedés al mejor precio por unidad.",
-    badge: "Temporada de verano",
-    code: null,
-    discountPercent: null,
-    image: "/img/bolsa-hielo.webp",
-    active: true,
-  },
-  {
-    id: "combo-emprendedor",
-    title: "Combo emprendedor",
-    description: "500 bolsas troqueladas impresas + adaptación de tu logo para serigrafía sin cargo.",
-    badge: "Combo",
-    code: "COMBO500",
-    discountPercent: 5,
-    image: "/img/bolsas-colores.webp",
+    id: "ecommerce",
+    title: "Tu marca llega más lejos",
+    description: "Novedad: bolsas para ecommerce en rosa y negro. Resistentes, seguras y con tu logo. Consultá medidas disponibles.",
+    badge: "Novedad",
+    price: null,
+    image: "/img/promo-ecommerce.webp",
+    cta: "/productos/bolsas-para-ecommerce",
     active: true,
   },
 ];
 
-export function unitPriceFor(product: Pick<Product, "tiers">, qty: number) {
-  const sorted = [...product.tiers].sort((a, b) => a.min - b.min);
-  let price = sorted[0]?.unitPrice ?? 0;
-  for (const t of sorted) if (qty >= t.min) price = t.unitPrice;
-  return price;
-}
-
-export function minQty(product: Pick<Product, "tiers">) {
-  return Math.min(...product.tiers.map((t) => t.min));
+export function fromPrice(p: Product) {
+  const prices = p.variants.map((v) => v.price).filter((x): x is number => x != null);
+  return prices.length ? Math.min(...prices) : null;
 }
