@@ -25,3 +25,4 @@ export const IconPin = (p: P) => (<svg {...base} {...p}><path d="M12 21s7-6.2 7-
 export const IconTrash = (p: P) => (<svg {...base} {...p}><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>);
 export const IconMinus = (p: P) => (<svg {...base} {...p}><path d="M5 12h14"/></svg>);
 export const IconPlus = (p: P) => (<svg {...base} {...p}><path d="M12 5v14M5 12h14"/></svg>);
+export const IconFacebook = (p: P) => (<svg {...base} {...p}><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v6h4v-6h3l1-4h-4V8Z"/></svg>);

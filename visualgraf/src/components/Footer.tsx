@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { nav, site, waLink } from "@/lib/site";
 import { Logo } from "./Logo";
-import { IconInstagram, IconMail, IconPin, IconWhatsApp } from "./Icons";
+import { IconFacebook, IconInstagram, IconMail, IconPin, IconWhatsApp } from "./Icons";
 
 export function Footer() {
   const pathname = usePathname();
@@ -60,6 +60,13 @@ export function Footer() {
                 </a>
               </li>
             )}
+            {site.facebook && (
+              <li>
+                <a className="inline-flex items-center gap-2 hover:text-white" href={`https://facebook.com/${site.facebook}`} target="_blank" rel="noopener noreferrer">
+                  <IconFacebook width={18} height={18} /> Facebook
+                </a>
+              </li>
+            )}
             <li className="inline-flex items-center gap-2">
               <IconPin width={18} height={18} /> {site.city ? `${site.city} · ` : ""}Envíos a todo el país
             </li>
@@ -69,7 +76,7 @@ export function Footer() {
       <div className="border-t border-line">
         <div className="container-vg flex flex-col gap-2 py-6 text-xs text-mute md:flex-row md:items-center md:justify-between">
           <p suppressHydrationWarning>© {year} Visual Graf · Tu bolsa impresa. Todos los derechos reservados.</p>
-          <p>Bolsas · Packaging · Impresión</p>
+          <p className="flex gap-4"><Link href="/privacidad" className="hover:text-white">Privacidad</Link><span>Bolsas · Packaging · Impresión</span></p>
         </div>
       </div>
     </footer>

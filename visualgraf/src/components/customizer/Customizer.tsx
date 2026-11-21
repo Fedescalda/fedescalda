@@ -39,6 +39,7 @@ export function Customizer() {
   const svgRef = useRef<SVGSVGElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dragRef = useRef<{ dx: number; dy: number } | null>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   const area = printArea[model];
   const inkHex = inkColors.find((c) => c.id === ink)?.hex ?? "#111";
@@ -71,6 +72,9 @@ export function Customizer() {
       setLogo(l);
       setPos({ x: 0.5, y: text ? 0.38 : 0.45 });
       setScale(0.7);
+      if (window.innerWidth < 1024) {
+        requestAnimationFrame(() => previewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error al cargar el logo");
     }
@@ -145,9 +149,43 @@ export function Customizer() {
   const textY = Math.min(area.y + area.h - 12, box.y + box.h + 34);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-12">
+    <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-x-12">
+      {/* Paso 1 (en celular va arriba de la vista previa) */}
+      <div className="lg:col-start-2 lg:row-start-1">
+        <section aria-labelledby="paso1">
+            <h2 id="paso1" className="mb-3 font-display text-lg font-extrabold"><span className="text-gradient">1.</span> Subí tu logo</h2>
+            <label
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragOver(true);
+              }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragOver(false);
+                handleFile(e.dataTransfer.files?.[0]);
+              }}
+              className={`ring-rainbow flex cursor-pointer flex-col items-center justify-center gap-2 rounded-3xl px-6 py-8 text-center transition ${dragOver ? "bg-white/10" : "bg-white/[0.03] hover:bg-white/[0.06]"}`}
+            >
+              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-white/10">
+                <IconUpload width={26} height={26} />
+              </span>
+              <span className="font-display font-bold">{logo ? `Cambiar logo (${logo.name})` : "Elegí tu logo o arrastralo acá"}</span>
+              <span className="text-sm text-mute">PNG, JPG, WEBP o SVG · hasta 8 MB · ideal con fondo blanco o transparente</span>
+              <input ref={inputRef} type="file" accept={ACCEPTED.join(",")} className="sr-only" onChange={(e) => handleFile(e.target.files?.[0])} />
+            </label>
+            <p className="mt-2 text-xs text-mute">Tu imagen se procesa en tu dispositivo, no la subimos a ningún servidor.</p>
+            {error && (
+              <p role="alert" className="mt-3 rounded-xl border border-brand-magenta/50 bg-brand-magenta/10 px-4 py-3 text-sm">
+                {error}
+              </p>
+            )}
+          </section>
+
+      </div>
+
       {/* Vista previa */}
-      <div className="lg:sticky lg:top-24 lg:self-start">
+      <div ref={previewRef} className="scroll-mt-20 lg:sticky lg:top-24 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-start">
         <div className="noise relative isolate overflow-hidden rounded-[2rem] border border-line p-4 sm:p-8" style={{ background: "radial-gradient(120% 80% at 50% 0%, #26246a 0%, #120f2b 55%, #0a0a14 100%)" }}>
           <div className="glow top-10 -left-10 h-60 w-60 bg-brand-violet opacity-40" aria-hidden />
           <div className="glow -right-10 bottom-0 h-60 w-60 bg-brand-magenta opacity-30" aria-hidden />
@@ -207,37 +245,7 @@ export function Customizer() {
       </div>
 
       {/* Controles */}
-      <div className="space-y-8">
-        <section aria-labelledby="paso1">
-          <h2 id="paso1" className="mb-3 font-display text-lg font-extrabold"><span className="text-gradient">1.</span> Subí tu logo</h2>
-          <label
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragOver(true);
-            }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragOver(false);
-              handleFile(e.dataTransfer.files?.[0]);
-            }}
-            className={`ring-rainbow flex cursor-pointer flex-col items-center justify-center gap-2 rounded-3xl px-6 py-8 text-center transition ${dragOver ? "bg-white/10" : "bg-white/[0.03] hover:bg-white/[0.06]"}`}
-          >
-            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-white/10">
-              <IconUpload width={26} height={26} />
-            </span>
-            <span className="font-display font-bold">{logo ? `Cambiar logo (${logo.name})` : "Elegí tu logo o arrastralo acá"}</span>
-            <span className="text-sm text-mute">PNG, JPG, WEBP o SVG · hasta 8 MB · ideal con fondo blanco o transparente</span>
-            <input ref={inputRef} type="file" accept={ACCEPTED.join(",")} className="sr-only" onChange={(e) => handleFile(e.target.files?.[0])} />
-          </label>
-          <p className="mt-2 text-xs text-mute">Tu imagen se procesa en tu dispositivo, no la subimos a ningún servidor.</p>
-          {error && (
-            <p role="alert" className="mt-3 rounded-xl border border-brand-magenta/50 bg-brand-magenta/10 px-4 py-3 text-sm">
-              {error}
-            </p>
-          )}
-        </section>
-
+      <div className="space-y-8 lg:col-start-2 lg:row-start-2">
         <section aria-labelledby="paso2">
           <h2 id="paso2" className="mb-3 font-display text-lg font-extrabold"><span className="text-gradient">2.</span> Elegí la bolsa</h2>
           <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Modelo de bolsa">
