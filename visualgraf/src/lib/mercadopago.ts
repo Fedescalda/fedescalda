@@ -15,8 +15,10 @@ export type PreferenceLine = { id: string; title: string; quantity: number; unit
 /** Crea una preferencia de Checkout Pro y devuelve la URL de pago. */
 export async function createPreference(opts: {
   orderId: string;
+  /** token del pedido para volver a su página */
+  token: string;
   lines: PreferenceLine[];
-  payer: { name: string; email: string; phone?: string };
+  payer: { name: string; email: string };
 }) {
   const c = client();
   if (!c) throw new Error("Mercado Pago no está configurado");
@@ -34,9 +36,9 @@ export async function createPreference(opts: {
       external_reference: opts.orderId,
       statement_descriptor: "VISUALGRAF",
       back_urls: {
-        success: `${site.url}/pedido/exito?pedido=${opts.orderId}`,
-        pending: `${site.url}/pedido/pendiente?pedido=${opts.orderId}`,
-        failure: `${site.url}/pedido/error?pedido=${opts.orderId}`,
+        success: `${site.url}/pedido/${opts.token}?pago=exito`,
+        pending: `${site.url}/pedido/${opts.token}?pago=pendiente`,
+        failure: `${site.url}/pedido/${opts.token}?pago=error`,
       },
       // Mercado Pago exige URLs públicas https para auto_return y webhooks
       ...(isPublic && { auto_return: "approved", notification_url: `${site.url}/api/mercadopago/webhook` }),

@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { blobToDataUrl, saveDesign } from "@/lib/design-store";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BagMockup, printArea, type BagModel } from "../BagMockup";
@@ -35,6 +37,8 @@ export function Customizer() {
   const [text, setText] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const router = useRouter();
 
   const svgRef = useRef<SVGSVGElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -70,6 +74,7 @@ export function Customizer() {
     try {
       const l = await loadLogoFile(file);
       setLogo(l);
+      setLogoFile(file);
       setPos({ x: 0.5, y: text ? 0.38 : 0.45 });
       setScale(0.7);
       if (window.innerWidth < 1024) {
@@ -141,6 +146,28 @@ export function Customizer() {
     } catch {
       setError("No se pudo descargar la imagen. Probá con otro navegador.");
     } finally {
+      setBusy(false);
+    }
+  }
+
+  /** Guarda simulación + logo original y lleva a elegir medida: se adjuntan solos al pedido. */
+  async function addDesignToOrder() {
+    if (!svgRef.current) return;
+    setBusy(true);
+    try {
+      const png = await svgToPng(svgRef.current, 900);
+      const mockup = await blobToDataUrl(png);
+      const logoData = logoFile && logoFile.size < 2.5 * 1024 * 1024 ? await blobToDataUrl(logoFile) : undefined;
+      saveDesign({
+        mockup,
+        logo: logoData,
+        logoName: logoFile?.name,
+        summary: `${modelDef.name} · bolsa ${bagName} · impresión ${original ? "a color" : inkName}${text ? ` · texto "${text}"` : ""}`,
+        savedAt: Date.now(),
+      });
+      router.push(`${modelDef.product}?bolsa=${bag}&tinta=${original ? "" : ink}&diseno=1`);
+    } catch {
+      setError("No pudimos guardar el diseño. Probá descargarlo y subirlo en el pedido.");
       setBusy(false);
     }
   }
@@ -238,8 +265,11 @@ export function Customizer() {
           <a href={waLink(waMsg)} target="_blank" rel="noopener noreferrer" className="btn btn-whatsapp">
             <IconWhatsApp /> Pedir presupuesto
           </a>
-          <Link href={`${modelDef.product}`} className="btn btn-primary sm:col-span-2">
-            <IconBag /> Elegir medida y comprar
+          <button type="button" onClick={addDesignToOrder} disabled={busy || !processed} className="btn btn-primary sm:col-span-2">
+            <IconBag /> {processed ? "Usar este diseño y comprar" : "Subí tu logo para comprar con este diseño"}
+          </button>
+          <Link href={modelDef.product} className="text-center text-sm text-mute underline-offset-4 hover:underline sm:col-span-2">
+            Prefiero elegir la medida y subir el logo después
           </Link>
         </div>
       </div>

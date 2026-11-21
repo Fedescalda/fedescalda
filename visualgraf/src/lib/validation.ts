@@ -46,7 +46,8 @@ export const orderSchema = z.object({
     )
     .min(1, "Tu pedido está vacío")
     .max(30),
-  paymentMethod: z.enum(["mercadopago", "whatsapp"]),
+  paymentMethod: z.enum(["mercadopago", "transferencia", "whatsapp"]),
+  logoLater: z.boolean().optional().default(false),
   promoCode: txt(30).optional().default(""),
   website: z.string().max(0).optional().default(""),
 });

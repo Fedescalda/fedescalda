@@ -136,14 +136,6 @@ export function notifyNewOrder(o: {
   });
 }
 
-export function notifyOrderPaid(o: { orderId: string; total: number; customerName?: string }) {
-  return notify({
-    subject: `✅ Pago acreditado · pedido #${o.orderId.slice(0, 8).toUpperCase()}`,
-    lines: [`${o.customerName ? `${o.customerName} pagó` : "Se acreditó el pago de"} ${formatARS(o.total)} con Mercado Pago.`, "Ya podés coordinar el diseño y la producción."],
-    link: { label: "Ver pedidos", url: `${site.url}/admin` },
-  });
-}
-
 export function notifyNewContact(c: { name: string; business?: string; email: string; phone?: string; province?: string; interest?: string; message: string }) {
   const wa = phoneLink(c.phone);
   return notify({

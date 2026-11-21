@@ -20,8 +20,11 @@ export function Configurator({ product }: { product: Product }) {
   const raw = Number(params.get("medida"));
   const initial = Number.isInteger(raw) && raw >= 0 && raw < product.variants.length ? raw : 0;
   const [vi, setVi] = useState(initial);
-  const [bag, setBag] = useState(product.colors[0]);
-  const [ink, setInk] = useState(product.colors[0] === "negro" ? "blanco" : "negro");
+  const paramBag = params.get("bolsa") as Product["colors"][number] | null;
+  const paramInk = params.get("tinta");
+  const fromDesigner = params.get("diseno") === "1";
+  const [bag, setBag] = useState(paramBag && product.colors.includes(paramBag) ? paramBag : product.colors[0]);
+  const [ink, setInk] = useState(paramInk && inkColors.some((c) => c.id === paramInk) ? paramInk : product.colors[0] === "negro" ? "blanco" : "negro");
   const [packs, setPacks] = useState(1);
   const [added, setAdded] = useState(false);
 
@@ -154,6 +157,12 @@ export function Configurator({ product }: { product: Product }) {
               </button>
             </div>
           </div>
+        )}
+
+        {fromDesigner && (
+          <p className="mt-6 rounded-2xl border border-brand-green/40 bg-brand-green/5 px-4 py-3 text-sm">
+            <strong className="text-brand-green">✓ Tu diseño del simulador quedó guardado.</strong> Elegí la medida y la cantidad: se adjunta solo a tu pedido.
+          </p>
         )}
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">

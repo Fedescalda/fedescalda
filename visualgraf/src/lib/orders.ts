@@ -2,6 +2,7 @@ import "server-only";
 import { getProducts, findPromoCode } from "./data";
 import { formatARS } from "./site";
 import type { OrderInput } from "./validation";
+import { quoteShipping } from "./settings";
 
 export type PricedLine = {
   productId: string;
@@ -40,7 +41,17 @@ export async function priceOrder(input: OrderInput) {
   const subtotal = lines.reduce((s, l) => s + l.quantity * l.unitPrice, 0);
   const promo = input.promoCode ? await findPromoCode(input.promoCode) : null;
   const discount = promo?.discountPercent ? Math.round((subtotal * promo.discountPercent) / 100) : 0;
-  return { lines, subtotal, discount, total: subtotal - discount, promoCode: promo?.code ?? null };
+  const ship = await quoteShipping(input.customer.province, subtotal - discount);
+  const shipping = ship.price ?? 0;
+  return {
+    lines,
+    subtotal,
+    discount,
+    shipping,
+    shippingZone: ship.price == null ? null : ship.zone,
+    total: subtotal - discount + shipping,
+    promoCode: promo?.code ?? null,
+  };
 }
 
 export function orderSummaryText(orderId: string, priced: Awaited<ReturnType<typeof priceOrder>>, customer: OrderInput["customer"]) {
@@ -51,7 +62,8 @@ export function orderSummaryText(orderId: string, priced: Awaited<ReturnType<typ
     `¡Hola Visual Graf! Quiero confirmar mi pedido #${orderId}:`,
     lines,
     priced.discount ? `Descuento (${priced.promoCode}): -${formatARS(priced.discount)}` : "",
-    `Total: ${formatARS(priced.total)} (sin envío)`,
+    priced.shippingZone ? `Envío (${priced.shippingZone}): ${priced.shipping ? formatARS(priced.shipping) : "gratis"}` : "Envío: a coordinar",
+    `Total: ${formatARS(priced.total)}`,
     "",
     `Nombre: ${customer.name}${customer.business ? ` (${customer.business})` : ""}`,
     `Envío a: ${customer.address}, ${customer.city}, ${customer.province}${customer.zip ? ` (CP ${customer.zip})` : ""}`,

@@ -17,6 +17,10 @@ test("Compra de punta a punta con cierre por WhatsApp", async ({ page }) => {
   await page.selectOption("#c-province", "Santa Fe");
   await page.fill("#c-city", "Rosario");
   await page.fill("#c-address", "Calle Falsa 123");
+  // Sin logo: hay que subirlo o marcar que se envía después
+  await page.getByRole("button", { name: "Confirmar pedido" }).click();
+  await expect(page.getByText("Subí tu logo o marcá que lo enviás después.")).toBeVisible();
+  await page.getByLabel(/Lo envío después/).check();
   await page.getByRole("button", { name: "Confirmar pedido" }).click();
 
   const wa = page.getByRole("link", { name: /Enviar pedido por WhatsApp/ });

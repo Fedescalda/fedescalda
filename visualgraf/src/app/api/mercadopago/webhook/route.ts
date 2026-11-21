@@ -1,5 +1,5 @@
-import { after, NextResponse } from "next/server";
-import { notifyOrderPaid } from "@/lib/notify";
+import { NextResponse } from "next/server";
+import { setOrderStatus } from "@/lib/order-events";
 import { WebhookSignatureValidator } from "mercadopago";
 import { getPayment } from "@/lib/mercadopago";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
   const orderId = payment.external_reference;
   if (!orderId) return NextResponse.json({ ok: true });
 
-  const { data: order, error } = await sb.from("orders").select("id,total,status,payment_method,mp_payment_id,customer").eq("id", orderId).maybeSingle();
+  const { data: order, error } = await sb.from("orders").select("id,total,status,payment_method,mp_payment_id").eq("id", orderId).maybeSingle();
   if (error) return NextResponse.json({ ok: false }, { status: 500 });
   if (!order) return NextResponse.json({ ok: true }); // pedido inexistente: no reintentar
   if (order.payment_method !== "mercadopago") return NextResponse.json({ ok: true });
@@ -64,26 +64,25 @@ export async function POST(req: Request) {
   const expectedCents = Math.round(Number(order.total) * 100);
   const amountOk = payment.currency_id === "ARS" && Math.abs(paidCents - expectedCents) <= 100; // tolerancia $1 por redondeo
 
-  let update: Record<string, string> | null = null;
   if (payment.status === "approved") {
     if (!amountOk) {
       console.error(`[mp-webhook] importe no coincide para pedido ${orderId}: ${paidCents} vs ${expectedCents}`);
       return NextResponse.json({ ok: true });
     }
-    if (order.status === "pendiente" || order.status === "cancelado") update = { status: "pagado", mp_payment_id: String(payment.id) };
-  } else if (payment.status === "refunded" || payment.status === "charged_back") {
-    // Solo revierte si es el mismo pago que acreditó el pedido
-    if (order.mp_payment_id === String(payment.id)) update = { status: "cancelado" };
-  }
-  // rejected / cancelled / pending: no cambian un pedido (el cliente puede reintentar con otro medio)
-
-  if (update) {
-    const { error: upErr } = await sb.from("orders").update(update).eq("id", orderId);
-    if (upErr) return NextResponse.json({ ok: false }, { status: 500 });
-    if (update.status === "pagado") {
-      const customerName = (order.customer as { name?: string } | null)?.name;
-      after(() => notifyOrderPaid({ orderId: order.id, total: Number(order.total), customerName }));
+    if (order.status === "pendiente" || order.status === "cancelado") {
+      const ok = await setOrderStatus(orderId, "pagado", {
+        note: `Pago acreditado en Mercado Pago (#${payment.id})`,
+        patch: { mp_payment_id: String(payment.id) },
+        notifyOwner: "✅ Pago acreditado con Mercado Pago",
+      });
+      if (!ok) return NextResponse.json({ ok: false }, { status: 500 });
     }
+  } else if ((payment.status === "refunded" || payment.status === "charged_back") && order.mp_payment_id === String(payment.id)) {
+    // Solo revierte si es el mismo pago que acreditó el pedido
+    const ok = await setOrderStatus(orderId, "cancelado", { note: `Pago ${payment.status} en Mercado Pago`, notifyOwner: "⚠️ Pago devuelto o desconocido" });
+    if (!ok) return NextResponse.json({ ok: false }, { status: 500 });
   }
+  // rejected / cancelled / pending: no cambian el pedido (el cliente puede reintentar)
+
   return NextResponse.json({ ok: true });
 }
