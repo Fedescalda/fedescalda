@@ -27,7 +27,7 @@ export function ComboPicker() {
         <fieldset>
           <legend className="eyebrow mb-3">Colores de bolsa</legend>
           <div className="flex flex-wrap gap-2">
-            {bagColors.map((b) => (
+            {bagColors.filter((b) => b.id !== "rosa").map((b) => (
               <button
                 key={b.id}
                 type="button"

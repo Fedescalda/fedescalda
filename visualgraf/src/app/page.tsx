@@ -149,8 +149,8 @@ export default async function Home() {
           <SectionHeading eyebrow="Trabajos reales" title="Marcas que ya" highlight="llevan su bolsa" />
         </div>
         <ul className="container-vg flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] md:grid md:grid-cols-5 md:overflow-visible">
-          {works.map((w, i) => (
-            <Reveal as="li" key={w.name} delay={i * 70} className="w-[70%] shrink-0 snap-center sm:w-[42%] md:w-auto">
+          {works.map((w) => (
+            <li key={w.name} className="w-[70%] shrink-0 snap-center sm:w-[42%] md:w-auto">
               <figure className="group overflow-hidden rounded-3xl border border-line bg-ink-3">
                 <div className="relative aspect-[4/5] overflow-hidden">
                   <Image src={w.src} alt={w.alt} fill sizes="(min-width:768px) 20vw, 70vw" className="object-cover transition duration-700 group-hover:scale-105" />
@@ -160,7 +160,7 @@ export default async function Home() {
                   <p className="text-xs text-mute">{w.detail}</p>
                 </figcaption>
               </figure>
-            </Reveal>
+            </li>
           ))}
         </ul>
       </section>

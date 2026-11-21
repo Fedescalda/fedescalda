@@ -56,6 +56,7 @@ export type OrderInput = z.infer<typeof orderSchema>;
 /** Rate limit muy simple en memoria (best effort por instancia). */
 const hits = new Map<string, number[]>();
 export function rateLimited(key: string, max = 5, windowMs = 60_000) {
+  if (process.env.RATE_LIMIT_OFF === "1") return false; // solo para tests e2e
   const now = Date.now();
   const list = (hits.get(key) ?? []).filter((t) => now - t < windowMs);
   list.push(now);

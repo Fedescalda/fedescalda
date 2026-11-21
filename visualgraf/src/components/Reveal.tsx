@@ -17,6 +17,11 @@ export function Reveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // Si ya está arriba del viewport (recarga a mitad de página o link con #ancla), mostrar ya
+    if (el.getBoundingClientRect().top < window.innerHeight) {
+      el.classList.add("is-visible");
+      return;
+    }
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
