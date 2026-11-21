@@ -75,8 +75,12 @@ export async function getProducts(): Promise<Product[]> {
     .select("*")
     .eq("active", true)
     .order("sort", { ascending: true });
-  if (error || !data?.length) return sampleProducts;
-  return (data as ProductRow[]).map(mapProduct);
+  if (error) {
+    console.error("[data] Error leyendo productos de Supabase:", error.message);
+    return [];
+  }
+  // Solo publicamos productos completos (con fotos y al menos una variante)
+  return (data as ProductRow[]).map(mapProduct).filter((p) => p.images.length > 0 && p.variants.length > 0);
 }
 
 export async function getProduct(slug: string) {
@@ -96,7 +100,10 @@ export async function getPromotions(): Promise<Promotion[]> {
     .select("*")
     .eq("active", true)
     .order("created_at", { ascending: false });
-  if (error || !data) return samplePromotions.filter(isCurrent);
+  if (error || !data) {
+    if (error) console.error("[data] Error leyendo promociones de Supabase:", error.message);
+    return [];
+  }
   return (data as PromotionRow[]).map(mapPromotion).filter(isCurrent);
 }
 

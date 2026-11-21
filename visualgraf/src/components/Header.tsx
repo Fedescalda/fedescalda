@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { nav } from "@/lib/site";
 import { Logo } from "./Logo";
 import { IconBag, IconClose, IconMenu } from "./Icons";
@@ -12,6 +12,8 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { count } = useCart();
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {
@@ -22,7 +24,26 @@ export function Header() {
   }, []);
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    if (!open) return;
+    // Foco al primer enlace y trampa de foco dentro del menú + botón
+    panelRef.current?.querySelector<HTMLElement>("a")?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
+      if (e.key === "Tab" && panelRef.current) {
+        const els = [toggleRef.current!, ...panelRef.current.querySelectorAll<HTMLElement>("a")];
+        const i = els.indexOf(document.activeElement as HTMLElement);
+        if (e.shiftKey && i <= 0) {
+          e.preventDefault();
+          els[els.length - 1].focus();
+        } else if (!e.shiftKey && i === els.length - 1) {
+          e.preventDefault();
+          els[0].focus();
+        }
+      }
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
@@ -32,6 +53,7 @@ export function Header() {
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
+    <>
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         scrolled || open ? "border-b border-line bg-ink/80 backdrop-blur-xl" : "bg-transparent"
@@ -73,6 +95,7 @@ export function Header() {
             Probá tu logo
           </Link>
           <button
+            ref={toggleRef}
             type="button"
             className="grid h-11 w-11 place-items-center rounded-full border border-line bg-white/5 lg:hidden"
             aria-expanded={open}
@@ -85,10 +108,16 @@ export function Header() {
         </div>
       </div>
 
+    </header>
       {/* Menú móvil */}
       <div
         id="menu-movil"
-        className={`fixed inset-x-0 top-16 bottom-0 overflow-y-auto bg-ink/98 backdrop-blur-xl transition-all duration-300 lg:hidden ${
+        ref={panelRef}
+        inert={!open}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menú"
+        className={`fixed inset-x-0 top-16 bottom-0 z-40 md:top-20 overflow-y-auto bg-ink/98 backdrop-blur-xl transition-all duration-300 lg:hidden ${
           open ? "visible opacity-100" : "invisible opacity-0"
         }`}
       >
@@ -113,6 +142,6 @@ export function Header() {
           </Link>
         </nav>
       </div>
-    </header>
+    </>
   );
 }

@@ -17,7 +17,8 @@ export function Configurator({ product }: { product: Product }) {
   const params = useSearchParams();
   const router = useRouter();
   const { add } = useCart();
-  const initial = Math.min(Math.max(Number(params.get("medida")) || 0, 0), product.variants.length - 1);
+  const raw = Number(params.get("medida"));
+  const initial = Number.isInteger(raw) && raw >= 0 && raw < product.variants.length ? raw : 0;
   const [vi, setVi] = useState(initial);
   const [bag, setBag] = useState(product.colors[0]);
   const [ink, setInk] = useState(product.colors[0] === "negro" ? "blanco" : "negro");
@@ -25,6 +26,8 @@ export function Configurator({ product }: { product: Product }) {
   const [added, setAdded] = useState(false);
 
   useEffect(() => setVi(initial), [initial]);
+  // Si cambia la selección, se puede volver a agregar
+  useEffect(() => setAdded(false), [vi, bag, ink, packs]);
 
   const variant = product.variants[vi];
   const price = variant.price;

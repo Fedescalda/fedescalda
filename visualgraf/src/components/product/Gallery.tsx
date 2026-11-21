@@ -1,9 +1,10 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function Gallery({ images, activeSrc }: { images: { src: string; alt: string }[]; activeSrc?: string }) {
   const [manual, setManual] = useState<number | null>(null);
+  useEffect(() => setManual(null), [activeSrc]);
   const fromVariant = activeSrc ? images.findIndex((i) => i.src === activeSrc) : -1;
   const index = manual ?? (fromVariant >= 0 ? fromVariant : 0);
   const current = images[index] ?? images[0];

@@ -43,7 +43,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE);
-      if (raw) setItems(JSON.parse(raw));
+      const parsed: unknown = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(parsed)) {
+        setItems(
+          parsed.filter(
+            (i): i is CartItem =>
+              i && typeof i === "object" && typeof i.key === "string" && typeof i.name === "string" &&
+              Number.isFinite(i.quantity) && i.quantity > 0 && Number.isFinite(i.unitPrice) && Number.isFinite(i.packSize),
+          ),
+        );
+      }
     } catch {}
     setReady(true);
   }, []);

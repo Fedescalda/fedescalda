@@ -137,7 +137,8 @@ body {
 
   .btn-primary {
     color: #fff;
-    background: var(--rainbow);
+    /* Gradiente más profundo que --rainbow para asegurar contraste AA con texto blanco */
+    background: linear-gradient(90deg, #1d4fd8 0%, #6a24d9 35%, #c2187a 70%, #c2410c 100%);
     background-size: 160% 100%;
     background-position: 0% 0;
     box-shadow: 0 10px 30px -10px rgb(255 46 147 / 0.6);

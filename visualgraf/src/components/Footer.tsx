@@ -68,7 +68,7 @@ export function Footer() {
       </div>
       <div className="border-t border-line">
         <div className="container-vg flex flex-col gap-2 py-6 text-xs text-mute md:flex-row md:items-center md:justify-between">
-          <p>© {year} Visual Graf · Tu bolsa impresa. Todos los derechos reservados.</p>
+          <p suppressHydrationWarning>© {year} Visual Graf · Tu bolsa impresa. Todos los derechos reservados.</p>
           <p>Bolsas · Packaging · Impresión</p>
         </div>
       </div>

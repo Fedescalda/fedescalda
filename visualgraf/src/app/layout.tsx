@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { DM_Sans, Montserrat } from "next/font/google";
 import "./globals.css";
 import { site } from "@/lib/site";
+import { jsonLd as safeJson } from "@/lib/jsonld";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
@@ -69,7 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es-AR" className={`${display.variable} ${body.variable}`}>
       <body className="min-h-dvh overflow-x-clip">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={safeJson(jsonLd)} />
         <CartProvider>
           <Header />
           <main id="contenido">{children}</main>

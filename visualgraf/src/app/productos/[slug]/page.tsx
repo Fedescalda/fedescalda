@@ -9,6 +9,7 @@ import { getProduct, getProducts } from "@/lib/data";
 import { categoryLabel, fromPrice } from "@/lib/catalog";
 import { site } from "@/lib/site";
 import { faqs } from "@/lib/content";
+import { jsonLd as safeJson } from "@/lib/jsonld";
 
 export const revalidate = 300;
 
@@ -56,7 +57,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={safeJson(jsonLd)} />
       <div className="container-vg pt-28 md:pt-32">
         <nav aria-label="Ruta de navegación" className="mb-6 text-sm text-mute">
           <ol className="flex flex-wrap items-center gap-1.5">
