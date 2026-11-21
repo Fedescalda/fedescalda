@@ -48,7 +48,12 @@ export const blobToDataUrl = (b: Blob) =>
     r.readAsDataURL(b);
   });
 
+/** Convierte un data URL en File sin usar fetch (la CSP bloquea fetch a data:). */
 export async function dataUrlToFile(url: string, name: string) {
-  const blob = await (await fetch(url)).blob();
-  return new File([blob], name, { type: blob.type });
+  const [head, b64 = ""] = url.split(",");
+  const type = /data:([^;]+)/.exec(head)?.[1] ?? "application/octet-stream";
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new File([bytes], name, { type });
 }
