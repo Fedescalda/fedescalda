@@ -50,6 +50,7 @@ src/
     content.ts                Textos editables: historia, FAQ, rubros, pasos, clientes
     data.ts                   Lectura productos/promos (Supabase → catálogo base si no está configurado)
     orders.ts mercadopago.ts validation.ts (zod + rate limit) jsonld.ts
+    notify.ts                 Avisos al dueño por email (Resend) y Telegram: pedidos, pagos, consultas
     supabase/                 Clientes browser/server/admin + config
   middleware.ts               Sesión Supabase para /admin
 supabase/schema.sql seed.sql  Tablas, RLS, datos base

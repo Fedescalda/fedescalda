@@ -55,6 +55,27 @@ Si cambiás los productos base en `src/lib/catalog.ts`, regenerá el seed con `n
    clave secreta a `MP_WEBHOOK_SECRET`.
 4. `NEXT_PUBLIC_SITE_URL` tiene que ser la URL pública `https://…` para que funcionen el retorno y el webhook.
 
+## Avisos de pedidos y consultas (email + celular)
+
+Cada pedido nuevo, pago acreditado o consulta del formulario te llega al instante. Podés activar uno o los dos canales.
+
+**Email (Resend, gratis hasta 3.000 mails/mes)**
+1. Creá una cuenta en https://resend.com con el email donde querés recibir los avisos.
+2. **API Keys → Create API Key** y copiala en `RESEND_API_KEY`.
+3. En `NOTIFY_EMAIL` poné ese mismo email. Sin dominio propio, Resend solo deja enviar al email de tu cuenta, que es justo lo que necesitás.
+   Si más adelante verificás `vgtubolsaimpresa.store` en Resend, podés usar `NOTIFY_FROM` y varios destinatarios separados por coma.
+
+**Celular (Telegram, gratis)**
+1. Instalá Telegram y escribile a **@BotFather** → `/newbot` → elegí un nombre (ej. "Avisos Visual Graf").
+   Te da un token: copialo en `TELEGRAM_BOT_TOKEN`.
+2. Abrí el chat con tu bot nuevo y mandale cualquier mensaje (por ejemplo "hola").
+3. Entrá desde el navegador a `https://api.telegram.org/bot<TU_TOKEN>/getUpdates` y buscá `"chat":{"id":123456789`.
+   Ese número va en `TELEGRAM_CHAT_ID`.
+4. Activá las notificaciones del chat del bot en tu celular.
+
+Después de cargar las variables (en `.env.local` o en Vercel → Settings → Environment Variables, y redeploy),
+entrá al panel `/admin` y tocá **Probar avisos**.
+
 ## Publicar gratis en Vercel
 
 1. Entrá a https://vercel.com con tu cuenta de GitHub.

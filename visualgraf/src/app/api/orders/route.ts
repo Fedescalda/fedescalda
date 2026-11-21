@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { notifyNewOrder } from "@/lib/notify";
 import { clientIp, orderSchema, rateLimited } from "@/lib/validation";
 import { createAdminClient } from "@/lib/supabase/server";
 import { createPreference, isMercadoPagoEnabled } from "@/lib/mercadopago";
@@ -57,6 +58,18 @@ export async function POST(req: Request) {
   }
   if (!persisted) useMP = false;
   const shortId = orderId.slice(0, 8).toUpperCase();
+
+  after(() =>
+    notifyNewOrder({
+      shortId,
+      customer: input.customer,
+      lines: priced.lines,
+      total: priced.total,
+      discount: priced.discount,
+      promoCode: priced.promoCode,
+      paymentMethod: useMP ? "mercadopago" : "whatsapp",
+    }),
+  );
   const whatsappUrl = waLink(orderSummaryText(shortId, priced, input.customer));
 
   if (useMP) {

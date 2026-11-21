@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { notifyNewContact } from "@/lib/notify";
 import { clientIp, contactSchema, rateLimited } from "@/lib/validation";
 import { createAdminClient } from "@/lib/supabase/server";
 
@@ -18,6 +19,9 @@ export async function POST(req: Request) {
   }
   const { website, ...data } = parsed.data;
   if (website) return NextResponse.json({ ok: true, stored: false }); // bot
+
+  // Aviso por email / Telegram (aunque la base no esté configurada)
+  after(() => notifyNewContact(data));
 
   const sb = createAdminClient();
   if (!sb) return NextResponse.json({ ok: true, stored: false });

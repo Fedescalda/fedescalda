@@ -1,7 +1,8 @@
 import { ActionForm } from "@/components/admin/ActionForm";
 import type { CartItem } from "@/components/cart/CartProvider";
 import { formatARS } from "@/lib/site";
-import { updateOrderStatus } from "../actions";
+import { sendTestNotification, updateOrderStatus } from "../actions";
+import { notificationChannels } from "@/lib/notify";
 import { customerWhatsApp, formatDate, orderStatuses } from "../display";
 import { getPanelClient } from "../session";
 
@@ -29,6 +30,7 @@ export default async function OrdersPage() {
   return (
     <section className="space-y-4">
       <h1 className="text-3xl font-bold">Pedidos</h1>
+      <NotificationsCard />
       {error && <p role="alert">No pudimos cargar los pedidos.</p>}
       {!error && !orders.length && <p className="text-mute">Todavía no hay pedidos.</p>}
       {orders.map((order) => {
@@ -72,5 +74,20 @@ export default async function OrdersPage() {
         );
       })}
     </section>
+  );
+}
+
+function NotificationsCard() {
+  const ch = notificationChannels();
+  return (
+    <div className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-sm">
+        <span className="font-semibold">Avisos de pedidos y consultas:</span>{" "}
+        <span className={ch.email ? "text-brand-green" : "text-mute"}>Email {ch.email ? "activo" : "sin configurar"}</span>
+        {" · "}
+        <span className={ch.telegram ? "text-brand-green" : "text-mute"}>Celular (Telegram) {ch.telegram ? "activo" : "sin configurar"}</span>
+      </p>
+      <ActionForm action={sendTestNotification} label="Probar avisos" secondary />
+    </div>
   );
 }

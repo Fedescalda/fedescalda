@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { notifyOrderPaid } from "@/lib/notify";
 import { WebhookSignatureValidator } from "mercadopago";
 import { getPayment } from "@/lib/mercadopago";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
   const orderId = payment.external_reference;
   if (!orderId) return NextResponse.json({ ok: true });
 
-  const { data: order, error } = await sb.from("orders").select("id,total,status,payment_method,mp_payment_id").eq("id", orderId).maybeSingle();
+  const { data: order, error } = await sb.from("orders").select("id,total,status,payment_method,mp_payment_id,customer").eq("id", orderId).maybeSingle();
   if (error) return NextResponse.json({ ok: false }, { status: 500 });
   if (!order) return NextResponse.json({ ok: true }); // pedido inexistente: no reintentar
   if (order.payment_method !== "mercadopago") return NextResponse.json({ ok: true });
@@ -79,6 +80,10 @@ export async function POST(req: Request) {
   if (update) {
     const { error: upErr } = await sb.from("orders").update(update).eq("id", orderId);
     if (upErr) return NextResponse.json({ ok: false }, { status: 500 });
+    if (update.status === "pagado") {
+      const customerName = (order.customer as { name?: string } | null)?.name;
+      after(() => notifyOrderPaid({ orderId: order.id, total: Number(order.total), customerName }));
+    }
   }
   return NextResponse.json({ ok: true });
 }

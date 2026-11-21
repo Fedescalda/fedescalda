@@ -7,6 +7,7 @@ import type { Variant } from "@/lib/catalog";
 import { createSessionClient } from "@/lib/supabase/server";
 import { orderStatuses } from "./display";
 import { getAdminClient } from "./session";
+import { notificationChannels, notify } from "@/lib/notify";
 
 const denied = { error: "No tenés permisos para hacer este cambio." };
 
@@ -160,4 +161,15 @@ function refreshPromotions() {
   revalidatePath("/admin/promociones");
   revalidatePath("/promociones");
   revalidatePath("/");
+}
+
+export async function sendTestNotification(): Promise<ActionResult> {
+  const supabase = await getAdminClient();
+  if (!supabase) return denied;
+  const ch = notificationChannels();
+  if (!ch.email && !ch.telegram) {
+    return { error: "No hay avisos configurados. Cargá RESEND_API_KEY + NOTIFY_EMAIL y/o TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID." };
+  }
+  await notify({ subject: "🔔 Prueba de avisos de Visual Graf", lines: ["Si ves este mensaje, los avisos de pedidos y consultas funcionan."] });
+  return { success: `Aviso de prueba enviado por ${[ch.email && "email", ch.telegram && "Telegram"].filter(Boolean).join(" y ")}. Revisá que te haya llegado.` };
 }
