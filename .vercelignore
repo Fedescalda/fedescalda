@@ -1,0 +1,7 @@
+**/node_modules
+**/.next
+**/screenshots
+**/test-results
+**/.env*
+!**/.env.example
+cadetes_app
