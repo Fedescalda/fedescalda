@@ -7,7 +7,7 @@ const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'" + (process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"),
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  `img-src 'self' data: blob:${supabase ? ` ${supabase}` : ""}`,
   "font-src 'self' data:",
   `connect-src 'self'${supabase ? ` ${supabase} ${supabase.replace("https://", "wss://")}` : ""}`,
   "frame-ancestors 'self'",
@@ -19,6 +19,12 @@ const csp = [
 const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
+    // Fotos de productos subidas desde el panel (Supabase Storage)
+    remotePatterns: [{ protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" }],
+  },
+  experimental: {
+    // Subida de fotos desde el panel (se comprimen antes en el navegador)
+    serverActions: { bodySizeLimit: "4mb" },
   },
   poweredByHeader: false,
   async headers() {
