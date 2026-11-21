@@ -36,7 +36,7 @@ src/
     personalizar/             Simulador de logo (components/customizer, lib/logo-processing.ts)
     promociones/ nuestra-historia/ contacto/ privacidad/
     carrito/                  Carrito + checkout (components/cart/Checkout.tsx)
-    pedido/[estado]/          Retorno de Mercado Pago: exito | pendiente | error
+    pedido/[token]/           Página privada del pedido: estado, pago, logo, aprobar diseño (actions.ts)
     admin/                    Login + (panel)/ pedidos, consultas, productos, promociones (server actions)
     api/contact               POST consulta → Supabase (service role)
     api/orders                POST pedido → recalcula precios en servidor → Mercado Pago o link WhatsApp
@@ -52,9 +52,16 @@ src/
     data.ts                   Lectura productos/promos (Supabase → catálogo base si no está configurado)
     orders.ts mercadopago.ts validation.ts (zod + rate limit) jsonld.ts
     notify.ts                 Avisos al dueño por email (Resend) y Telegram: pedidos, pagos, consultas
+    order-status.ts           Estados del pedido y textos (compartido)
+    order-events.ts           setOrderStatus(): cambia estado + historial + email al cliente (+ aviso al dueño)
+    order-files.ts            Archivos privados del pedido (bucket "pedidos", URLs firmadas)
+    customer-email.ts         Emails automáticos al cliente
+    settings.ts               Envío por zona (tabla settings) y datos de transferencia
+    design-store.ts           Diseño del simulador guardado en el navegador para el checkout
     supabase/                 Clientes browser/server/admin + config
   middleware.ts               Sesión Supabase para /admin
 supabase/schema.sql seed.sql  Tablas, RLS, datos base
+supabase/migrations/          Cambios posteriores (correr en orden)
 scripts/seed-sql.ts           Genera seed.sql
 tests/                        Playwright: smoke, flujos, compra
 public/img/                   Fotos webp (productos/, clientes/) y logo
@@ -74,6 +81,13 @@ panel admin, e hizo revisiones de código y seguridad. Al delegar: asignar archi
   `MP_ACCESS_TOKEN` solo se usan en el servidor; nunca con prefijo `NEXT_PUBLIC_`.
 - Accesibilidad: foco visible, `aria-label` en botones de ícono, contraste AA sobre fondo oscuro.
 - Commits chicos y descriptivos en español.
+
+## Flujo de compra automática
+pendiente → (Mercado Pago webhook / admin marca transferencia) pagado → admin sube prueba → diseno →
+cliente aprueba en /pedido/[token] → en_produccion → admin carga envío → enviado → entregado.
+Todo cambio de estado pasa por `setOrderStatus()` para que quede en el historial y se avise al cliente.
+Correr SQL contra Supabase desde la nube de Claude: no hay acceso directo al puerto de Postgres; usar un deploy
+temporal de Vercel con un endpoint protegido por token y borrarlo después.
 
 ## Pendientes conocidos
 - Confirmar precios de bolsas para hielo con manija riñón y ecommerce (hoy "a cotizar").

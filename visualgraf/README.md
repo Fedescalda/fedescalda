@@ -55,6 +55,28 @@ Si cambiás los productos base en `src/lib/catalog.ts`, regenerá el seed con `n
    clave secreta a `MP_WEBHOOK_SECRET`.
 4. `NEXT_PUBLIC_SITE_URL` tiene que ser la URL pública `https://…` para que funcionen el retorno y el webhook.
 
+## Compra automática
+
+Flujo completo sin intervención manual hasta la producción:
+
+1. El cliente arma su bolsa en `/personalizar` (o elige producto) y en el checkout **sube su logo** o se adjunta solo el diseño del simulador.
+2. El **envío se calcula solo** según la provincia (configurable en `/admin/configuracion`; sin precios queda "a coordinar").
+3. Paga con **Mercado Pago** (se acredita solo por webhook) o **transferencia** (ve tu alias/CBU; marcás el pago en el panel).
+4. Recibe **emails automáticos** en cada estado y sigue su pedido en `/pedido/<link-privado>`.
+5. Vos subís la **prueba de diseño** desde la ficha del pedido → el cliente la **aprueba con un botón** → pasa solo a producción.
+6. Al despachar cargás transportista y código de seguimiento → el cliente recibe el aviso.
+
+Variables (Vercel → Settings → Environment Variables):
+
+| Variable | Para qué |
+|---|---|
+| `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET` | Cobro con Mercado Pago y acreditación automática |
+| `TRANSFER_ALIAS`, `TRANSFER_CBU`, `TRANSFER_HOLDER`, `TRANSFER_BANK` | Opción de pago por transferencia |
+| `RESEND_API_KEY`, `CUSTOMER_EMAIL_FROM` | Emails automáticos al cliente (dominio verificado en Resend) |
+| `RESEND_API_KEY` + `NOTIFY_EMAIL`, `TELEGRAM_*` | Avisos para vos |
+
+Migraciones de base de datos: `supabase/schema.sql`, `supabase/seed.sql` y luego `supabase/migrations/*.sql` en orden.
+
 ## Avisos de pedidos y consultas (email + celular)
 
 Cada pedido nuevo, pago acreditado o consulta del formulario te llega al instante. Podés activar uno o los dos canales.
