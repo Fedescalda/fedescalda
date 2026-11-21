@@ -104,7 +104,7 @@
     const url = new URL(location.href);
     if (filtro === "Todos") url.searchParams.delete("cat");
     else url.searchParams.set("cat", filtro);
-    history.replaceState(null, "", url);
+    try { history.replaceState(null, "", url); } catch (_) {}
     renderFiltros();
     renderProductos();
   });
@@ -125,7 +125,6 @@
     $(".cart-btn").classList.toggle("has-items", unidades > 0);
     $(".cart-btn").setAttribute("aria-label", `Ver pedido, ${unidades} ${unidades === 1 ? "producto" : "productos"}`);
     $("#cart-empty").hidden = items.length > 0;
-    $("#cart-send").disabled = items.length === 0;
     $("#cart-total").innerHTML = total ? `<span>Total${consultar ? " (sin los de consultar)" : ""}</span><span>${pesos.format(total)}</span>` : "";
     $("#cart-items").innerHTML = items
       .map(
@@ -140,6 +139,7 @@
       </li>`
       )
       .join("");
+    linkPedido();
   }
 
   const cart = $("#cart");
@@ -196,20 +196,25 @@
   // Mantener el foco dentro del pedido mientras está abierto
   cart.addEventListener("keydown", (e) => {
     if (e.key !== "Tab") return;
-    const f = [...cart.querySelectorAll("button:not([disabled]), input")];
+    const f = [...cart.querySelectorAll("button:not([disabled]), input, a[href]:not([aria-disabled=\"true\"])")];
     const [primero, ultimo] = [f[0], f[f.length - 1]];
     if (e.shiftKey && document.activeElement === primero) { e.preventDefault(); ultimo.focus(); }
     else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primero.focus(); }
   });
 
-  $("#cart-send").addEventListener("click", () => {
+  // El envío es un link común (funciona aunque el navegador bloquee ventanas emergentes)
+  function linkPedido() {
     const nombre = $("#cart-name").value.trim();
     const items = lineasCarrito();
     const lineas = items.map(([p, q]) => `• ${q} x ${p.nombre}${p.precio ? ` (${pesos.format(p.precio)} c/u)` : ""}`);
     const total = items.reduce((t, [p, q]) => t + (p.precio || 0) * q, 0);
     const texto = `¡Hola Amantes del Fuego!${nombre ? ` Soy ${nombre}.` : ""}\nQuiero hacer este pedido:\n${lineas.join("\n")}${total ? `\n\nTotal aprox.: ${pesos.format(total)}` : ""}`;
-    window.open(waUrl(texto), "_blank", "noopener");
-  });
+    const envio = $("#cart-send");
+    envio.href = items.length ? waUrl(texto) : "#";
+    envio.setAttribute("aria-disabled", String(!items.length));
+  }
+  $("#cart-name").addEventListener("input", linkPedido);
+  $("#cart-send").addEventListener("click", (e) => { if (!lineasCarrito().length) e.preventDefault(); });
 
   // Video del catálogo: se reproduce solo cuando está en pantalla; siempre se puede pausar
   const video = $("#reel-video");
