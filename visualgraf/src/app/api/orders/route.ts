@@ -29,42 +29,51 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : "Error de precios" }, { status: 409 });
   }
 
-  const useMP = input.paymentMethod === "mercadopago" && isMercadoPagoEnabled();
   const sb = createAdminClient();
+  // Mercado Pago solo con pedido guardado en la base (para poder conciliar el pago)
+  let useMP = input.paymentMethod === "mercadopago" && isMercadoPagoEnabled() && Boolean(sb);
   let orderId: string = crypto.randomUUID();
+  let persisted = false;
 
   if (sb) {
     const { data, error } = await sb
       .from("orders")
       .insert({
         customer: input.customer,
+        payment_method: input.paymentMethod === "mercadopago" && isMercadoPagoEnabled() ? "mercadopago" : "whatsapp",
         items: priced.lines,
         subtotal: priced.subtotal,
         discount: priced.discount,
         total: priced.total,
         promo_code: priced.promoCode,
-        payment_method: useMP ? "mercadopago" : "whatsapp",
       })
       .select("id")
       .single();
     if (error) console.error("[orders] insert error", error.message);
-    else orderId = data.id;
+    else {
+      orderId = data.id;
+      persisted = true;
+    }
   }
+  if (!persisted) useMP = false;
   const shortId = orderId.slice(0, 8).toUpperCase();
   const whatsappUrl = waLink(orderSummaryText(shortId, priced, input.customer));
 
   if (useMP) {
     try {
-      const factor = priced.subtotal ? priced.total / priced.subtotal : 1;
+      // Con descuento enviamos una sola línea por el total exacto (evita diferencias de redondeo)
+      const lines = priced.discount
+        ? [{ id: "pedido", title: `Pedido Visual Graf #${shortId} (${priced.lines.length} producto/s)`, quantity: 1, unitPrice: priced.total }]
+        : priced.lines.map((l) => ({
+            id: l.productId,
+            title: `${l.name} ${l.size} · ${l.bagColor} / ${l.inkColor} (pack ${l.packSize} u.)`,
+            quantity: l.quantity,
+            unitPrice: l.unitPrice,
+          }));
       const pref = await createPreference({
         orderId,
         payer: { name: input.customer.name, email: input.customer.email, phone: input.customer.phone },
-        lines: priced.lines.map((l) => ({
-          id: l.productId,
-          title: `${l.name} ${l.size} · ${l.bagColor} / ${l.inkColor} (pack ${l.packSize} u.)`,
-          quantity: l.quantity,
-          unitPrice: l.unitPrice * factor,
-        })),
+        lines,
       });
       if (sb) await sb.from("orders").update({ mp_preference_id: pref.id }).eq("id", orderId);
       return NextResponse.json({ ok: true, orderId: shortId, redirectUrl: pref.initPoint, whatsappUrl });

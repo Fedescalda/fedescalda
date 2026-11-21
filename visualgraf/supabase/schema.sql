@@ -117,3 +117,12 @@ create policy "pedidos: admin" on public.orders for all using (public.is_admin()
 
 -- Para hacer admin a un usuario (creado en Authentication → Users):
 -- insert into public.admins (user_id) select id from auth.users where email = 'TU_EMAIL';
+
+-- ───────────── Cupones privados ─────────────
+-- El público puede leer promociones pero NO las columnas code ni discount_percent
+-- (los códigos se validan en el servidor con la service role).
+revoke select on public.promotions from anon, authenticated;
+grant select (id, slug, title, description, badge, price, price_note, details, ends_at, image, cta, active, created_at)
+  on public.promotions to anon, authenticated;
+grant insert, update, delete on public.promotions to authenticated; -- RLS: solo admins
+-- El panel admin lee los códigos con la service role, después de verificar is_admin().

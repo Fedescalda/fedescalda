@@ -1,6 +1,6 @@
 # VisualGraf — tienda web de bolsas personalizadas
 
-Sitio de **Visual Graf · "Tu bolsa impresa"**: bolsas impresas en serigrafía (troqueladas y para hielo)
+Sitio de **Visual Graf · "Tu bolsa impresa"**: bolsas impresas en serigrafía (manija riñón, para hielo y ecommerce)
 para comercios y emprendimientos, con venta a toda Argentina. Idioma: español rioplatense (voseo:
 "elegí", "subí", "pedí"). Público: emprendedores y comercios. Objetivo: vender y captar compradores.
 
@@ -21,35 +21,47 @@ npm run start      # servir el build
 npm run lint       # ESLint
 npm run typecheck  # TypeScript
 npm test           # Playwright (levanta el server solo). En la nube de Claude: PW_CHROMIUM=/opt/pw-browsers/chromium
+npm run seed:sql   # regenera supabase/seed.sql desde src/lib/catalog.ts
 ```
+Variables: copiar `.env.example` a `.env.local`. Sin Supabase/Mercado Pago el sitio funciona igual (catálogo base + WhatsApp).
+`RATE_LIMIT_OFF=1` desactiva el rate limit de las APIs: solo para tests.
 
 ## Estructura
 ```
 src/
   app/
     page.tsx                  Inicio
-    productos/                Catálogo y ficha [slug] (configurador + agregar al pedido)
-    personalizar/             Simulador: subir logo → ver la bolsa impresa → descargar / pedir
-    promociones/              Promos vigentes (Supabase o ejemplo)
-    nuestra-historia/         Línea de tiempo
-    contacto/                 Formulario + WhatsApp
-    carrito/                  Carrito y checkout (Mercado Pago o WhatsApp)
-    pedido/[estado]/          Retorno de Mercado Pago (exito | pendiente | error)
-    admin/                    Login + panel (pedidos, consultas, productos, promos)
-    api/contact|orders|mercadopago/webhook
-    sitemap.ts robots.ts opengraph-image.tsx manifest.ts
-  components/                 UI reutilizable (Header, Footer, BagMockup, Reveal…)
-  components/cart/            Contexto del carrito (localStorage)
+    productos/                Catálogo por categoría y ficha [slug] (Configurator + Gallery)
+    personalizar/             Simulador de logo (components/customizer, lib/logo-processing.ts)
+    promociones/ nuestra-historia/ contacto/ privacidad/
+    carrito/                  Carrito + checkout (components/cart/Checkout.tsx)
+    pedido/[estado]/          Retorno de Mercado Pago: exito | pendiente | error
+    admin/                    Login + (panel)/ pedidos, consultas, productos, promociones (server actions)
+    api/contact               POST consulta → Supabase (service role)
+    api/orders                POST pedido → recalcula precios en servidor → Mercado Pago o link WhatsApp
+    api/promo                 GET valida código de descuento
+    api/mercadopago/webhook   Actualiza estado del pedido (firma con MP_WEBHOOK_SECRET)
+    sitemap.ts robots.ts manifest.ts opengraph-image.tsx not-found.tsx
+  components/                 Header, Footer, BagMockup (bolsa SVG), Reveal, ProductCard, PageHeader, CtaBand, Faq, Icons
+  components/{home,product,customizer,cart,forms,admin}/
   lib/
-    site.ts                   Datos de contacto, navegación, helpers (waLink, formatARS)
-    catalog.ts                Tipos + datos de ejemplo (productos, promos, colores)
-    content.ts                Textos editables (historia, FAQ, rubros)
-    data.ts                   Lectura de productos/promos (Supabase → fallback ejemplo)
-    supabase/                 Clientes browser/server/admin
-    mercadopago.ts            Preferencias de pago
-supabase/schema.sql           Tablas, RLS y datos iniciales
-public/img/                   Imágenes optimizadas (webp) y logo
+    site.ts                   Contacto, navegación, waLink, formatARS
+    catalog.ts                Tipos + catálogo base (precios reales) + colores de bolsa/impresión
+    content.ts                Textos editables: historia, FAQ, rubros, pasos, clientes
+    data.ts                   Lectura productos/promos (Supabase → catálogo base si no está configurado)
+    orders.ts mercadopago.ts validation.ts (zod + rate limit) jsonld.ts
+    supabase/                 Clientes browser/server/admin + config
+  middleware.ts               Sesión Supabase para /admin
+supabase/schema.sql seed.sql  Tablas, RLS, datos base
+scripts/seed-sql.ts           Genera seed.sql
+tests/                        Playwright: smoke, flujos, compra
+public/img/                   Fotos webp (productos/, clientes/) y logo
 ```
+
+## Trabajo con Codex
+Este proyecto se construye con Claude Code + Codex CLI (`codex exec`). Codex escribió la suite Playwright y el
+panel admin, e hizo revisiones de código y seguridad. Al delegar: asignar archivos exclusivos y pedir que no corra
+`npm run build` en paralelo (comparten `.next/`).
 
 ## Convenciones
 - Textos en español de Argentina con voseo. Precios en ARS con `formatARS`.
@@ -62,5 +74,6 @@ public/img/                   Imágenes optimizadas (webp) y logo
 - Commits chicos y descriptivos en español.
 
 ## Pendientes conocidos
-- Precios y promociones de `catalog.ts` / `schema.sql` son **de ejemplo**: reemplazar por los reales.
-- Textos de "Nuestra historia" (`content.ts`) son genéricos: completar con fechas e hitos reales.
+- Confirmar precios de bolsas para hielo con manija riñón y ecommerce (hoy "a cotizar").
+- La historia está tomada de la web actual: revisar que siga vigente.
+- Política de privacidad: texto base, revisar con un profesional.

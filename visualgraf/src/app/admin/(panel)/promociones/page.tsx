@@ -3,6 +3,7 @@ import type { Promotion } from "@/lib/catalog";
 import { mapPromotion } from "@/lib/data";
 import { deletePromotion, savePromotion } from "../../actions";
 import { getPanelClient } from "../../session";
+import { createAdminClient } from "@/lib/supabase/server";
 
 function PromotionForm({ promotion }: { promotion?: Promotion }) {
   return (
@@ -56,7 +57,9 @@ export default async function PromotionsPage() {
   const supabase = await getPanelClient();
   if (!supabase) return null;
 
-  const { data, error } = await supabase.from("promotions").select("*").order("created_at", { ascending: false });
+  // Los códigos de cupón no son legibles con la sesión: se leen con la service role tras verificar admin
+  const reader = createAdminClient() ?? supabase;
+  const { data, error } = await reader.from("promotions").select("*").order("created_at", { ascending: false });
   const promotions = (data ?? []).map(mapPromotion);
 
   return (

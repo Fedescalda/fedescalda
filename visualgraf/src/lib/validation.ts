@@ -58,6 +58,7 @@ const hits = new Map<string, number[]>();
 export function rateLimited(key: string, max = 5, windowMs = 60_000) {
   if (process.env.RATE_LIMIT_OFF === "1") return false; // solo para tests e2e
   const now = Date.now();
+  if (hits.size > 5000) for (const [k, v] of hits) if (!v.length || now - v[v.length - 1] > windowMs) hits.delete(k);
   const list = (hits.get(key) ?? []).filter((t) => now - t < windowMs);
   list.push(now);
   hits.set(key, list);

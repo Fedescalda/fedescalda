@@ -27,7 +27,7 @@ export async function createPreference(opts: {
         id: l.id,
         title: l.title.slice(0, 250),
         quantity: l.quantity,
-        unit_price: Math.round(l.unitPrice * 100) / 100,
+        unit_price: Math.round(l.unitPrice),
         currency_id: "ARS",
       })),
       payer: { name: opts.payer.name, email: opts.payer.email },
