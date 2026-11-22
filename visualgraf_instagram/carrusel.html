@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>VisualGraf Carrusel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=block" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0D0D1F; --paper:#F6F3EC;
+    --c:#00B8F0; --m:#FF2E88; --y:#FFD21F; --k:#0D0D1F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#222;font-family:Inter,sans-serif;display:flex;flex-direction:column;gap:40px;padding:40px;align-items:center}
+  .slide{width:1080px;height:1350px;position:relative;overflow:hidden;background:var(--ink);color:var(--paper);padding:96px}
+  .slide.light{background:var(--paper);color:var(--ink)}
+  h1,h2,.display{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;letter-spacing:-0.03em;line-height:.95}
+  .brand{position:absolute;top:72px;left:96px;display:flex;align-items:center;gap:18px;font-family:'Bricolage Grotesque';font-weight:700;font-size:30px;letter-spacing:-0.01em}
+  .page{position:absolute;top:78px;right:96px;font-size:24px;font-weight:600;opacity:.55;letter-spacing:.08em}
+  .foot{position:absolute;bottom:72px;left:96px;right:96px;display:flex;justify-content:space-between;align-items:center;font-size:26px;font-weight:600}
+  .swipe{display:flex;align-items:center;gap:14px}
+  .swipe span{display:inline-block;width:64px;height:4px;background:currentColor;position:relative}
+  .swipe span:after{content:"";position:absolute;right:-2px;top:-8px;border:10px solid transparent;border-left:14px solid currentColor;border-right:0}
+  /* logo: three overlapping CMY dots */
+  .logo{position:relative;width:54px;height:48px}
+  .logo i{position:absolute;width:30px;height:30px;border-radius:50%;mix-blend-mode:multiply}
+  .slide:not(.light) .logo i{mix-blend-mode:screen}
+  .logo i:nth-child(1){background:var(--c);left:0;top:0}
+  .logo i:nth-child(2){background:var(--m);left:22px;top:0}
+  .logo i:nth-child(3){background:var(--y);left:11px;top:18px}
+  .bar{display:flex;height:14px;position:absolute;left:0;right:0;bottom:0}
+  .bar b{flex:1}.bar b:nth-child(1){background:var(--c)}.bar b:nth-child(2){background:var(--m)}.bar b:nth-child(3){background:var(--y)}.bar b:nth-child(4){background:#fff;opacity:.15}
+  .light .bar b:nth-child(4){background:var(--k);opacity:1}
+
+  /* S1 */
+  .s1 .blobs{position:absolute;right:-200px;top:40px;width:760px;height:760px;transform:scale(.82);transform-origin:top right}
+  .s1 .blobs i{position:absolute;width:460px;height:460px;border-radius:50%;mix-blend-mode:screen;filter:saturate(1.1)}
+  .s1 .blobs i:nth-child(1){background:var(--c);left:0;top:0}
+  .s1 .blobs i:nth-child(2){background:var(--m);left:280px;top:0}
+  .s1 .blobs i:nth-child(3){background:var(--y);left:140px;top:240px}
+  .s1 .eyebrow{position:absolute;top:560px;left:96px;font-size:28px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--y)}
+  .s1 h1{position:absolute;left:96px;bottom:260px;font-size:168px;width:900px;z-index:2}
+  .s1 h1 em{font-style:normal;color:var(--ink);background:var(--paper);padding:0 18px;display:inline-block;transform:rotate(-2deg);margin-top:12px}
+  .s1 .sub{position:absolute;left:96px;bottom:178px;font-size:34px;opacity:.85;z-index:2}
+
+  /* S2 */
+  .s2 .big{font-family:'Bricolage Grotesque';font-weight:800;font-size:520px;line-height:.8;position:absolute;top:150px;left:70px;letter-spacing:-0.06em;color:var(--m)}
+  .s2 .big small{font-size:120px;letter-spacing:-0.02em;color:var(--ink);margin-left:12px}
+  .s2 h2{position:absolute;top:600px;left:96px;width:880px;font-size:72px}
+  .s2 ul{position:absolute;top:880px;left:96px;right:96px;list-style:none;display:flex;flex-direction:column;gap:22px}
+  .s2 li{font-size:34px;font-weight:500;display:flex;gap:20px;align-items:center;padding-bottom:22px;border-bottom:2px solid rgba(13,13,31,.12)}
+  .s2 li:before{content:"✕";font-weight:700;color:var(--m);font-size:30px;width:30px}
+
+  /* S3 */
+  .s3 h2{margin-top:150px;font-size:96px;width:880px}
+  .s3 h2 span{color:var(--c)}
+  .grid{margin-top:64px;display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  .card{border-radius:28px;padding:40px 38px;min-height:400px;display:flex;flex-direction:column;justify-content:space-between;color:var(--ink)}
+  .card:nth-child(1){background:var(--c)}.card:nth-child(2){background:var(--m);color:#fff}
+  .card:nth-child(3){background:var(--y)}.card:nth-child(4){background:var(--paper)}
+  .card .n{font-family:'Bricolage Grotesque';font-weight:800;font-size:30px;opacity:.6}
+  .card h3{font-family:'Bricolage Grotesque';font-weight:800;font-size:46px;letter-spacing:-0.02em;line-height:1}
+  .card p{font-size:24px;line-height:1.35;margin-top:12px;font-weight:500}
+
+  /* S4 */
+  .s4 h2{margin-top:150px;font-size:96px}
+  .steps{margin-top:70px;display:flex;flex-direction:column;gap:0}
+  .step{display:grid;grid-template-columns:190px 1fr;align-items:center;padding:52px 0;border-top:3px solid var(--ink)}
+  .step:last-child{border-bottom:3px solid var(--ink)}
+  .step .k{font-family:'Bricolage Grotesque';font-weight:800;font-size:92px;line-height:1;letter-spacing:-0.04em}
+  .step:nth-child(1) .k{color:var(--c)}.step:nth-child(2) .k{color:var(--m)}.step:nth-child(3) .k{color:#E0B000}.step:nth-child(4) .k{color:var(--ink)}
+  .step h3{font-family:'Bricolage Grotesque';font-weight:700;font-size:46px;letter-spacing:-0.02em}
+  .step p{font-size:28px;opacity:.75;margin-top:6px}
+
+  /* S5 */
+  .s5{display:flex;flex-direction:column;justify-content:center}
+  .s5 h2{font-size:136px;margin-top:-40px}
+  .s5 h2 span{background:linear-gradient(90deg,var(--c),var(--m) 55%,var(--y));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .s5 .dm{margin-top:70px;display:inline-flex;align-items:center;gap:24px;background:var(--paper);color:var(--ink);border-radius:999px;padding:30px 48px;font-size:36px;font-weight:700;align-self:flex-start;white-space:nowrap}
+  .s5 .dm b{font-family:'Bricolage Grotesque';font-weight:800;color:var(--m)}
+  .s5 .extra{margin-top:56px;display:flex;gap:40px;font-size:28px;opacity:.85}
+  .s5 .extra div{display:flex;align-items:center;gap:14px}
+  .s5 .extra i{font-style:normal;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:24px;background:rgba(255,255,255,.1)}
+  .s5 .ring{position:absolute;right:-220px;top:-220px;width:620px;height:620px;border-radius:50%;border:90px solid var(--m);opacity:.9}
+  .s5 .ring2{position:absolute;right:120px;top:210px;width:150px;height:150px;border-radius:50%;background:var(--y)}
+</style>
+</head>
+<body>
+
+<!-- 1 · Hook -->
+<section class="slide s1" id="s1">
+  <div class="brand"><div class="logo"><i></i><i></i><i></i></div>VisualGraf</div>
+  <div class="page">01 / 05</div>
+  <div class="blobs"><i></i><i></i><i></i></div>
+  <div class="eyebrow">Diseño gráfico · Imprenta</div>
+  <h1>Tu marca<br>entra por<br><em>los ojos.</em></h1>
+  <div class="sub">Y nosotros sabemos cómo hacer que se quede.</div>
+  <div class="foot"><span></span><span class="swipe">Deslizá <span></span></span></div>
+  <div class="bar"><b></b><b></b><b></b><b></b></div>
+</section>
+
+<!-- 2 · Problema -->
+<section class="slide light s2" id="s2">
+  <div class="brand"><div class="logo"><i></i><i></i><i></i></div>VisualGraf</div>
+  <div class="page">02 / 05</div>
+  <div class="big">3<small>seg.</small></div>
+  <h2>Es lo que tarda alguien en decidir si te elige.</h2>
+  <ul>
+    <li>Logo hecho a las apuradas</li>
+    <li>Flyers pixelados o difíciles de leer</li>
+    <li>Colores distintos en cada publicación</li>
+  </ul>
+  <div class="foot"><span style="opacity:.6">Cada detalle suma… o resta.</span><span class="swipe"><span></span></span></div>
+  <div class="bar"><b></b><b></b><b></b><b></b></div>
+</section>
+
+<!-- 3 · Servicios -->
+<section class="slide s3" id="s3">
+  <div class="brand"><div class="logo"><i></i><i></i><i></i></div>VisualGraf</div>
+  <div class="page">03 / 05</div>
+  <h2>Todo lo visual,<br><span>en un solo lugar.</span></h2>
+  <div class="grid">
+    <div class="card"><div class="n">C</div><div><h3>Identidad<br>de marca</h3><p>Logo, paleta, tipografías y manual.</p></div></div>
+    <div class="card"><div class="n">M</div><div><h3>Diseño para<br>redes</h3><p>Posts, historias y plantillas listas para usar.</p></div></div>
+    <div class="card"><div class="n">Y</div><div><h3>Impresión</h3><p>Tarjetas, flyers, stickers, etiquetas y lonas.</p></div></div>
+    <div class="card"><div class="n">K</div><div><h3>Cartelería</h3><p>Vinilos, vidrieras y señalética para tu local.</p></div></div>
+  </div>
+  <div class="foot"><span></span><span class="swipe"><span></span></span></div>
+  <div class="bar"><b></b><b></b><b></b><b></b></div>
+</section>
+
+<!-- 4 · Proceso -->
+<section class="slide light s4" id="s4">
+  <div class="brand"><div class="logo"><i></i><i></i><i></i></div>VisualGraf</div>
+  <div class="page">04 / 05</div>
+  <h2>Así trabajamos</h2>
+  <div class="steps">
+    <div class="step"><div class="k">01</div><div><h3>Nos contás tu idea</h3><p>Qué hacés, a quién le vendés y qué te gusta.</p></div></div>
+    <div class="step"><div class="k">02</div><div><h3>Diseñamos propuestas</h3><p>Opciones pensadas para tu negocio, no plantillas.</p></div></div>
+    <div class="step"><div class="k">03</div><div><h3>Ajustamos juntos</h3><p>Hasta que digas “es esto”.</p></div></div>
+    <div class="step"><div class="k">04</div><div><h3>Listo para usar</h3><p>Archivos digitales o impreso en tu mano.</p></div></div>
+  </div>
+  <div class="foot"><span></span><span class="swipe"><span></span></span></div>
+  <div class="bar"><b></b><b></b><b></b><b></b></div>
+</section>
+
+<!-- 5 · CTA -->
+<section class="slide s5" id="s5">
+  <div class="ring"></div><div class="ring2"></div>
+  <div class="brand"><div class="logo"><i></i><i></i><i></i></div>VisualGraf</div>
+  <div class="page">05 / 05</div>
+  <h2>¿Arrancamos<br>con <span>tu marca</span>?</h2>
+  <div class="dm">Escribinos <b>“QUIERO MI MARCA”</b> por DM</div>
+  <div class="extra">
+    <div><i>↻</i>Compartilo con quien lo necesite</div>
+    <div><i>⌑</i>Guardalo</div>
+  </div>
+  <div class="foot"><span style="opacity:.7">@visualgraf</span><span style="opacity:.7">Diseño · Impresión · Cartelería</span></div>
+  <div class="bar"><b></b><b></b><b></b><b></b></div>
+</section>
+
+</body>
+</html>
