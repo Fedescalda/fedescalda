@@ -23,7 +23,14 @@ type CartCtx = {
   count: number;
   subtotal: number;
   ready: boolean;
-  add: (item: Omit<CartItem, "key">) => void;
+  /** último ítem agregado (para el panel lateral) */
+  lastAdded: CartItem | null;
+  drawerOpen: boolean;
+  openDrawer: () => void;
+  closeDrawer: () => void;
+  /** cambia en cada agregado: dispara la animación del ícono */
+  pulse: number;
+  add: (item: Omit<CartItem, "key">, opts?: { silent?: boolean }) => void;
   update: (key: string, quantity: number) => void;
   remove: (key: string) => void;
   clear: () => void;
@@ -39,6 +46,9 @@ export function itemKey(i: Pick<CartItem, "productId" | "size" | "bagColor" | "i
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
+  const [lastAdded, setLastAdded] = useState<CartItem | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [pulse, setPulse] = useState(0);
 
   useEffect(() => {
     try {
@@ -64,8 +74,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, [items, ready]);
 
-  const add = useCallback<CartCtx["add"]>((item) => {
+  const add = useCallback<CartCtx["add"]>((item, opts) => {
     const key = itemKey(item);
+    setLastAdded({ ...item, key });
+    setPulse((n) => n + 1);
+    // el panel se abre cuando termina la animación "vuela al carrito"
+    if (!opts?.silent) setTimeout(() => setDrawerOpen(true), 650);
     setItems((prev) => {
       const found = prev.find((p) => p.key === key);
       if (found) return prev.map((p) => (p.key === key ? { ...p, quantity: p.quantity + item.quantity, unitPrice: item.unitPrice } : p));
@@ -89,8 +103,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       update,
       remove,
       clear,
+      lastAdded,
+      drawerOpen,
+      pulse,
+      openDrawer: () => setDrawerOpen(true),
+      closeDrawer: () => setDrawerOpen(false),
     }),
-    [items, ready, add, update, remove, clear],
+    [items, ready, add, update, remove, clear, lastAdded, drawerOpen, pulse],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

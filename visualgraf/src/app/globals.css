@@ -241,3 +241,36 @@ body {
   from { opacity: 0; transform: scale(1.02); }
   to { opacity: 1; transform: none; }
 }
+
+/* ─────────────── Carrito: micro-animaciones ─────────────── */
+@keyframes cart-bump {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.25) rotate(-8deg); }
+  55% { transform: scale(0.92) rotate(6deg); }
+  80% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+@keyframes badge-pop {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+@keyframes drawer-in-right { from { transform: translateX(105%); } to { transform: none; } }
+@keyframes drawer-in-up { from { transform: translateY(105%); } to { transform: none; } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes item-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes item-out {
+  to { opacity: 0; transform: translateX(40px); height: 0; margin: 0; padding-top: 0; padding-bottom: 0; }
+}
+@keyframes check-draw { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
+.anim-cart-bump { animation: cart-bump 0.6s cubic-bezier(.3,.7,.4,1); }
+.anim-badge-pop { animation: badge-pop 0.45s cubic-bezier(.3,1.6,.5,1); }
+.anim-item-in { animation: item-in 0.5s cubic-bezier(.2,.8,.2,1) both; }
+.anim-item-out { animation: item-out 0.35s ease-in forwards; overflow: hidden; }
+.anim-fade-in { animation: fade-in 0.25s ease-out both; }
+.anim-drawer { animation: drawer-in-up 0.45s cubic-bezier(.2,.9,.25,1) both; }
+@media (min-width: 640px) { .anim-drawer { animation-name: drawer-in-right; } }
+.anim-check path { stroke-dasharray: 24; animation: check-draw 0.45s 0.25s ease-out both; }

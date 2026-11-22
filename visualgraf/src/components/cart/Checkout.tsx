@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "./CartProvider";
+import { AnimatedNumber } from "./AnimatedNumber";
 import { formatARS } from "@/lib/site";
 import { provinces } from "@/lib/validation";
 import { clearDesign, dataUrlToFile, loadDesign, type SavedDesign } from "@/lib/design-store";
@@ -34,6 +35,15 @@ export function Checkout({ methods }: { methods: Methods }) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [waResult, setWaResult] = useState<WaResult | null>(null);
+  const [leaving, setLeaving] = useState<string[]>([]);
+  /** Quita con animación de salida */
+  const removeAnimated = (key: string) => {
+    setLeaving((l) => [...l, key]);
+    setTimeout(() => {
+      remove(key);
+      setLeaving((l) => l.filter((k) => k !== key));
+    }, 330);
+  };
 
   useEffect(() => setDesign(loadDesign()), []);
 
@@ -177,8 +187,8 @@ export function Checkout({ methods }: { methods: Methods }) {
       <section aria-labelledby="items">
         <h2 id="items" className="sr-only">Productos</h2>
         <ul className="space-y-3">
-          {items.map((i) => (
-            <li key={i.key} className="card flex gap-4 p-4">
+          {items.map((i, idx) => (
+            <li key={i.key} className={`card flex gap-4 p-4 ${leaving.includes(i.key) ? "anim-item-out" : "anim-item-in"}`} style={{ animationDelay: leaving.includes(i.key) ? "0ms" : `${idx * 70}ms` }}>
               <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-ink-3">
                 {i.image && <Image src={i.image} alt="" fill sizes="96px" className="object-cover" />}
               </div>
@@ -187,18 +197,18 @@ export function Checkout({ methods }: { methods: Methods }) {
                 <p className="text-sm text-mute">{i.size} · bolsa {i.bagColor} · impresión {i.inkColor}</p>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                   <div className="inline-flex items-center rounded-full border border-line" role="group" aria-label={`Cantidad de packs de ${i.name} ${i.size}`}>
-                    <button type="button" className="grid h-10 w-10 place-items-center rounded-full hover:bg-white/10" aria-label="Restar un pack" onClick={() => (i.quantity > 1 ? update(i.key, i.quantity - 1) : remove(i.key))}>
+                    <button type="button" className="grid h-10 w-10 place-items-center rounded-full hover:bg-white/10" aria-label="Restar un pack" onClick={() => (i.quantity > 1 ? update(i.key, i.quantity - 1) : removeAnimated(i.key))}>
                       <IconMinus width={16} height={16} />
                     </button>
-                    <span className="w-24 text-center text-sm" aria-live="polite">{i.quantity} × {i.packSize} u.</span>
+                    <span key={i.quantity} className="anim-badge-pop w-24 text-center text-sm" aria-live="polite">{i.quantity} × {i.packSize} u.</span>
                     <button type="button" className="grid h-10 w-10 place-items-center rounded-full hover:bg-white/10" aria-label="Sumar un pack" onClick={() => update(i.key, Math.min(100, i.quantity + 1))}>
                       <IconPlus width={16} height={16} />
                     </button>
                   </div>
-                  <p className="font-display font-extrabold">{formatARS(i.quantity * i.unitPrice)}</p>
+                  <p className="font-display font-extrabold"><AnimatedNumber value={i.quantity * i.unitPrice} format={formatARS} /></p>
                 </div>
               </div>
-              <button type="button" onClick={() => remove(i.key)} className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-mute hover:bg-white/10 hover:text-white" aria-label={`Quitar ${i.name} ${i.size}`}>
+              <button type="button" onClick={() => removeAnimated(i.key)} className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-mute hover:bg-white/10 hover:text-white" aria-label={`Quitar ${i.name} ${i.size}`}>
                 <IconTrash width={18} height={18} />
               </button>
             </li>
@@ -264,7 +274,7 @@ export function Checkout({ methods }: { methods: Methods }) {
         </div>
 
         <dl className="card mt-4 space-y-2 p-5 text-sm" aria-live="polite">
-          <div className="flex justify-between"><dt className="text-mute">Subtotal</dt><dd>{formatARS(subtotal)}</dd></div>
+          <div className="flex justify-between"><dt className="text-mute">Subtotal</dt><dd><AnimatedNumber value={subtotal} format={formatARS} /></dd></div>
           {discount > 0 && <div className="flex justify-between text-brand-green"><dt>Descuento</dt><dd>-{formatARS(discount)}</dd></div>}
           <div className="flex justify-between">
             <dt className="text-mute">Envío{quote?.zone && quote.price != null ? ` (${quote.zone})` : ""}</dt>
@@ -272,7 +282,7 @@ export function Checkout({ methods }: { methods: Methods }) {
               {!province ? "Completá provincia y CP" : quoting ? "Calculando…" : quote?.price == null ? "A coordinar" : quote.free ? "¡Gratis!" : formatARS(quote.price)}
             </dd>
           </div>
-          <div className="flex justify-between border-t border-line pt-3 font-display text-xl font-black"><dt>Total</dt><dd>{formatARS(total)}</dd></div>
+          <div className="flex justify-between border-t border-line pt-3 font-display text-xl font-black"><dt>Total</dt><dd><AnimatedNumber value={total} format={formatARS} /></dd></div>
         </dl>
       </section>
 

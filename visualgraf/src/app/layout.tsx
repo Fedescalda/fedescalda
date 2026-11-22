@@ -7,6 +7,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { CartProvider } from "@/components/cart/CartProvider";
+import { CartDrawer } from "@/components/cart/CartDrawer";
 
 const display = Montserrat({ subsets: ["latin"], weight: ["600", "700", "800", "900"], variable: "--font-montserrat", display: "swap" });
 const body = DM_Sans({ subsets: ["latin"], variable: "--font-dmsans", display: "swap" });
@@ -76,6 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main id="contenido">{children}</main>
           <Footer />
           <WhatsAppFloat />
+          <CartDrawer />
         </CartProvider>
       </body>
     </html>

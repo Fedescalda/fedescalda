@@ -11,7 +11,7 @@ export function Gallery({ images, activeSrc }: { images: { src: string; alt: str
 
   return (
     <div className="lg:sticky lg:top-28">
-      <div className="relative aspect-square overflow-hidden rounded-[2rem] border border-line bg-ink-3">
+      <div data-product-image className="relative aspect-square overflow-hidden rounded-[2rem] border border-line bg-ink-3">
         <Image key={current.src} src={current.src} alt={current.alt} fill priority sizes="(min-width:1024px) 50vw, 100vw" className="animate-[fadein_.5s_ease] object-cover" />
       </div>
       {images.length > 1 && (

@@ -7,7 +7,11 @@ test("Compra de punta a punta con cierre por WhatsApp", async ({ page }) => {
   await page.getByRole("button", { name: "Sumar un pack" }).click();
   await expect(page.getByText("$ 104.000").first()).toBeVisible();
   await page.getByRole("button", { name: /Agregar al pedido/ }).click();
-  await page.getByRole("link", { name: /Ver mi pedido/ }).click();
+  // Se abre el panel lateral con lo agregado
+  const drawer = page.getByRole("dialog", { name: /Agregado a tu pedido/ });
+  await expect(drawer).toBeVisible();
+  await expect(drawer).toContainText("30 × 40 cm");
+  await drawer.getByRole("link", { name: /Ver pedido y finalizar/ }).click();
   await expect(page).toHaveURL(/\/carrito/);
   await expect(page.getByText("30 × 40 cm").first()).toBeVisible();
 

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { bagColors, inkColors, type Product } from "@/lib/catalog";
 import { formatARS, waLink } from "@/lib/site";
 import { useCart } from "../cart/CartProvider";
+import { flyToCart } from "@/lib/fly-to-cart";
 import { Gallery } from "./Gallery";
 import { IconBag, IconBrush, IconCheck, IconMinus, IconPlus, IconWhatsApp } from "../Icons";
 
@@ -41,6 +42,7 @@ export function Configurator({ product }: { product: Product }) {
 
   function addToCart() {
     if (price == null) return;
+    flyToCart(document.querySelector("[data-product-image]"), variant.image ?? product.images[0].src, document.activeElement);
     add({
       productId: product.id,
       slug: product.slug,

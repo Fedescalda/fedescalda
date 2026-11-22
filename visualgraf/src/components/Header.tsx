@@ -11,7 +11,7 @@ export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { count } = useCart();
+  const { count, pulse } = useCart();
   const toggleRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -85,10 +85,19 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link href="/carrito" className="relative grid h-11 w-11 place-items-center rounded-full border border-line bg-white/5 transition hover:bg-white/10" aria-label={`Ver pedido (${count} ${count === 1 ? "producto" : "productos"})`}>
+          <Link
+            id="cart-button"
+            key={`cart-${pulse}`}
+            href="/carrito"
+            className={`relative grid h-11 w-11 place-items-center rounded-full border border-line bg-white/5 transition hover:bg-white/10 ${pulse ? "anim-cart-bump" : ""}`}
+            style={pulse ? { animationDelay: "620ms" } : undefined}
+            aria-label={`Ver pedido (${count} ${count === 1 ? "producto" : "productos"})`}
+          >
             <IconBag />
             {count > 0 && (
-              <span className="absolute -top-1 -right-1 grid h-5 min-w-5 place-items-center rounded-full bg-brand-magenta px-1 text-[0.7rem] font-bold">{count}</span>
+              <span key={count} className="anim-badge-pop absolute -top-1 -right-1 grid h-5 min-w-5 place-items-center rounded-full bg-brand-magenta px-1 text-[0.7rem] font-bold" style={pulse ? { animationDelay: "650ms" } : undefined}>
+                {count}
+              </span>
             )}
           </Link>
           <Link href="/personalizar" className="btn btn-primary hidden !min-h-11 !py-2.5 text-sm md:inline-flex">
