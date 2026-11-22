@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Plantilla Testimonio</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=DM+Sans:opsz,wght@9..40,500;9..40,700&display=block" rel="stylesheet">
+<style>
+  :root{--ink:#07070d;--cyan:#34d3f3;--blue:#3a64ff;--violet:#9b33f5;--magenta:#ff2e93;--yellow:#ffc61f;
+    --rainbow:linear-gradient(90deg,#34d3f3 0%,#3a64ff 22%,#9b33f5 44%,#ff2e93 64%,#ff7a1c 82%,#ffc61f 100%)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#333;padding:40px;display:flex;justify-content:center;font-family:'DM Sans',sans-serif}
+  .slide{width:1080px;height:1350px;position:relative;overflow:hidden;color:var(--ink);
+    background:radial-gradient(900px 700px at 20% 10%,#d9f8ff 0%,#7fe3fa 30%,#34d3f3 55%,#3a64ff 100%)}
+  .brand{position:absolute;top:56px;left:70px;display:flex;align-items:center;gap:14px}
+  .brand img{width:64px;height:64px}
+  .brand b{font-family:Montserrat;font-weight:900;font-size:28px;line-height:1}
+  .brand small{display:block;font-family:Montserrat;font-weight:700;font-size:13px;letter-spacing:.32em;margin-top:6px;opacity:.75}
+  .kicker{position:absolute;top:190px;left:70px;font-family:Montserrat;font-weight:900;font-size:40px;text-transform:uppercase;background:var(--ink);color:#fff;padding:10px 22px;border-radius:14px}
+  .q{position:absolute;left:70px;right:70px;top:290px;background:#fff;border:6px solid var(--ink);border-radius:40px;box-shadow:0 20px 0 var(--ink);padding:80px 60px 50px}
+  .q::before{content:"“";position:absolute;top:-70px;left:40px;font-family:Montserrat;font-weight:900;font-size:260px;line-height:1;color:var(--magenta)}
+  .q p{font-family:Montserrat;font-weight:800;font-size:54px;letter-spacing:-0.02em;line-height:1.1}
+  .ph{background:var(--yellow);padding:0 10px;border-radius:8px;border:3px dashed var(--ink)}
+  .who{margin-top:40px;display:flex;align-items:center;gap:24px}
+  .who img{width:120px;height:120px;border-radius:50%;object-fit:cover;border:5px solid var(--ink)}
+  .who b{display:block;font-family:Montserrat;font-weight:900;font-size:36px}
+  .who span{font-size:26px;font-weight:700}
+  .stat{position:absolute;left:70px;right:70px;top:1000px;display:flex;align-items:center;gap:30px;background:var(--ink);color:#fff;border-radius:34px;padding:34px 44px}
+  .stat b{font-family:Montserrat;font-weight:900;font-size:120px;letter-spacing:-0.06em;line-height:1;background:var(--rainbow);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stat b.ph{color:var(--ink);-webkit-text-fill-color:var(--ink);background:var(--yellow)}
+  .stat p{font-size:32px;font-weight:700;line-height:1.25}
+  .rbar{position:absolute;left:0;right:0;bottom:0;height:14px;background:var(--rainbow)}
+</style>
+</head>
+<body>
+<section class="slide" id="tpl">
+  <div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div>
+  <div class="kicker">Lo dice un cliente</div>
+  <div class="q">
+    <p><span class="ph">[Frase real del cliente, con sus palabras. Ej.: lo que cambió desde que usa la bolsa con su marca]</span></p>
+    <div class="who"><img src="img/thomas.webp" alt=""><div><b><span class="ph">[Nombre]</span></b><span><span class="ph">[Marca de hielo · ciudad]</span></span></div></div>
+  </div>
+  <div class="stat"><b class="ph">[+X]</b><p><span class="ph">[dato real que te dé el cliente: pedidos por WhatsApp, comercios nuevos, bolsas vendidas…]</span></p></div>
+  <div class="rbar"></div>
+</section>
+</body>
+</html>

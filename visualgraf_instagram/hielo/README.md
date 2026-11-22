@@ -85,3 +85,26 @@ Misma estrategia y textos, con diseño de alto impacto: concepto **hielo vs. cal
 y naranja/magenta, tipografía gigante, stickers inclinados, cinta de advertencia, cubos de hielo en 3D y un “40°” que
 se derrite. Placas: `v2/slide-01.png` → `v2/slide-07.png`. Fuente: `v2/carrusel-hielo-v2.html`.
 La placa 6 (“1 de diciembre, arranca la temporada”) sirve para publicar antes de diciembre. Después, cambiá el texto.
+
+## Placa de números (nueva, en las dos versiones)
+Ahora los carruseles tienen **8 placas**: se sumó la **04 “Los números hablan solos”** (v1) / **“1.500 veces a la calle”** (v2).
+Solo usa datos reales y comprobables:
+- **12 marcas** ya llevan su logo en bolsas Visual Graf (los trabajos de `content.ts`).
+- **10 rubros** (lista de rubros de la web).
+- **8 años** de experiencia en el rubro (historia del fundador).
+- **1.500**: un pack son 1.500 bolsas, o sea 1.500 veces tu WhatsApp en la calle (es una cuenta, no una promesa).
+
+⚠️ **No pusimos “nuestros clientes vendieron X % más”** porque no tenemos ese dato. Inventarlo es publicidad engañosa
+(Ley 22.802 de Lealtad Comercial y Ley 24.240 de Defensa del Consumidor) y, si alguien lo pregunta, te deja expuesto.
+
+## Cómo conseguir estadísticas reales de clientes
+Mandales este WhatsApp a Thomas Hielo y a 3 o 4 clientes más:
+
+> _“¡Hola! ¿Cómo andás? Estoy armando contenido para Visual Graf y me encantaría contar tu experiencia.
+> Desde que usás las bolsas con tu logo, ¿notaste algún cambio? Por ejemplo: más pedidos por WhatsApp, comercios
+> nuevos que te pidieron, o clientes que te reconocen por la bolsa. Si tenés un número aproximado, mejor. ¿Te molesta
+> si lo publico con tu nombre? 🙌”_
+
+Con la respuesta, completá `plantilla-testimonio.html` (los textos en amarillo entre corchetes) y sumala como placa
+extra o publicala sola como “testimonio”. Vista previa: `plantilla-testimonio.png`.
+Siempre con permiso escrito del cliente y con sus palabras reales.

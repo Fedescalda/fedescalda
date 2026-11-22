@@ -134,6 +134,20 @@
   .s7 .alt span{background:var(--ink);color:#fff;padding:4px 18px;border-radius:12px}
   .s7 .links{position:absolute;left:70px;right:70px;bottom:60px;display:flex;justify-content:space-between;font-family:Montserrat;font-weight:800;font-size:26px;z-index:20}
   .s7 .sticker{right:80px;top:680px;background:var(--yellow);font-size:40px;transform:rotate(8deg);padding:14px 26px}
+
+  /* Números (nueva) */
+  .frost-bg{background:radial-gradient(900px 700px at 80% 0%,#ffffff 0%,#e6fbff 45%,#bff3ff 100%)}
+  .sN .lbl{left:70px;top:190px;font-family:Montserrat;font-weight:900;font-size:38px;text-transform:uppercase;z-index:7}
+  .sN .big{left:40px;top:240px;font-size:330px;letter-spacing:-0.08em;z-index:7;background:linear-gradient(90deg,#34d3f3,#3a64ff 45%,#9b33f5);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 16px 0 rgba(7,7,13,.9))}
+  .sN .per{left:70px;top:560px;font-size:70px;z-index:7}
+  .sN .sticker{right:70px;top:650px;background:var(--yellow);font-size:38px;transform:rotate(-7deg);padding:14px 24px}
+  .sN .row{position:absolute;left:70px;right:70px;top:790px;display:grid;grid-template-columns:repeat(3,1fr);gap:22px;z-index:8}
+  .sN .card{border-radius:30px;padding:30px 28px;border:5px solid var(--ink);box-shadow:0 14px 0 var(--ink);color:var(--ink)}
+  .sN .card b{display:block;font-family:Montserrat;font-weight:900;font-size:104px;letter-spacing:-0.06em;line-height:.9}
+  .sN .card p{margin-top:12px;font-size:25px;font-weight:700;line-height:1.25}
+  .sN .faces{position:absolute;left:70px;right:70px;top:1140px;display:flex;align-items:center;z-index:8;font-family:Montserrat;font-weight:800;font-size:27px;text-transform:uppercase}
+  .sN .faces img{width:96px;height:96px;border-radius:50%;object-fit:cover;border:5px solid var(--ink);margin-right:-30px}
+  .sN .faces span{margin-left:52px;line-height:1.2}
 </style>
 </head>
 <body>
@@ -156,7 +170,7 @@
 <section class="slide heat-bg s2" id="s2">
   <svg class="drip" viewBox="0 0 1080 260" preserveAspectRatio="none"><path fill="#bff3ff" d="M0 0H1080V70c-30 0-34 40-60 40s-30-40-60-40-20 120-55 120-26-120-60-120-30 60-62 60-28-60-60-60-22 160-60 160-24-160-58-160-30 50-62 50-28-50-60-50-24 110-58 110-28-110-62-110-30 40-60 40-26-40-58-40-22 180-60 180-26-180-62-180-30 60-62 60-26-60-58-60-24 90-60 90S38 70 0 70Z"/></svg>
   <div class="brand" style="top:150px"></div>
-  <div class="pg">02 / 07</div>
+  <div class="pg">02 / 08</div>
   <div class="X abs deg">40<sup>°</sup></div>
   <h2 class="X abs t2">Y tu hielo<br>en bolsa lisa<br><em>no lo reconoce nadie.</em></h2>
   <ul>
@@ -170,7 +184,7 @@
 <!-- 3 -->
 <section class="slide dark-bg s3" id="s3">
   <div class="brand"><img src="../img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div>
-  <div class="pg" style="background:#fff;color:var(--ink)">03 / 07</div>
+  <div class="pg" style="background:#fff;color:var(--ink)">03 / 08</div>
   <h2 class="X abs t3">¿Cuál<br><span class="grad">se lleva?</span></h2>
   <div class="fz">
     <div class="bag"><span>HIELO</span></div>
@@ -183,10 +197,28 @@
   <div class="rbar"></div>
 </section>
 
-<!-- 4 -->
+<!-- 4 · Números -->
+<section class="slide frost-bg sN" id="sN">
+  <div class="brand"><img src="../img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div>
+  <div class="pg">04 / 08</div>
+  <div class="cube" style="width:140px;height:140px;right:50px;top:300px;transform:rotate(18deg)"></div>
+  <div class="abs lbl">Con un solo pack, tu WhatsApp sale</div>
+  <div class="X abs big">1.500</div>
+  <div class="X abs per">veces a la calle.</div>
+  <div class="sticker">¡Y en cada asado!</div>
+  <div class="row">
+    <div class="card" style="background:var(--cyan)"><b>12</b><p>marcas ya llevan su logo en nuestras bolsas</p></div>
+    <div class="card" style="background:var(--magenta);color:#fff"><b>10</b><p>rubros, de perfumerías a fábricas de hielo</p></div>
+    <div class="card" style="background:var(--yellow)"><b>8</b><p>años de experiencia imprimiendo bolsas</p></div>
+  </div>
+  <div class="faces"><img src="../img/thomas.webp" alt=""><img src="../img/perfumate.webp" alt=""><img src="../img/olivia.webp" alt=""><img src="../img/dobleg-negra.webp" alt=""><span>Thomas Hielo y muchas marcas más<br>ya confiaron en nosotros.</span></div>
+  <div class="rbar"></div>
+</section>
+
+<!-- 5 -->
 <section class="slide ice-bg s4" id="s4">
   <div class="brand"><img src="../img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div>
-  <div class="pg">04 / 07</div>
+  <div class="pg">05 / 08</div>
   <div class="cube" style="width:170px;height:170px;right:60px;top:200px;transform:rotate(20deg)"></div>
   <div class="cube" style="width:110px;height:110px;right:250px;top:560px;transform:rotate(-14deg)"></div>
   <div class="abs lbl">Tu marca por menos de</div>
@@ -229,7 +261,7 @@
 <!-- 6 -->
 <section class="slide heat-bg s6" id="s6" style="background:radial-gradient(900px 800px at 50% 40%,#ff7a1c 0%,#ff2e93 55%,#9b33f5 100%)">
   <div class="brand" style="color:#fff"><img src="../img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div>
-  <div class="pg">06 / 07</div>
+  <div class="pg">07 / 08</div>
   <h2 class="X abs t6">Se viene<br>el calor.</h2>
   <div class="rings"><i></i><i></i></div>
   <div class="cal">
