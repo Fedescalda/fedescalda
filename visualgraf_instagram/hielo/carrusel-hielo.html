@@ -136,16 +136,31 @@
 
   /* Números (nueva) */
   .sN h2{margin-top:160px;font-size:92px}
-  .sN .stats{margin-top:56px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px}
-  .sN .st{background:var(--ink3);border:2px solid rgba(255,255,255,.08);border-radius:30px;padding:34px 36px}
+  .sN .stats{margin-top:40px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px}
+  .sN .st{background:var(--ink3);border:2px solid rgba(255,255,255,.08);border-radius:30px;padding:28px 30px}
   .sN .st b{display:block;font-family:Montserrat;font-weight:900;font-size:130px;letter-spacing:-0.05em;line-height:.95}
-  .sN .st p{margin-top:10px;font-size:27px;color:#d2d2e0;line-height:1.3}
-  .sN .st.wide{grid-column:1/-1;display:flex;align-items:center;gap:40px;padding:44px 40px;background:linear-gradient(135deg,rgba(52,211,243,.18),rgba(58,100,255,.18));border-color:rgba(52,211,243,.4)}
+  .sN .st p{margin-top:8px;font-size:25px;color:#d2d2e0;line-height:1.3}
+  .sN .st.wide{grid-column:1/-1;display:flex;align-items:center;gap:40px;padding:34px 40px;background:linear-gradient(135deg,rgba(52,211,243,.18),rgba(58,100,255,.18));border-color:rgba(52,211,243,.4)}
   .sN .st.wide p{font-size:38px;font-weight:600;color:#fff;margin:0}
   .sN .faces{margin-top:56px;display:flex;align-items:center;gap:18px;font-size:25px;color:var(--mute)}
   .sN .faces img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid var(--ink);margin-right:-34px;box-shadow:0 0 0 3px rgba(255,255,255,.2)}
   .sN .faces span{margin-left:46px}
   .sN .faces b{color:#fff}
+
+  .sN .st.wide b{font-size:150px}
+  .sN .st.wide p strong{color:var(--cyan)}
+  .sN .thomas{margin-top:24px;display:flex;align-items:center;gap:20px;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);border-radius:28px;padding:20px 26px}
+  .sN .thomas img{width:96px;height:120px;border-radius:16px;object-fit:cover;object-position:center 60%}
+  .sN .thomas p{font-size:27px;line-height:1.3;margin-left:10px}
+  .sN .thomas p span{color:var(--mute);font-size:23px}
+  .sN .faces{display:none}
+  /* cubo de hielo CSS */
+  .cube{position:absolute!important;border-radius:28%;z-index:1!important;
+    background:linear-gradient(135deg,rgba(255,255,255,.95) 0%,rgba(150,232,255,.75) 30%,rgba(52,211,243,.45) 60%,rgba(120,200,255,.8) 100%);
+    border:3px solid rgba(220,250,255,.9);
+    box-shadow:inset 0 0 50px rgba(255,255,255,.55),inset -18px -22px 40px rgba(58,100,255,.35),0 30px 60px rgba(52,211,243,.25)}
+  .cube::before{content:"";position:absolute;left:14%;top:12%;width:42%;height:18%;border-radius:50%;background:rgba(255,255,255,.95);filter:blur(5px);transform:rotate(-20deg)}
+  .cube::after{content:"";position:absolute;right:16%;bottom:14%;width:22%;height:22%;border-radius:40%;border:3px solid rgba(255,255,255,.55)}
 </style>
 </head>
 <body>
@@ -155,6 +170,7 @@
   <div class="head"><div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div><span class="tag">FÁBRICAS DE HIELO</span></div>
   <div class="photo"><img src="img/thomas-grande.webp" alt=""></div>
   <div class="shade"></div>
+  <div class="cube" style="width:120px;height:120px;left:880px;top:600px;transform:rotate(-18deg);z-index:4!important"></div>
   <div class="copy">
     <div class="eyebrow">🧊 Para quienes venden hielo</div>
     <h1><span class="dim">En el freezer,<br>todo el hielo es igual.</span><br><span class="ice">Menos el tuyo.</span></h1>
@@ -199,17 +215,18 @@
   <div class="rbar"></div>
 </section>
 
-<!-- 4 · Números -->
+<!-- 4 · La cuenta del hielo -->
 <section class="slide sN" id="sN">
   <div class="head"><div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div><span class="tag">04 / 08</span></div>
-  <h2>Los números<br><span class="grad">hablan solos</span></h2>
+  <div class="cube" style="width:150px;height:150px;right:70px;top:150px;transform:rotate(16deg)"></div>
+  <h2>La cuenta<br><span class="ice">del hielo.</span></h2>
   <div class="stats">
-    <div class="st"><b class="ice">12</b><p>marcas ya llevan su logo en nuestras bolsas</p></div>
-    <div class="st"><b class="grad">10</b><p>rubros, de perfumerías a fábricas de hielo</p></div>
-    <div class="st"><b class="ice">8</b><p>años de experiencia imprimiendo bolsas</p></div>
-    <div class="st wide"><b class="grad">1.500</b><p>veces tu WhatsApp<br>en la calle con un solo pack.</p></div>
+    <div class="st wide"><b class="ice">1.500</b><p>bolsas en un pack =<br><strong>1.500 veces tu WhatsApp</strong> viajando a asados, fiestas y conservadoras.</p></div>
+    <div class="st"><b class="grad">3</b><p>medidas en el mismo pack, para cada presentación que vendés</p></div>
+    <div class="st"><b class="ice">60</b><p>micrones en la bolsa grande, pensada para el peso del hielo</p></div>
+    <div class="st"><b class="grad">90</b><p>días de pico: diciembre, enero y febrero</p></div>
   </div>
-  <div class="faces"><img src="img/thomas.webp" alt=""><img src="img/perfumate.webp" alt=""><img src="img/olivia.webp" alt=""><img src="img/dobleg-negra.webp" alt=""><span><b>Thomas Hielo</b>, Perfúmate MG, Olivia Kids y más ya confiaron.</span></div>
+  <div class="thomas"><img src="img/thomas.webp" alt=""><img src="img/thomas-grande.webp" alt=""><p><b>Thomas Hielo</b> ya sale a la calle con su bolsa impresa por Visual Graf.<br><span>Bolsa chica y bolsa grande, con su WhatsApp de pedidos.</span></p></div>
   <div class="rbar"></div>
 </section>
 
@@ -276,6 +293,9 @@
 
 <!-- 7 · CTA -->
 <section class="slide s7" id="s7">
+  <div class="cube" style="width:170px;height:170px;left:70px;top:150px;transform:rotate(-14deg)"></div>
+  <div class="cube" style="width:120px;height:120px;right:90px;top:260px;transform:rotate(20deg)"></div>
+  <div class="cube" style="width:100px;height:100px;right:160px;bottom:170px;transform:rotate(-8deg)"></div>
   <img class="logo" src="img/logo-512.png" alt="">
   <h2>Que esta temporada<br><span class="ice">te pidan por nombre.</span></h2>
   <p class="lead">Mandanos tu logo y te enviamos la prueba de diseño.<br>Envíos a toda la Argentina.</p>

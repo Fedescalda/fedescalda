@@ -1,6 +1,6 @@
 # Visual Graf × fábricas de hielo: carrusel + estrategia
 
-Carrusel de 7 placas (1080×1350) para atraer a **fábricas, distribuidoras y emprendimientos de hielo**.
+Carrusel de 8 placas (1080×1350) para atraer a **fábricas, distribuidoras y emprendimientos de hielo**.
 Subí `slide-01.png` → `slide-07.png` en orden. Fuente editable: `carrusel-hielo.html`.
 
 ## 1. Qué aprendí de este público
@@ -60,7 +60,7 @@ Baja densidad virgen, apta alimentos, cristal, impresas 1 cara 1 color.
 
 📌 Guardá la placa 5: todo lo que tiene que decir tu bolsa de hielo.
 
-#BolsasParaHielo #FabricaDeHielo #Hielo #HieloEnCubos #HieloRolito #DistribuidoraDeHielo #BolsasPersonalizadas #BolsasConLogo #Packaging #EmprendedoresArgentinos #Emprendimiento #Verano2027 #VisualGraf #TuBolsaImpresa
+#BolsasParaHielo #FabricaDeHielo #Hielo #HieloEnCubos #HieloRolito #DistribuidoraDeHielo #BolsasPersonalizadas #BolsasConLogo #HieloEnBolsa #VentaDeHielo #HieloPicado #Verano2027 #VisualGraf #TuBolsaImpresa
 ```
 
 ## 4. Cómo publicarlo y llegar a los que venden hielo
@@ -86,13 +86,15 @@ y naranja/magenta, tipografía gigante, stickers inclinados, cinta de advertenci
 se derrite. Placas: `v2/slide-01.png` → `v2/slide-07.png`. Fuente: `v2/carrusel-hielo-v2.html`.
 La placa 6 (“1 de diciembre, arranca la temporada”) sirve para publicar antes de diciembre. Después, cambiá el texto.
 
-## Placa de números (nueva, en las dos versiones)
-Ahora los carruseles tienen **8 placas**: se sumó la **04 “Los números hablan solos”** (v1) / **“1.500 veces a la calle”** (v2).
-Solo usa datos reales y comprobables:
-- **12 marcas** ya llevan su logo en bolsas Visual Graf (los trabajos de `content.ts`).
-- **10 rubros** (lista de rubros de la web).
-- **8 años** de experiencia en el rubro (historia del fundador).
-- **1.500**: un pack son 1.500 bolsas, o sea 1.500 veces tu WhatsApp en la calle (es una cuenta, no una promesa).
+## Placa de números (04)
+**v1, “La cuenta del hielo”** (100 % del rubro hielo, datos reales):
+- **1.500** bolsas por pack = 1.500 veces tu WhatsApp viajando a asados, fiestas y conservadoras.
+- **3** medidas en el mismo pack (26×40, 28×50 y 35×75).
+- **60** micrones en la bolsa grande.
+- **90** días de pico: diciembre, enero y febrero.
+- Caso real: **Thomas Hielo**, con su bolsa chica y su bolsa grande.
+
+**v2, “1.500 veces a la calle”:** usa además 12 marcas, 10 rubros y 8 años (datos de la web).
 
 ⚠️ **No pusimos “nuestros clientes vendieron X % más”** porque no tenemos ese dato. Inventarlo es publicidad engañosa
 (Ley 22.802 de Lealtad Comercial y Ley 24.240 de Defensa del Consumidor) y, si alguien lo pregunta, te deja expuesto.
