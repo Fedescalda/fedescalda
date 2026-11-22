@@ -12,6 +12,12 @@ export type OrderRow = EmailOrder & {
   logo_path: string | null;
   mockup_path: string | null;
   proof_feedback: string | null;
+  proof_version: number;
+  proof_approved_at: string | null;
+  proof_approved_ip: string | null;
+  proof_approved_path: string | null;
+  terms_accepted_at: string | null;
+  design: Record<string, unknown> | null;
   shipping_zone: string | null;
   created_at: string;
 };

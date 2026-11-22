@@ -48,6 +48,24 @@ export const orderSchema = z.object({
     .max(30),
   paymentMethod: z.enum(["mercadopago", "transferencia", "whatsapp"]),
   logoLater: z.boolean().optional().default(false),
+  termsAccepted: z.literal(true, { message: "Tenés que aceptar las condiciones del diseño" }),
+  newsletter: z.boolean().optional().default(false),
+  /** Datos técnicos del simulador (medida, colores, cm). Se guardan tal cual para producción. */
+  design: z
+    .object({
+      model: z.string().max(40),
+      size: z.string().max(60),
+      bagColor: z.string().max(30),
+      ink: z.string().max(60),
+      multicolor: z.boolean(),
+      logoCm: z.object({ w: z.number().min(0).max(200), h: z.number().min(0).max(200) }).nullable(),
+      rotation: z.number().min(-90).max(90),
+      contact: z.array(z.string().max(60)).max(6),
+      font: z.string().max(30),
+      quality: z.object({ dpi: z.number().nullable(), colors: z.number(), gradient: z.boolean() }).optional(),
+    })
+    .nullable()
+    .optional(),
   promoCode: txt(30).optional().default(""),
   website: z.string().max(0).optional().default(""),
 });

@@ -5,6 +5,21 @@ export type SavedDesign = {
   logoName?: string;
   summary: string; // ej. "Manija riñón · bolsa Negro · impresión Oro"
   savedAt: number;
+  /** Datos técnicos del diseño (se guardan con el pedido) */
+  meta?: DesignMeta;
+};
+
+export type DesignMeta = {
+  model: string;
+  size: string;
+  bagColor: string;
+  ink: string;
+  multicolor: boolean;
+  logoCm: { w: number; h: number } | null;
+  rotation: number;
+  contact: string[];
+  font: string;
+  quality?: { dpi: number | null; colors: number; gradient: boolean };
 };
 
 const KEY = "vg-design-v1";

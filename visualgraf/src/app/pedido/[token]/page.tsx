@@ -95,8 +95,12 @@ export default async function OrderPage({ params, searchParams }: { params: Prom
               <a href={proofUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost mt-4">Ver prueba (PDF)</a>
             )}
             <div className="mt-5">
-              {order.proof_status === "enviada" && <ApproveProof approve={approveProof.bind(null, token)} changes={requestChanges.bind(null, token)} />}
-              {order.proof_status === "aprobada" && <p className="font-semibold text-brand-green">✓ Aprobaste este diseño.</p>}
+              {order.proof_status === "enviada" && <ApproveProof approve={approveProof.bind(null, token)} changes={requestChanges.bind(null, token)} version={order.proof_version ?? 0} />}
+              {order.proof_status === "aprobada" && (
+                <p className="font-semibold text-brand-green">
+                  ✓ Aprobaste este diseño{order.proof_approved_at ? ` el ${new Date(order.proof_approved_at).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires", dateStyle: "short", timeStyle: "short" })}` : ""}.
+                </p>
+              )}
               {order.proof_status === "cambios" && <p className="text-white/80">Pediste cambios: “{order.proof_feedback}”. Te mandamos una nueva prueba en breve.</p>}
             </div>
           </section>

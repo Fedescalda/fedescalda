@@ -11,22 +11,34 @@ function Msg({ s }: { s: CustomerActionResult }) {
   return null;
 }
 
-export function ApproveProof({ approve, changes }: { approve: () => Promise<CustomerActionResult>; changes: A }) {
-  const [aState, aSubmit, aPending] = useActionState(async () => approve(), {});
+export function ApproveProof({ approve, changes, version }: { approve: A; changes: A; version: number }) {
+  const [aState, aSubmit, aPending] = useActionState(approve, {});
   const [cState, cSubmit, cPending] = useActionState(changes, {});
   const [showChanges, setShowChanges] = useState(false);
+  const [c1, setC1] = useState(false);
+  const [c2, setC2] = useState(false);
   return (
     <div>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <form action={aSubmit}>
-          <button className="btn btn-primary w-full" disabled={aPending}>
-            <IconCheck /> {aPending ? "Aprobando…" : "Aprobar diseño"}
+      <form action={aSubmit} className="space-y-3">
+        <input type="hidden" name="version" value={version} />
+        <p className="font-semibold">Antes de aprobar, revisá con atención:</p>
+        <label className="flex items-start gap-3 text-sm">
+          <input type="checkbox" name="check_texts" checked={c1} onChange={(e) => setC1(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#34d3f3]" />
+          <span>Revisé <strong>textos y ortografía</strong>, teléfonos, redes, <strong>colores</strong>, <strong>tamaño y ubicación</strong> del logo.</span>
+        </label>
+        <label className="flex items-start gap-3 text-sm">
+          <input type="checkbox" name="check_print" checked={c2} onChange={(e) => setC2(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#34d3f3]" />
+          <span>Entiendo que <strong>se imprime tal cual esta prueba</strong> y que después de aprobarla no se pueden hacer cambios.</span>
+        </label>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button className="btn btn-primary" disabled={aPending || !c1 || !c2}>
+            <IconCheck /> {aPending ? "Aprobando…" : "Apruebo el diseño para producción"}
           </button>
-        </form>
-        <button type="button" className="btn btn-ghost" onClick={() => setShowChanges((v) => !v)} aria-expanded={showChanges}>
-          Pedir cambios
-        </button>
-      </div>
+          <button type="button" className="btn btn-ghost" onClick={() => setShowChanges((v) => !v)} aria-expanded={showChanges}>
+            Pedir cambios
+          </button>
+        </div>
+      </form>
       <Msg s={aState} />
       {showChanges && (
         <form action={cSubmit} className="mt-4 space-y-3">

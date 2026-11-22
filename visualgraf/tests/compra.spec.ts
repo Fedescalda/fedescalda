@@ -22,6 +22,10 @@ test("Compra de punta a punta con cierre por WhatsApp", async ({ page }) => {
   await page.getByRole("button", { name: "Confirmar pedido" }).click();
   await expect(page.getByText("Subí tu logo o marcá que lo enviás después.")).toBeVisible();
   await page.getByLabel(/Lo envío después/).check();
+  // Sin aceptar las condiciones del diseño no se puede confirmar
+  await page.getByRole("button", { name: "Confirmar pedido" }).click();
+  await expect(page.getByText("Para confirmar tenés que aceptar las condiciones del diseño.")).toBeVisible();
+  await page.getByLabel(/Acepto las condiciones del diseño/).check();
   await page.getByRole("button", { name: "Confirmar pedido" }).click();
 
   const wa = page.getByRole("link", { name: /Enviar pedido por WhatsApp/ });
@@ -42,6 +46,7 @@ test("El servidor ignora precios manipulados y valida datos", async ({ request }
       customer: { name: "Ana", email: "a@b.co", phone: "123456", province: "Salta", city: "Salta", address: "X 1", zip: "4400" },
       items: [{ productId: "manija-rinon-ad", size: "99 × 99 cm", bagColor: "Blanco", inkColor: "Negro", quantity: 1 }],
       paymentMethod: "whatsapp",
+      termsAccepted: true,
     },
   });
   expect(bad.status()).toBe(409);

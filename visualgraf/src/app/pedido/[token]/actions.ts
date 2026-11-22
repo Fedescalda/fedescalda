@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getOrderByToken, setOrderStatus } from "@/lib/order-events";
 import { uploadOrderFile } from "@/lib/order-files";
@@ -14,13 +15,44 @@ export type CustomerActionResult = { error?: string; success?: string };
 const adminUrl = (id: string) => `${site.url}/admin/pedidos/${id}`;
 const short = (id: string) => id.slice(0, 8).toUpperCase();
 
-export async function approveProof(token: string): Promise<CustomerActionResult> {
+export async function approveProof(token: string, _s: CustomerActionResult, form: FormData): Promise<CustomerActionResult> {
   const order = await getOrderByToken(token);
   if (!order) return { error: "Pedido no encontrado." };
-  if (order.proof_status !== "enviada") return { error: "No hay una prueba de diseño pendiente de aprobar." };
+  if (order.proof_status !== "enviada" || !order.proof_path) return { error: "No hay una prueba de diseño pendiente de aprobar." };
+  // La versión que el cliente vio tiene que ser la vigente (evita aprobar una prueba vieja)
+  if (String(form.get("version")) !== String(order.proof_version ?? 0)) {
+    return { error: "Hay una versión más nueva de la prueba. Recargá la página para verla antes de aprobar." };
+  }
+  if (form.get("check_texts") !== "on" || form.get("check_print") !== "on") {
+    return { error: "Marcá las dos confirmaciones para aprobar el diseño." };
+  }
   const sb = createAdminClient()!;
-  await sb.from("orders").update({ proof_status: "aprobada", proof_feedback: null }).eq("id", order.id);
-  await setOrderStatus(order.id, "en_produccion", { note: "Diseño aprobado por el cliente", notifyOwner: "🎨 El cliente aprobó el diseño" });
+  const h = await headers();
+  const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || h.get("x-real-ip") || null;
+
+  // Copia inmutable de la versión aprobada (respaldo ante cualquier reclamo)
+  const ext = order.proof_path.split(".").pop() || "png";
+  const approvedPath = `${order.id}/aprobada-v${order.proof_version ?? 0}-${Date.now()}.${ext}`;
+  const { error: copyError } = await sb.storage.from("pedidos").copy(order.proof_path, approvedPath);
+
+  const now = new Date().toISOString();
+  const { error } = await sb
+    .from("orders")
+    .update({
+      proof_status: "aprobada",
+      proof_feedback: null,
+      proof_approved_at: now,
+      proof_approved_ip: ip,
+      proof_approved_path: copyError ? order.proof_path : approvedPath,
+    })
+    .eq("id", order.id)
+    .eq("proof_status", "enviada");
+  if (error) return { error: "No pudimos registrar la aprobación. Probá de nuevo." };
+
+  await setOrderStatus(order.id, "en_produccion", {
+    note: `Diseño aprobado por el cliente (prueba v${order.proof_version ?? 0}) · ${new Date(now).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })}`,
+    notifyOwner: "🎨 El cliente aprobó el diseño",
+  });
   revalidatePath(`/pedido/${token}`);
   return { success: "¡Diseño aprobado! Pasamos tu pedido a producción." };
 }

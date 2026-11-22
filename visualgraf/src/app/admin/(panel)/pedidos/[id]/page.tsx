@@ -88,10 +88,27 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           <h2 className="text-xl font-bold">Archivos del cliente</h2>
           <OrderFile title="Logo del cliente" path={order.logo_path} empty="El cliente todavía no subió su logo" />
           <OrderFile title="Mockup del simulador" path={order.mockup_path} empty="Todavía no hay un mockup." />
+          {order.design && <DesignSpecs design={order.design as DesignSpecsData} />}
         </section>
         <section className="card min-w-0 space-y-4 p-4 sm:p-5">
           <h2 className="text-xl font-bold">Prueba de diseño</h2>
-          <p>Estado: {order.proof_status ?? "pendiente"}</p>
+          <p>
+            Estado: <strong>{order.proof_status ?? "pendiente"}</strong>
+            {order.proof_version ? ` · versión ${order.proof_version}` : ""}
+          </p>
+          {order.proof_status === "aprobada" ? (
+            <div className="rounded-xl border border-brand-green/40 bg-brand-green/5 p-3 text-sm">
+              <p className="font-semibold text-brand-green">✓ Diseño aprobado por el cliente</p>
+              {order.proof_approved_at && <p>Fecha: {formatDate(order.proof_approved_at)}</p>}
+              {order.proof_approved_ip && <p>Origen: {order.proof_approved_ip}</p>}
+              <OrderFile title="Versión aprobada (copia de respaldo)" path={order.proof_approved_path} empty="Sin copia" />
+            </div>
+          ) : (
+            <p className="rounded-xl border border-brand-yellow/40 bg-brand-yellow/5 p-3 text-sm">
+              El pedido no puede pasar a producción hasta que el cliente apruebe la prueba.
+            </p>
+          )}
+          {order.terms_accepted_at && <p className="text-xs text-mute">Aceptó las condiciones de diseño en el checkout: {formatDate(order.terms_accepted_at)}</p>}
           {order.proof_status === "cambios" && order.proof_feedback && (
             <div><h3 className="font-semibold">Cambios que pidió el cliente</h3><p className="whitespace-pre-wrap break-words">{order.proof_feedback}</p></div>
           )}
@@ -128,6 +145,12 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               <input type="checkbox" name="email" defaultChecked />
               Avisar al cliente por email
             </label>
+            {order.proof_status !== "aprobada" && (
+              <label className="flex items-start gap-2 text-sm">
+                <input type="checkbox" name="offline_approval" className="mt-1" />
+                <span>El cliente aprobó el diseño por otro medio (WhatsApp/email). <span className="text-mute">Queda registrado en el historial.</span></span>
+              </label>
+            )}
           </ActionForm>
         </section>
         <section className="card min-w-0 space-y-4 p-4 sm:p-5">
@@ -144,6 +167,49 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           </ol>
         </section>
       </div>
+    </div>
+  );
+}
+
+type DesignSpecsData = {
+  model?: string;
+  size?: string;
+  bagColor?: string;
+  ink?: string;
+  logoCm?: { w: number; h: number } | null;
+  rotation?: number;
+  contact?: string[];
+  font?: string;
+  quality?: { dpi: number | null; colors: number; gradient: boolean };
+};
+
+/** Datos técnicos que el cliente armó en el simulador (para producción). */
+function DesignSpecs({ design }: { design: DesignSpecsData }) {
+  const rows: [string, string | undefined][] = [
+    ["Bolsa", [design.model, design.size].filter(Boolean).join(" · ")],
+    ["Color de bolsa", design.bagColor],
+    ["Impresión", design.ink],
+    ["Logo", design.logoCm ? `${design.logoCm.w} × ${design.logoCm.h} cm (aprox.)${design.rotation ? ` · rotado ${design.rotation}°` : ""}` : undefined],
+    ["Textos", design.contact?.length ? design.contact.join(" · ") : undefined],
+    ["Tipografía", design.contact?.length ? design.font : undefined],
+    [
+      "Calidad del archivo",
+      design.quality
+        ? `${design.quality.dpi ? `${design.quality.dpi} ppp` : "vectorial"} · ${design.quality.colors} color(es)${design.quality.gradient ? " · tiene degradados" : ""}`
+        : undefined,
+    ],
+  ];
+  return (
+    <div className="rounded-xl border border-line p-3 text-sm">
+      <h3 className="mb-2 font-semibold">Datos del simulador</h3>
+      <dl className="grid gap-1 sm:grid-cols-[auto_1fr] sm:gap-x-4">
+        {rows.filter(([, v]) => v).map(([k, v]) => (
+          <div key={k} className="contents">
+            <dt className="text-mute">{k}</dt>
+            <dd className="break-words">{v}</dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }

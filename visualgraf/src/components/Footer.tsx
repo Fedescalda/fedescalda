@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { nav, site, waLink } from "@/lib/site";
 import { Logo } from "./Logo";
+import { NewsletterForm } from "./newsletter/NewsletterForm";
 import { IconFacebook, IconInstagram, IconMail, IconPin, IconWhatsApp } from "./Icons";
 
 export function Footer() {
@@ -23,6 +24,10 @@ export function Footer() {
           <a href={waLink("¡Hola! Quiero pedir un presupuesto.")} target="_blank" rel="noopener noreferrer" className="btn btn-whatsapp mt-6">
             <IconWhatsApp /> Cotizá por WhatsApp
           </a>
+          <div className="mt-8 max-w-sm">
+            <h2 className="eyebrow mb-3">Newsletter</h2>
+            <NewsletterForm variant="footer" source="footer" />
+          </div>
         </div>
 
         <nav aria-label="Secciones">

@@ -8,6 +8,7 @@ import { uploadOrderFile } from "@/lib/order-files";
 import { sendCustomerEmail } from "@/lib/customer-email";
 import type { OrderRow } from "@/lib/order-events";
 import { notifyNewOrder } from "@/lib/notify";
+import { subscribe } from "@/lib/newsletter";
 import { site, waLink } from "@/lib/site";
 
 /**
@@ -81,7 +82,9 @@ export async function POST(req: Request) {
       total: priced.total,
       promo_code: priced.promoCode,
       payment_method: method,
-      history: [{ status: "pendiente", at: new Date().toISOString(), note: "Pedido creado en la web" }],
+      terms_accepted_at: new Date().toISOString(),
+      design: input.design ?? null,
+      history: [{ status: "pendiente", at: new Date().toISOString(), note: "Pedido creado en la web · condiciones de diseño aceptadas" }],
     })
     .select("*")
     .single();
@@ -103,6 +106,7 @@ export async function POST(req: Request) {
   }
 
   after(async () => {
+    if (input.newsletter) await subscribe({ email: input.customer.email, name: input.customer.name, source: "checkout" }).catch(() => {});
     await notifyNewOrder({ shortId, customer: input.customer, lines: priced.lines, total: priced.total, discount: priced.discount, promoCode: priced.promoCode, paymentMethod: method === "mercadopago" ? "mercadopago" : "whatsapp" });
     await sendCustomerEmail(order, "pendiente", { transfer });
   });

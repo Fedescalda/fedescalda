@@ -29,6 +29,8 @@ export function Checkout({ methods }: { methods: Methods }) {
   const [design, setDesign] = useState<SavedDesign | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
   const [logoLater, setLogoLater] = useState(false);
+  const [terms, setTerms] = useState(false);
+  const [newsletter, setNewsletter] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [waResult, setWaResult] = useState<WaResult | null>(null);
@@ -92,6 +94,10 @@ export function Checkout({ methods }: { methods: Methods }) {
       setError("Subí tu logo o marcá que lo enviás después.");
       return;
     }
+    if (!terms) {
+      setError("Para confirmar tenés que aceptar las condiciones del diseño.");
+      return;
+    }
     const fields = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>;
     const { website = "", name, email, phone, business, cuit, province: prov, city, address, zip, notes } = fields;
     const payload = {
@@ -100,6 +106,9 @@ export function Checkout({ methods }: { methods: Methods }) {
       paymentMethod: payment,
       promoCode: promo?.code ?? "",
       logoLater: !hasDesign && logoLater,
+      termsAccepted: terms,
+      newsletter,
+      design: design?.meta ?? null,
       items: items.map((i) => ({ productId: i.productId, size: i.size, bagColor: i.bagColor, inkColor: i.inkColor, quantity: i.quantity })),
     };
     setSending(true);
@@ -307,6 +316,20 @@ export function Checkout({ methods }: { methods: Methods }) {
               )}
             </div>
           </fieldset>
+
+          <div className="space-y-3 rounded-2xl border border-line bg-white/[0.03] p-4 text-sm">
+            <label className="flex items-start gap-3">
+              <input type="checkbox" checked={terms} aria-required="true" onChange={(e) => setTerms(e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[#34d3f3]" />
+              <span>
+                <strong>Acepto las condiciones del diseño:</strong> la simulación es orientativa; antes de imprimir recibo una <strong>prueba de diseño final</strong> y
+                la producción empieza solo cuando la apruebo. Una vez aprobada, se imprime tal cual (no se aceptan cambios ni reclamos por textos, colores o medidas aprobados).
+              </span>
+            </label>
+            <label className="flex items-start gap-3 text-mute">
+              <input type="checkbox" checked={newsletter} onChange={(e) => setNewsletter(e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[#34d3f3]" />
+              <span>Quiero recibir novedades y promos de Visual Graf (1 o 2 mails por mes, me doy de baja cuando quiera).</span>
+            </label>
+          </div>
 
           {error && <p role="alert" className="rounded-xl border border-brand-magenta/50 bg-brand-magenta/10 px-4 py-3 text-sm">{error}</p>}
 

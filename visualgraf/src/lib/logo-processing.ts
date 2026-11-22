@@ -138,3 +138,53 @@ export async function svgToPng(svg: SVGSVGElement, width = 1200): Promise<Blob> 
     URL.revokeObjectURL(url);
   }
 }
+
+export type LogoAnalysis = {
+  width: number;
+  height: number;
+  /** colores planos detectados (sin contar el fondo blanco/transparente) */
+  colors: number;
+  /** muchos tonos distintos: degradados, sombras o foto */
+  gradient: boolean;
+  transparent: boolean;
+  vector: boolean;
+};
+
+/** Analiza el logo para avisar si sirve para serigrafía (colores planos) y su resolución. */
+export function analyzeLogo(img: HTMLImageElement, isSvg: boolean): LogoAnalysis {
+  const w0 = img.naturalWidth || img.width;
+  const h0 = img.naturalHeight || img.height;
+  const k = Math.min(1, 300 / Math.max(w0, h0));
+  const w = Math.max(1, Math.round(w0 * k));
+  const h = Math.max(1, Math.round(h0 * k));
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  const ctx = c.getContext("2d", { willReadFrequently: true })!;
+  ctx.drawImage(img, 0, 0, w, h);
+  const d = ctx.getImageData(0, 0, w, h).data;
+  const buckets = new Map<number, number>();
+  let opaque = 0;
+  let transparentPx = 0;
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] < 128) {
+      transparentPx++;
+      continue;
+    }
+    if (Math.min(d[i], d[i + 1], d[i + 2]) > 232) continue; // fondo blanco
+    opaque++;
+    const key = ((d[i] >> 5) << 6) | ((d[i + 1] >> 5) << 3) | (d[i + 2] >> 5); // 8 niveles por canal
+    buckets.set(key, (buckets.get(key) ?? 0) + 1);
+  }
+  // Un "color" cuenta si ocupa al menos 2% de la tinta (descarta bordes antialias)
+  const significant = [...buckets.values()].filter((n) => n / Math.max(1, opaque) > 0.02).length;
+  const gradient = buckets.size > 40 && significant > 5;
+  return {
+    width: w0,
+    height: h0,
+    colors: Math.max(1, significant),
+    gradient,
+    transparent: transparentPx / (w * h) > 0.04,
+    vector: isSvg,
+  };
+}

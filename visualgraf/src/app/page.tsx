@@ -8,6 +8,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
 import { Faq } from "@/components/Faq";
 import { CtaBand } from "@/components/CtaBand";
+import { NewsletterForm } from "@/components/newsletter/NewsletterForm";
 import { IconArrow, IconBrush, IconCheck, IconShield, IconSpark, IconTruck, IconUpload } from "@/components/Icons";
 import { benefits, steps, works } from "@/lib/content";
 import { getProducts } from "@/lib/data";
@@ -170,6 +171,14 @@ export default async function Home() {
         <SectionHeading eyebrow="Preguntas frecuentes" title="Lo que todos" highlight="nos preguntan" />
         <Reveal>
           <Faq />
+        </Reveal>
+      </section>
+
+      <section className="container-vg mt-24 md:mt-32" aria-label="Newsletter">
+        <Reveal>
+          <div className="mx-auto max-w-2xl">
+            <NewsletterForm variant="card" source="home" />
+          </div>
         </Reveal>
       </section>
 

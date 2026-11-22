@@ -34,8 +34,24 @@ export async function changeOrderStatus(id: string, _state: ActionResult, form: 
   const { status, note, carrier, tracking_code } = input.data;
   if (!isOrderStatus(status)) return { error: "Elegí un estado válido." };
 
+  // Regla de negocio: no se produce ni se despacha sin la aprobación del diseño
+  const current = await getOrderById(id);
+  if (!current) return { error: "No pudimos abrir el pedido." };
+  const needsApproval = ["en_produccion", "enviado", "entregado"].includes(status);
+  const offlineApproval = form.get("offline_approval") === "on";
+  if (needsApproval && current.proof_status !== "aprobada" && !offlineApproval) {
+    return {
+      error:
+        "El cliente todavía no aprobó el diseño. Subí la prueba y esperá su aprobación, o marcá \"El cliente aprobó por otro medio\" si lo confirmó por WhatsApp o email.",
+    };
+  }
+  if (needsApproval && current.proof_status !== "aprobada" && offlineApproval) {
+    const supabase = await getAdminClient();
+    await supabase!.from("orders").update({ proof_status: "aprobada", proof_approved_at: new Date().toISOString(), proof_approved_ip: "aprobación fuera de la web" }).eq("id", id);
+  }
+
   const saved = await setOrderStatus(id, status, {
-    note,
+    note: [note, needsApproval && current.proof_status !== "aprobada" && offlineApproval ? "Diseño aprobado por el cliente fuera de la web (registrado por el admin)" : ""].filter(Boolean).join(" · "),
     patch: { carrier: carrier || null, tracking_code: tracking_code || null },
     email: form.get("email") === "on",
   });
@@ -54,7 +70,8 @@ export async function uploadProof(id: string, _state: ActionResult, form: FormDa
   if (file.size > MAX_ORDER_FILE) return { error: "El archivo supera los 4 MB." };
   if (!ORDER_FILE_TYPES.includes(file.type)) return { error: "Usá PNG, JPG, WEBP, SVG o PDF." };
 
-  const { data: order } = await supabase.from("orders").select("status").eq("id", id).maybeSingle();
+  const { data: order } = await supabase.from("orders").select("status, proof_version, proof_status").eq("id", id).maybeSingle();
+  if (order?.proof_status === "aprobada") return { error: "El cliente ya aprobó una prueba. Si hay que cambiarla, coordinalo con el cliente antes." };
   if (!order) return { error: "No pudimos abrir el pedido." };
 
   let path: string;
@@ -64,9 +81,10 @@ export async function uploadProof(id: string, _state: ActionResult, form: FormDa
     return { error: "No pudimos subir la prueba. Intentá de nuevo." };
   }
 
+  const version = (order.proof_version ?? 0) + 1;
   const saved = await setOrderStatus(id, "diseno", {
-    note: "Prueba de diseño enviada",
-    patch: { proof_path: path, proof_status: "enviada", proof_feedback: null },
+    note: `Prueba de diseño v${version} enviada`,
+    patch: { proof_path: path, proof_status: "enviada", proof_feedback: null, proof_version: version },
   });
   if (!saved) return { error: "No pudimos guardar la prueba en el pedido. Intentá de nuevo." };
 
