@@ -28,6 +28,18 @@
   $("#hours-list").innerHTML = HORARIOS.map(
     (h) => `<div><dt>${h.etiqueta}</dt><dd>${h.desde} a ${h.hasta} hs</dd></div>`
   ).join("");
+  // "Abrimos hoy a las 10:00 hs" / "Abrimos mañana…" / "Abrimos el lunes…"
+  function proximaApertura(dia, ahora) {
+    const nombres = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+    for (let i = 0; i < 7; i++) {
+      const d = (dia + i) % 7;
+      const h = HORARIOS.find((x) => x.dias.includes(d));
+      if (!h || (i === 0 && ahora >= h.desde)) continue;
+      const cuando = i === 0 ? "hoy" : i === 1 ? "mañana" : `el ${nombres[d]}`;
+      return `Abrimos ${cuando} a las ${h.desde} hs.`;
+    }
+    return "";
+  }
   function estadoHorario() {
     const partes = Object.fromEntries(
       new Intl.DateTimeFormat("en-US", { timeZone: "America/Argentina/Buenos_Aires", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
@@ -38,7 +50,7 @@
     const hoy = HORARIOS.find((h) => h.dias.includes(dia));
     const abierto = hoy && ahora >= hoy.desde && ahora < hoy.hasta;
     const el = $("#hours-status");
-    el.textContent = abierto ? `Abierto ahora, hasta las ${hoy.hasta} hs` : "Cerrado ahora. Dejanos tu mensaje y te respondemos.";
+    el.textContent = abierto ? `Abierto ahora, hasta las ${hoy.hasta} hs` : `Cerrado ahora. ${proximaApertura(dia, ahora)} Dejanos tu mensaje y te respondemos.`;
     el.classList.toggle("is-open", Boolean(abierto));
   }
   estadoHorario();
@@ -53,7 +65,7 @@
 
   function renderFiltros() {
     $("#filters").innerHTML = ["Todos", ...categorias]
-      .map((c) => `<button type="button" class="filter" data-cat="${escapar(c)}" aria-pressed="${c === filtro}">${escapar(c)}<small>${c === "Todos" ? PRODUCTOS.length : cuenta(c)}</small></button>`)
+      .map((c) => `<button type="button" class="filter" data-cat="${escapar(c)}" aria-pressed="${c === filtro}" aria-label="${escapar(c)}, ${c === "Todos" ? PRODUCTOS.length : cuenta(c)} productos">${escapar(c)}<small>${c === "Todos" ? PRODUCTOS.length : cuenta(c)}</small></button>`)
       .join("");
   }
 
@@ -66,7 +78,7 @@
         <div class="item__media"><img src="${escapar(p.imagen)}" alt="${escapar(p.nombre)}" width="480" height="480" loading="lazy" decoding="async"></div>
         <h4>${escapar(p.nombre)}</h4>
         <p>${escapar(p.descripcion)}</p>
-        <div class="item__foot">${precio}<button type="button" class="item__add" data-add="${i}">Agregar al pedido</button></div>
+        <div class="item__foot">${precio}<button type="button" class="item__add" data-add="${i}" aria-label="Agregar ${escapar(p.nombre)} al pedido">Agregar al pedido</button></div>
       </li>`;
   }
 
@@ -260,6 +272,23 @@
     }, { threshold: 0.4 }).observe(video);
   }
 
+  // Botón para pausar las animaciones continuas (cinta, brasa y chispas). Se recuerda en este navegador.
+  const raiz = document.documentElement;
+  const btnPausa = $("#pausa-anim");
+  let animPausada = false;
+  try { animPausada = localStorage.getItem("adf-pausa") === "1"; } catch (_) {}
+  function aplicarPausa() {
+    raiz.classList.toggle("pausado", animPausada);
+    btnPausa.setAttribute("aria-label", animPausada ? "Reanudar animaciones" : "Pausar animaciones");
+    document.dispatchEvent(new CustomEvent("adf-pausa", { detail: animPausada }));
+  }
+  btnPausa.addEventListener("click", () => {
+    animPausada = !animPausada;
+    try { localStorage.setItem("adf-pausa", animPausada ? "1" : "0"); } catch (_) {}
+    aplicarPausa();
+    avisar(animPausada ? "Animaciones pausadas" : "Animaciones reanudadas");
+  });
+
   // Chispas que suben desde la brasa de la portada
   const canvas = $("#chispas");
   if (canvas && !sinMovimiento) {
@@ -333,8 +362,11 @@
     }
     // Pausar cuando la portada no se ve o la pestaña está oculta
     const reanudar = () => { activo = true; if (!corriendo) { corriendo = true; ultimo = performance.now(); requestAnimationFrame(cuadro); } };
-    new IntersectionObserver(([e]) => (e.isIntersecting ? reanudar() : (activo = false))).observe(canvas);
-    document.addEventListener("visibilitychange", () => (document.hidden ? (activo = false) : reanudar()));
+    let enPantalla = true;
+    const decidir = () => (enPantalla && !document.hidden && !animPausada ? reanudar() : (activo = false));
+    new IntersectionObserver(([e]) => { enPantalla = e.isIntersecting; decidir(); }).observe(canvas);
+    document.addEventListener("visibilitychange", decidir);
+    document.addEventListener("adf-pausa", decidir);
     requestAnimationFrame(cuadro);
   }
 
@@ -363,6 +395,8 @@
     const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { pasos.classList.add("is-in"); obs.disconnect(); } }, { threshold: 0.35 });
     obs.observe(pasos);
   } else pasos.classList.add("is-in");
+
+  aplicarPausa();
 
   // Datos estructurados (schema.org): URLs absolutas, horarios y catálogo desde productos.js
   try {

@@ -136,6 +136,10 @@
 
     <div class="motto" translate="no">
       <p class="sr-only">El fuego nos une. La pasión nos identifica.</p>
+      <button class="motto__pausa" id="pausa-anim" type="button" aria-label="Pausar animaciones">
+        <svg class="i-pause" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg>
+        <svg class="i-play" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor" transform="translate(1.5 0)"/></svg>
+      </button>
       <div class="motto__track" aria-hidden="true"><span>El fuego nos une</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg><span>La pasión nos identifica</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg><span>El fuego nos une</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg><span>La pasión nos identifica</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg><span>El fuego nos une</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg><span>La pasión nos identifica</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg><span>El fuego nos une</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg><span>La pasión nos identifica</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg></div>
     </div>
 
@@ -180,7 +184,7 @@
           <p class="contact__text">Estamos en Arroyo Seco, Santa Fe. Consultanos por productos, medidas, envíos y formas de pago.</p>
           <p class="contact__tel">WhatsApp: <a href="#" class="js-wa-link">+54 9 3402 48-7788</a></p>
           <div class="contact__actions">
-            <a href="#" class="btn btn--primary js-wa-link">Escribir por WhatsApp</a>
+            <a href="#" class="btn btn--primary js-wa-link">Escribinos por WhatsApp</a>
             <a href="https://www.instagram.com/amantesdelfuego.as/" target="_blank" rel="noopener" class="btn btn--ghost">Instagram @amantesdelfuego.as</a>
           </div>
         </div>
@@ -197,15 +201,16 @@
 
   <footer class="footer">
     <p>© <span id="year"></span> <span translate="no">Amantes del Fuego</span>. Arroyo Seco, Santa Fe. WhatsApp +54&nbsp;9&nbsp;3402&nbsp;48-7788.</p>
-  </footer>
-
-  <a href="#" class="wa-float js-wa-link" aria-label="Escribir por WhatsApp">
+  <a href="#" class="wa-float js-wa-link" aria-label="Escribinos por WhatsApp">
     <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 18.8L4 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-2-2l.8-1-1-2L9 9.5z" fill="currentColor"/></svg>
   </a>
+  </footer>
+
+
 
   <div class="cart" id="cart" hidden>
     <div class="cart__backdrop" data-close></div>
-    <aside class="cart__panel" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+    <div class="cart__panel" role="dialog" aria-modal="true" aria-labelledby="cart-title">
       <div class="cart__head">
         <h3 id="cart-title">Tu pedido</h3>
         <button class="cart__close" type="button" aria-label="Cerrar pedido" data-close>
@@ -213,14 +218,17 @@
         </button>
       </div>
       <ul class="cart__items" id="cart-items"></ul>
-      <p class="cart__empty" id="cart-empty">Todavía no agregaste productos. Elegí lo que quieras del catálogo y volvé acá para enviar el pedido.</p>
+      <div class="cart__empty" id="cart-empty">
+        <p>Todavía no agregaste productos. Elegí lo que quieras del catálogo y volvé acá para enviar el pedido.</p>
+        <a href="#catalogo" class="btn btn--ghost" data-close>Ver catálogo</a>
+      </div>
       <div class="cart__foot">
         <p class="cart__total" id="cart-total"></p>
         <label class="cart__label" for="cart-name">Tu nombre (opcional)</label>
         <input id="cart-name" name="name" autocomplete="name" class="cart__input" type="text" placeholder="Ej.: Juan Pérez…">
         <a class="btn btn--primary cart__send" id="cart-send" href="#" target="_blank" rel="noopener" aria-disabled="true">Enviar pedido por WhatsApp</a>
       </div>
-    </aside>
+    </div>
   </div>
 
   <p class="sr-only" id="aviso" aria-live="polite"></p>
