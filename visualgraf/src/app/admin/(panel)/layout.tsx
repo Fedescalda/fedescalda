@@ -5,6 +5,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 const links = [
   { href: "/admin", label: "Pedidos" },
+  { href: "/admin/estadisticas", label: "Estadísticas" },
   { href: "/admin/consultas", label: "Consultas" },
   { href: "/admin/productos", label: "Productos" },
   { href: "/admin/promociones", label: "Promociones" },

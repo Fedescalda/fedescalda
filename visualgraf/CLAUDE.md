@@ -36,7 +36,8 @@ src/
     promociones/ nuestra-historia/ contacto/ privacidad/
     carrito/                  Carrito + checkout (components/cart/Checkout.tsx)
     pedido/[token]/           Página privada del pedido: estado, pago, logo, aprobar diseño (actions.ts)
-    admin/                    Login + (panel)/ pedidos, consultas, productos, promociones (server actions)
+    admin/                    Login + (panel)/ pedidos, estadísticas, consultas, productos, promociones (server actions)
+                              estadisticas/ + stats-export (CSV) + stats-load.ts (lee pedidos paginados)
     api/contact               POST consulta → Supabase (service role)
     api/orders                POST pedido → recalcula precios en servidor → Mercado Pago o link WhatsApp
     api/promo                 GET valida código de descuento
@@ -60,13 +61,15 @@ src/
     design-store.ts           Diseño del simulador guardado en el navegador para el checkout
     bag-render.ts             Bolsas realistas en canvas (texturas propias) + "impresión" con luces/pliegues
     muestra.ts                Genera la "Muestra digital" (JPG) con el estilo de Visual Graf
+    stats.ts stats-types.ts   Estadísticas: rangos en hora ART, KPIs, serie día/mes, rankings, CSV.
+                              Venta = pedido pagado o más avanzado, fechado cuando se acreditó el pago (history)
     supabase/                 Clientes browser/server/admin + config
   middleware.ts               Sesión Supabase para /admin
 supabase/schema.sql seed.sql  Tablas, RLS, datos base
 supabase/migrations/          Cambios posteriores (correr en orden)
 scripts/seed-sql.ts           Genera seed.sql
 scripts/generate-bag-textures.py  Genera public/img/bags/*.webp (plástico arrugado, sin fotos de terceros)
-tests/                        Playwright: smoke, flujos, compra
+tests/                        Playwright: smoke, flujos, compra, andreani, newsletter, stats
 public/img/                   Fotos webp (productos/, clientes/) y logo
 ```
 
@@ -81,7 +84,7 @@ public/img/                   Fotos webp (productos/, clientes/) y logo
    accesibilidad y seguridad; Claude corrige los hallazgos reales y avisa cuáles.
 5. Contarle al usuario qué hizo cada uno.
 Historial: Codex escribió la suite Playwright, el panel admin, el panel de pedidos/configuración y el newsletter,
-e hizo 4 revisiones (código, seguridad, animaciones del carrito).
+los cálculos/CSV de estadísticas, e hizo 6 revisiones (código, seguridad, animaciones del carrito, estadísticas).
 
 ## Convenciones
 - Textos en español de Argentina con voseo. Precios en ARS con `formatARS`.
