@@ -17,6 +17,18 @@ export type PricedLine = {
   unitPrice: number;
 };
 
+/** Peso y volumen total del pedido; null si algún producto no tiene esos datos cargados. */
+export function parcelFor(lines: { quantity: number; variant?: { kilos?: number | null; volumen?: number | null } }[]) {
+  let kilos = 0;
+  let volumen = 0;
+  for (const l of lines) {
+    if (!l.variant?.kilos || !l.variant?.volumen) return null;
+    kilos += l.variant.kilos * l.quantity;
+    volumen += l.variant.volumen * l.quantity;
+  }
+  return kilos > 0 ? { kilos, volumen } : null;
+}
+
 /** Recalcula precios en el servidor a partir del catálogo: nunca confiamos en precios del cliente. */
 export async function priceOrder(input: OrderInput) {
   const products = await getProducts();
@@ -41,7 +53,10 @@ export async function priceOrder(input: OrderInput) {
   const subtotal = lines.reduce((s, l) => s + l.quantity * l.unitPrice, 0);
   const promo = input.promoCode ? await findPromoCode(input.promoCode) : null;
   const discount = promo?.discountPercent ? Math.round((subtotal * promo.discountPercent) / 100) : 0;
-  const ship = await quoteShipping(input.customer.province, subtotal - discount);
+  const ship = await quoteShipping(input.customer.province, subtotal - discount, {
+    cp: input.customer.zip,
+    parcel: parcelFor(lines.map((l) => ({ ...l, variant: products.find((p) => p.id === l.productId)?.variants.find((v) => v.size === l.size) }))),
+  });
   const shipping = ship.price ?? 0;
   return {
     lines,

@@ -6,7 +6,7 @@ import type { ActionResult } from "./ActionForm";
 import { bagColors, type Product } from "@/lib/catalog";
 
 type Action = (state: ActionResult, formData: FormData) => Promise<ActionResult>;
-type Row = { key: number; size: string; price: string };
+type Row = { key: number; size: string; price: string; kilos: string; volumen: string };
 type NewImage = { key: number; file: File; url: string };
 
 const categories = [
@@ -58,7 +58,13 @@ export function ProductEditor({
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
   const [rows, setRows] = useState<Row[]>(() =>
-    (product?.variants.length ? product.variants : [{ size: "", price: null }]).map((v) => ({ key: nextKey(), size: v.size, price: v.price != null ? String(v.price) : "" })),
+    (product?.variants.length ? product.variants : [{ size: "", price: null }]).map((v) => ({
+      key: nextKey(),
+      size: v.size,
+      price: v.price != null ? String(v.price) : "",
+      kilos: v.kilos != null ? String(v.kilos) : "",
+      volumen: v.volumen != null ? String(v.volumen) : "",
+    })),
   );
   const [existing, setExisting] = useState(() => (product?.images ?? []).map((img) => ({ ...img, remove: false })));
   const [added, setAdded] = useState<NewImage[]>([]);
@@ -144,9 +150,12 @@ export function ProductEditor({
 
       <fieldset className="card space-y-3 p-5">
         <legend className="px-1 font-bold">Medidas y precios *</legend>
-        <p className="text-sm text-mute">Precio por pack. Dejalo vacío para mostrar &quot;Consultá precio&quot;.</p>
+        <p className="text-sm text-mute">
+          Precio por pack. Dejalo vacío para mostrar &quot;Consultá precio&quot;. Peso y volumen del pack embalado se usan para cotizar el envío con Andreani
+          (volumen = largo × ancho × alto en cm).
+        </p>
         {rows.map((row, i) => (
-          <div key={row.key} className="grid grid-cols-[1fr_1fr_auto] items-end gap-2">
+          <div key={row.key} className="grid grid-cols-2 items-end gap-2 rounded-xl border border-line p-3 sm:grid-cols-[1.3fr_1fr_0.8fr_1fr_auto]">
             <label className="block">
               <span className="label">Medida {i + 1}</span>
               <input className="field" name="variant_size" value={row.size} onChange={(e) => setRows((r) => r.map((x) => (x.key === row.key ? { ...x, size: e.target.value } : x)))} placeholder="30 × 40 cm" />
@@ -155,12 +164,20 @@ export function ProductEditor({
               <span className="label">Precio (ARS)</span>
               <input className="field" name="variant_price" type="number" min={0} step="any" inputMode="decimal" value={row.price} onChange={(e) => setRows((r) => r.map((x) => (x.key === row.key ? { ...x, price: e.target.value } : x)))} placeholder="A cotizar" />
             </label>
+            <label className="block">
+              <span className="label">Peso pack (kg)</span>
+              <input className="field" name="variant_kilos" type="number" min={0} step="0.01" inputMode="decimal" value={row.kilos} onChange={(e) => setRows((r) => r.map((x) => (x.key === row.key ? { ...x, kilos: e.target.value } : x)))} placeholder="Ej: 1.2" />
+            </label>
+            <label className="block">
+              <span className="label">Volumen (cm³)</span>
+              <input className="field" name="variant_volumen" type="number" min={0} step="1" inputMode="numeric" value={row.volumen} onChange={(e) => setRows((r) => r.map((x) => (x.key === row.key ? { ...x, volumen: e.target.value } : x)))} placeholder="Ej: 6000" />
+            </label>
             <button type="button" className="btn btn-ghost !min-h-12 !px-4" disabled={rows.length === 1} onClick={() => setRows((r) => r.filter((x) => x.key !== row.key))} aria-label={`Quitar medida ${i + 1}`}>
               ✕
             </button>
           </div>
         ))}
-        <button type="button" className="btn btn-ghost" onClick={() => setRows((r) => [...r, { key: nextKey(), size: "", price: "" }])}>
+        <button type="button" className="btn btn-ghost" onClick={() => setRows((r) => [...r, { key: nextKey(), size: "", price: "", kilos: "", volumen: "" }])}>
           + Agregar medida
         </button>
       </fieldset>

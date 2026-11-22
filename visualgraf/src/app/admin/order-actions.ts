@@ -86,6 +86,8 @@ const optionalPrice = z.string().trim()
 
 const shippingForm = z.object({
   enabled: z.boolean(),
+  provider: z.enum(["zonas", "andreani"]),
+  markupPercent: z.coerce.number().min(0).max(200),
   freeFrom: optionalPrice,
   zones: z.array(z.object({
     id: z.string().regex(/^[a-zA-Z0-9_-]{1,80}$/),
@@ -101,6 +103,8 @@ export async function saveShipping(_state: ActionResult, form: FormData): Promis
 
   const parsed = shippingForm.safeParse({
     enabled: form.get("enabled") === "on",
+    provider: form.get("provider") === "andreani" ? "andreani" : "zonas",
+    markupPercent: form.get("markupPercent") || 0,
     freeFrom: form.get("freeFrom"),
     zones: form.getAll("zone").map((id) => ({
       id,

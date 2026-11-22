@@ -33,6 +33,10 @@ export type Variant = {
   price: number | null;
   image?: string;
   detail?: string;
+  /** Peso de un pack en kg (para cotizar envío) */
+  kilos?: number | null;
+  /** Volumen de un pack en cm³ (largo × ancho × alto del paquete) */
+  volumen?: number | null;
 };
 
 export type Product = {

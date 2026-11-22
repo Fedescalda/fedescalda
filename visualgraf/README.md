@@ -73,9 +73,20 @@ Variables (Vercel → Settings → Environment Variables):
 | `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET` | Cobro con Mercado Pago y acreditación automática |
 | `TRANSFER_ALIAS`, `TRANSFER_CBU`, `TRANSFER_HOLDER`, `TRANSFER_BANK` | Opción de pago por transferencia |
 | `RESEND_API_KEY`, `CUSTOMER_EMAIL_FROM` | Emails automáticos al cliente (dominio verificado en Resend) |
+| `ANDREANI_CLIENTE`, `ANDREANI_CONTRATO` | Envío cotizado en vivo con Andreani (código postal + peso/volumen) |
 | `RESEND_API_KEY` + `NOTIFY_EMAIL`, `TELEGRAM_*` | Avisos para vos |
 
 Migraciones de base de datos: `supabase/schema.sql`, `supabase/seed.sql` y luego `supabase/migrations/*.sql` en orden.
+
+### Envíos con Andreani
+
+1. Pedile a tu comercial de Andreani tu **número de cliente** y tu **número de contrato** de envío a domicilio.
+2. Cargalos en Vercel como `ANDREANI_CLIENTE` y `ANDREANI_CONTRATO` y redeployá.
+3. En **Admin → Productos**, completá **peso (kg)** y **volumen (cm³ = largo × ancho × alto)** de cada medida, tal como sale embalada.
+4. En **Admin → Configuración → Envíos** elegí **Andreani en vivo**, opcionalmente un recargo % y un mínimo para envío gratis, y activá el cálculo.
+
+El checkout pide el código postal y cotiza al instante. Si falta algún dato o Andreani no responde, se usan las zonas
+de respaldo o queda "a coordinar": nunca se muestra un precio inventado. Pedidos de más de 25 kg se dividen en bultos.
 
 ## Avisos de pedidos y consultas (email + celular)
 

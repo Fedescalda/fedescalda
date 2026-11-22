@@ -89,12 +89,19 @@ function parseProduct(form: FormData) {
 
   const sizes = form.getAll("variant_size").map((v) => String(v).trim());
   const prices = form.getAll("variant_price").map((v) => priceValue(String(v).trim()));
+  const kilosList = form.getAll("variant_kilos").map((v) => priceValue(String(v).trim()));
+  const volList = form.getAll("variant_volumen").map((v) => priceValue(String(v).trim()));
   const variants: Variant[] = [];
   for (let i = 0; i < sizes.length; i++) {
     if (!sizes[i] && prices[i] == null) continue; // fila vacía
     if (!sizes[i]) return { error: `Completá la medida de la fila ${i + 1}.` } as const;
     if (!validPrice(prices[i])) return { error: `El precio de "${sizes[i]}" no es válido.` } as const;
-    variants.push({ size: sizes[i].slice(0, 80), price: prices[i] });
+    const kilos = kilosList[i] ?? null;
+    const volumen = volList[i] ?? null;
+    if ((kilos != null && !(kilos > 0 && kilos <= 500)) || (volumen != null && !(volumen > 0 && volumen <= 5_000_000))) {
+      return { error: `Revisá el peso o el volumen de "${sizes[i]}".` } as const;
+    }
+    variants.push({ size: sizes[i].slice(0, 80), price: prices[i], kilos, volumen });
   }
   if (!variants.length) return { error: "Agregá al menos una medida (con precio o vacío para cotizar)." } as const;
   if (new Set(variants.map((v) => v.size)).size !== variants.length) return { error: "Hay medidas repetidas." } as const;

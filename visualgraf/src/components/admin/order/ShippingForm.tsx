@@ -5,8 +5,9 @@ import { ActionForm } from "@/components/admin/ActionForm";
 import { saveShipping } from "@/app/admin/order-actions";
 import type { ShippingConfig } from "@/lib/settings";
 
-export function ShippingForm({ config, provinces }: { config: ShippingConfig; provinces: readonly string[] }) {
+export function ShippingForm({ config, provinces, andreaniReady }: { config: ShippingConfig; provinces: readonly string[]; andreaniReady: boolean }) {
   const [zones, setZones] = useState(config.zones);
+  const [provider, setProvider] = useState(config.provider);
 
   function addZone() {
     const zone = { id: crypto.randomUUID(), name: "", price: null, provinces: [] };
@@ -19,6 +20,36 @@ export function ShippingForm({ config, provinces }: { config: ShippingConfig; pr
         <input type="checkbox" name="enabled" defaultChecked={config.enabled} />
         Calcular envío automático
       </label>
+      <fieldset className="space-y-2">
+        <legend className="label">¿Cómo se calcula?</legend>
+        <label className={`flex items-start gap-3 rounded-xl border p-3 ${provider === "andreani" ? "border-white bg-white/5" : "border-white/20"}`}>
+          <input type="radio" name="provider" value="andreani" checked={provider === "andreani"} onChange={() => setProvider("andreani")} className="mt-1" />
+          <span>
+            <span className="block font-semibold">Andreani en vivo (recomendado)</span>
+            <span className="text-sm text-mute">
+              Cotiza con tu contrato según el código postal, el peso y el volumen de cada pack. Si algo falta o Andreani no responde, se usan las zonas de abajo.
+            </span>
+            <span className={`mt-1 block text-sm ${andreaniReady ? "text-brand-green" : "text-brand-yellow"}`}>
+              {andreaniReady ? "✓ Contrato de Andreani configurado" : "Falta cargar ANDREANI_CLIENTE y ANDREANI_CONTRATO en Vercel"}
+            </span>
+          </span>
+        </label>
+        <label className={`flex items-start gap-3 rounded-xl border p-3 ${provider === "zonas" ? "border-white bg-white/5" : "border-white/20"}`}>
+          <input type="radio" name="provider" value="zonas" checked={provider === "zonas"} onChange={() => setProvider("zonas")} className="mt-1" />
+          <span>
+            <span className="block font-semibold">Precio fijo por zona</span>
+            <span className="text-sm text-mute">Un precio por región, sin consultar a ningún correo.</span>
+          </span>
+        </label>
+      </fieldset>
+      {provider === "andreani" && (
+        <label className="block max-w-xs">
+          <span className="label">Recargo sobre la tarifa de Andreani (%)</span>
+          <input name="markupPercent" className="field" type="number" min="0" max="200" step="0.5" defaultValue={config.markupPercent || ""} placeholder="0" />
+          <span className="mt-1 block text-xs text-mute">Para cubrir embalaje o despacho. 0 = tarifa exacta.</span>
+        </label>
+      )}
+      {provider !== "andreani" && <input type="hidden" name="markupPercent" value={config.markupPercent || 0} />}
       <label className="block max-w-xs">
         <span className="label">Envío gratis desde $</span>
         <input name="freeFrom" className="field" type="number" min="0" step="any" defaultValue={config.freeFrom ?? ""} placeholder="Nunca" />

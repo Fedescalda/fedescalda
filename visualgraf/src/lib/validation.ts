@@ -28,7 +28,7 @@ export const customerSchema = z.object({
   province: txt(40).min(2, "Elegí tu provincia"),
   city: txt(60).min(2, "Ingresá tu localidad"),
   address: txt(120).min(3, "Ingresá tu dirección"),
-  zip: txt(10).optional().default(""),
+  zip: txt(10).min(4, "Ingresá tu código postal"),
   notes: txt(500).optional().default(""),
 });
 

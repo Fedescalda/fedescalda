@@ -17,6 +17,7 @@ test("Compra de punta a punta con cierre por WhatsApp", async ({ page }) => {
   await page.selectOption("#c-province", "Santa Fe");
   await page.fill("#c-city", "Rosario");
   await page.fill("#c-address", "Calle Falsa 123");
+  await page.fill("#c-zip", "2000");
   // Sin logo: hay que subirlo o marcar que se envía después
   await page.getByRole("button", { name: "Confirmar pedido" }).click();
   await expect(page.getByText("Subí tu logo o marcá que lo enviás después.")).toBeVisible();
@@ -38,7 +39,7 @@ test("El servidor ignora precios manipulados y valida datos", async ({ request }
   expect(res.status()).toBe(400);
   const bad = await request.post("/api/orders", {
     data: {
-      customer: { name: "Ana", email: "a@b.co", phone: "123456", province: "Salta", city: "Salta", address: "X 1" },
+      customer: { name: "Ana", email: "a@b.co", phone: "123456", province: "Salta", city: "Salta", address: "X 1", zip: "4400" },
       items: [{ productId: "manija-rinon-ad", size: "99 × 99 cm", bagColor: "Blanco", inkColor: "Negro", quantity: 1 }],
       paymentMethod: "whatsapp",
     },

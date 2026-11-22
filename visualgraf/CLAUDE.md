@@ -55,7 +55,8 @@ src/
     order-events.ts           setOrderStatus(): cambia estado + historial + email al cliente (+ aviso al dueño)
     order-files.ts            Archivos privados del pedido (bucket "pedidos", URLs firmadas)
     customer-email.ts         Emails automáticos al cliente
-    settings.ts               Envío por zona (tabla settings) y datos de transferencia
+    settings.ts               Envío: Andreani en vivo o por zona (tabla settings) y datos de transferencia
+    andreani.ts andreani-core.ts  Cotizador Andreani (GET /v1/tarifas, sin login) + lógica pura (CP, bultos)
     design-store.ts           Diseño del simulador guardado en el navegador para el checkout
     supabase/                 Clientes browser/server/admin + config
   middleware.ts               Sesión Supabase para /admin

@@ -2,6 +2,7 @@ import { ShippingForm } from "@/components/admin/order/ShippingForm";
 import { customerEmailsEnabled } from "@/lib/customer-email";
 import { notificationChannels } from "@/lib/notify";
 import { getShippingConfig } from "@/lib/settings";
+import { andreaniConfigured } from "@/lib/andreani";
 import { provinces } from "@/lib/validation";
 import { getPanelClient } from "../../session";
 
@@ -12,6 +13,7 @@ export default async function SettingsPage() {
   const channels = notificationChannels();
   const services = [
     { name: "Mercado Pago", ready: Boolean(process.env.MP_ACCESS_TOKEN && process.env.MP_WEBHOOK_SECRET), variables: ["MP_ACCESS_TOKEN", "MP_WEBHOOK_SECRET"] },
+    { name: "Andreani", ready: andreaniConfigured(), variables: ["ANDREANI_CLIENTE", "ANDREANI_CONTRATO"] },
     { name: "Transferencia", ready: Boolean(process.env.TRANSFER_ALIAS), variables: ["TRANSFER_ALIAS"] },
     { name: "Emails al cliente", ready: customerEmailsEnabled(), variables: ["RESEND_API_KEY", "CUSTOMER_EMAIL_FROM"] },
     { name: "Avisos por email", ready: channels.email, variables: ["RESEND_API_KEY", "NOTIFY_EMAIL"] },
@@ -23,7 +25,7 @@ export default async function SettingsPage() {
       <h1 className="text-3xl font-bold">Configuración</h1>
       <section className="card space-y-3 p-4 sm:p-5">
         <h2 className="text-xl font-bold">Envíos</h2>
-        <ShippingForm config={config} provinces={provinces} />
+        <ShippingForm config={config} provinces={provinces} andreaniReady={andreaniConfigured()} />
       </section>
       <section className="card space-y-3 p-4 sm:p-5">
         <h2 className="text-xl font-bold">Pagos y avisos</h2>

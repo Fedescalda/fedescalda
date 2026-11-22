@@ -23,6 +23,8 @@ export function Checkout({ methods }: { methods: Methods }) {
   const [promo, setPromo] = useState<{ code: string; percent: number } | null>(null);
   const [promoMsg, setPromoMsg] = useState("");
   const [province, setProvince] = useState("");
+  const [zip, setZip] = useState("");
+  const [quoting, setQuoting] = useState(false);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [design, setDesign] = useState<SavedDesign | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
@@ -37,16 +39,35 @@ export function Checkout({ methods }: { methods: Methods }) {
   const shipping = quote?.price ?? 0;
   const total = subtotal - discount + shipping;
 
-  // Cotización de envío automática al elegir provincia
+  // Cotización de envío automática (provincia + código postal + carrito), con pequeña espera mientras se tipea
+  const itemsKey = items.map((i) => `${i.productId}|${i.size}|${i.quantity}`).join(",");
   useEffect(() => {
     if (!province) return setQuote(null);
     const ctrl = new AbortController();
-    fetch(`/api/shipping?provincia=${encodeURIComponent(province)}&subtotal=${subtotal - discount}`, { signal: ctrl.signal })
-      .then((r) => r.json())
-      .then(setQuote)
-      .catch(() => {});
-    return () => ctrl.abort();
-  }, [province, subtotal, discount]);
+    const t = setTimeout(() => {
+      setQuoting(true);
+      fetch("/api/shipping", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: ctrl.signal,
+        body: JSON.stringify({
+          province,
+          cp: zip,
+          discountPercent: promo?.percent ?? 0,
+          items: items.map((i) => ({ productId: i.productId, size: i.size, quantity: i.quantity })),
+        }),
+      })
+        .then((r) => r.json())
+        .then(setQuote)
+        .catch(() => {})
+        .finally(() => setQuoting(false));
+    }, 450);
+    return () => {
+      clearTimeout(t);
+      ctrl.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- itemsKey resume items
+  }, [province, zip, itemsKey, promo?.percent]);
 
   async function applyCode() {
     setPromoMsg("");
@@ -239,7 +260,7 @@ export function Checkout({ methods }: { methods: Methods }) {
           <div className="flex justify-between">
             <dt className="text-mute">Envío{quote?.zone && quote.price != null ? ` (${quote.zone})` : ""}</dt>
             <dd className={quote?.price != null ? "" : "text-mute"}>
-              {!province ? "Elegí tu provincia" : quote?.price == null ? "A coordinar" : quote.free ? "¡Gratis!" : formatARS(quote.price)}
+              {!province ? "Completá provincia y CP" : quoting ? "Calculando…" : quote?.price == null ? "A coordinar" : quote.free ? "¡Gratis!" : formatARS(quote.price)}
             </dd>
           </div>
           <div className="flex justify-between border-t border-line pt-3 font-display text-xl font-black"><dt>Total</dt><dd>{formatARS(total)}</dd></div>
@@ -264,7 +285,10 @@ export function Checkout({ methods }: { methods: Methods }) {
             </div>
             <div><label htmlFor="c-city" className="label">Localidad *</label><input id="c-city" name="city" required autoComplete="address-level2" className="field" /></div>
             <div className="sm:col-span-2"><label htmlFor="c-address" className="label">Dirección de envío *</label><input id="c-address" name="address" required autoComplete="street-address" className="field" /></div>
-            <div><label htmlFor="c-zip" className="label">Código postal</label><input id="c-zip" name="zip" autoComplete="postal-code" className="field" /></div>
+            <div>
+              <label htmlFor="c-zip" className="label">Código postal *</label>
+              <input id="c-zip" name="zip" required minLength={4} maxLength={8} autoComplete="postal-code" className="field" value={zip} onChange={(e) => setZip(e.target.value.toUpperCase())} placeholder="Ej: 2000" />
+            </div>
             <div className="sm:col-span-2"><label htmlFor="c-notes" className="label">Notas (opcional)</label><textarea id="c-notes" name="notes" rows={2} maxLength={500} className="field" /></div>
             <div aria-hidden className="absolute -left-[9999px]"><input name="website" tabIndex={-1} autoComplete="off" /></div>
           </div>
