@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Visual Graf Hielo v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;0,800;0,900;1,900&family=DM+Sans:opsz,wght@9..40,500;9..40,700&display=block" rel="stylesheet">
+<style>
+  :root{
+    --ink:#07070d; --cyan:#34d3f3; --blue:#3a64ff; --violet:#9b33f5; --magenta:#ff2e93; --orange:#ff7a1c; --yellow:#ffc61f; --wa:#25d366;
+    --rainbow:linear-gradient(90deg,#34d3f3 0%,#3a64ff 22%,#9b33f5 44%,#ff2e93 64%,#ff7a1c 82%,#ffc61f 100%);
+    --icebg:radial-gradient(900px 700px at 20% 10%,#d9f8ff 0%,#7fe3fa 30%,#34d3f3 55%,#3a64ff 100%);
+    --heatbg:radial-gradient(900px 800px at 70% 20%,#ffc61f 0%,#ff7a1c 38%,#ff2e93 78%,#9b33f5 110%);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#333;font-family:'DM Sans',sans-serif;display:flex;flex-direction:column;gap:40px;padding:40px;align-items:center}
+  .slide{width:1080px;height:1350px;position:relative;overflow:hidden;color:var(--ink)}
+  .ice-bg{background:var(--icebg)}
+  .heat-bg{background:var(--heatbg)}
+  .dark-bg{background:var(--ink);color:#fff}
+  .X{font-family:Montserrat,sans-serif;font-weight:900;letter-spacing:-0.045em;line-height:.86;text-transform:uppercase}
+  .abs{position:absolute}
+  .grad{background:var(--rainbow);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* marca */
+  .brand{position:absolute;top:56px;left:70px;display:flex;align-items:center;gap:14px;z-index:20}
+  .brand img{width:64px;height:64px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.25))}
+  .brand b{font-family:Montserrat;font-weight:900;font-size:28px;letter-spacing:.01em;line-height:1}
+  .brand small{display:block;font-family:Montserrat;font-weight:700;font-size:13px;letter-spacing:.32em;margin-top:6px;opacity:.75}
+
+  /* cinta de advertencia */
+  .tape{position:absolute;left:-120px;right:-120px;height:86px;background:var(--yellow);color:var(--ink);display:flex;align-items:center;gap:38px;white-space:nowrap;font-family:Montserrat;font-weight:900;font-size:36px;letter-spacing:.04em;z-index:15;box-shadow:0 14px 30px rgba(0,0,0,.25);overflow:hidden;
+    border-top:10px solid var(--ink);border-bottom:10px solid var(--ink)}
+  .tape span{display:inline-flex;align-items:center;gap:38px}
+
+  /* sticker */
+  .sticker{position:absolute;z-index:16;font-family:Montserrat;font-weight:900;text-transform:uppercase;letter-spacing:-0.02em;padding:22px 34px;border-radius:22px;box-shadow:0 18px 0 rgba(7,7,13,.9);border:5px solid var(--ink)}
+
+  /* cubo de hielo CSS */
+  .cube{position:absolute;border-radius:28%;z-index:5;
+    background:linear-gradient(135deg,rgba(255,255,255,.95) 0%,rgba(214,248,255,.55) 30%,rgba(255,255,255,.18) 55%,rgba(170,232,255,.65) 100%);
+    border:3px solid rgba(255,255,255,.85);
+    box-shadow:inset 0 0 50px rgba(255,255,255,.75),inset -18px -22px 40px rgba(58,100,255,.28),0 30px 50px rgba(10,40,130,.35);backdrop-filter:blur(3px)}
+  .cube::before{content:"";position:absolute;left:14%;top:12%;width:42%;height:18%;border-radius:50%;background:rgba(255,255,255,.95);filter:blur(5px);transform:rotate(-20deg)}
+  .cube::after{content:"";position:absolute;right:16%;bottom:14%;width:22%;height:22%;border-radius:40%;border:3px solid rgba(255,255,255,.6)}
+
+  .polaroid{position:absolute;background:#fff;padding:18px 18px 70px;border-radius:12px;box-shadow:0 40px 70px rgba(7,7,13,.45);z-index:8}
+  .polaroid img{display:block;width:100%;height:100%;object-fit:cover;border-radius:4px}
+  .polaroid figcaption{position:absolute;left:0;right:0;bottom:18px;text-align:center;font-family:Montserrat;font-weight:900;font-size:26px;letter-spacing:.02em}
+
+  .swipe{position:absolute;right:70px;bottom:56px;z-index:20;font-family:Montserrat;font-weight:900;font-size:26px;display:flex;align-items:center;gap:14px;text-transform:uppercase}
+  .swipe i{width:70px;height:70px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-style:normal;font-size:34px}
+  .rbar{position:absolute;left:0;right:0;bottom:0;height:14px;background:var(--rainbow);z-index:19}
+  .pg{position:absolute;top:66px;right:70px;z-index:20;font-family:Montserrat;font-weight:900;font-size:24px;background:var(--ink);color:#fff;border-radius:999px;padding:10px 20px}
+
+  /* ---------- 1 ---------- */
+  .s1 .t1{left:70px;top:320px;font-size:156px;z-index:12}
+  .s1 .t1 .out{color:#fff;-webkit-text-stroke:5px var(--ink);paint-order:stroke fill}
+  .s1 .polaroid{right:60px;top:690px;width:340px;height:450px;transform:rotate(7deg)}
+  .s1 .sticker{left:60px;top:1010px;background:var(--magenta);color:#fff;font-size:70px;transform:rotate(-4deg)}
+  .s1 .tape{top:200px;transform:rotate(-6deg);left:-160px}
+
+  /* ---------- 2 ---------- */
+  .s2 .drip{position:absolute;top:0;left:0;width:1080px;z-index:4}
+  .s2 .deg{left:40px;top:230px;font-size:470px;color:#fff;letter-spacing:-0.07em;text-shadow:0 20px 0 rgba(7,7,13,.15);z-index:6}
+  .s2 .deg sup{font-size:200px;vertical-align:top;position:relative;top:40px}
+  .s2 .t2{left:70px;top:690px;font-size:84px;width:940px;z-index:7}
+  .s2 .t2 em{font-style:normal;color:#fff}
+  .s2 ul{position:absolute;left:70px;right:70px;top:1020px;list-style:none;display:flex;flex-direction:column;gap:16px;z-index:7}
+  .s2 li{background:var(--ink);color:#fff;font-weight:700;font-size:31px;padding:18px 28px;border-radius:16px;display:flex;gap:16px;align-items:center;width:fit-content}
+  .s2 li b{color:var(--yellow);font-family:Montserrat;font-weight:900}
+
+  /* ---------- 3 ---------- */
+  .s3 .t3{left:70px;top:170px;font-size:118px;z-index:7}
+  .s3 .fz{position:absolute;left:70px;right:70px;top:500px;height:620px;border-radius:40px;background:linear-gradient(180deg,#1b2a55,#0b1230);border:8px solid #c9d3e6;box-shadow:inset 0 0 80px rgba(52,211,243,.25),0 40px 80px rgba(0,0,0,.6);display:grid;grid-template-columns:repeat(4,1fr);gap:22px;padding:60px 36px 40px;align-items:end}
+  .s3 .fz::before{content:"";position:absolute;inset:16px;border-radius:28px;background:linear-gradient(115deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 30%,rgba(255,255,255,.08) 60%,rgba(255,255,255,0) 70%);pointer-events:none;z-index:3}
+  .s3 .bag{height:420px;border-radius:24px 24px 40px 40px;background:linear-gradient(160deg,rgba(255,255,255,.4),rgba(191,243,255,.15) 45%,rgba(255,255,255,.3));border:3px solid rgba(255,255,255,.35);position:relative;display:grid;place-items:center;filter:saturate(.3) brightness(.75)}
+  .s3 .bag::before{content:"";position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:44px;height:26px;border-radius:8px;background:rgba(255,255,255,.4)}
+  .s3 .bag span{font-family:Montserrat;font-weight:800;font-size:22px;color:rgba(255,255,255,.4)}
+  .s3 .bag.me{filter:none;height:470px;background:linear-gradient(160deg,rgba(255,255,255,.95),rgba(205,246,255,.75) 45%,rgba(255,255,255,.9));border:5px solid #fff;box-shadow:0 0 0 8px var(--cyan),0 0 90px 20px rgba(52,211,243,.75)}
+  .s3 .bag.me div{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+  .s3 .bag.me img{width:110px;height:110px}
+  .s3 .bag.me b{font-family:Montserrat;font-weight:900;font-size:26px;color:#1f37d6;line-height:1}
+  .s3 .bag.me small{font-weight:700;font-size:17px;color:#1f37d6}
+  .s3 .sticker{right:150px;top:410px;background:var(--yellow);font-size:44px;transform:rotate(7deg);padding:16px 26px}
+  .s3 .arrow{position:absolute;right:290px;top:500px;z-index:17;width:120px}
+  .s3 .cap{position:absolute;left:70px;right:70px;top:1160px;font-size:34px;font-weight:700;color:#d9d9e6}
+  .s3 .cap b{color:#fff}
+
+  /* ---------- 4 ---------- */
+  .s4 .lbl{left:70px;top:190px;font-family:Montserrat;font-weight:900;font-size:44px;letter-spacing:.02em;text-transform:uppercase;z-index:7}
+  .s4 .price{left:40px;top:250px;font-size:420px;color:#fff;letter-spacing:-0.08em;z-index:7;text-shadow:0 18px 0 rgba(7,7,13,.9)}
+  .s4 .price sup{font-size:170px;vertical-align:top;position:relative;top:60px;margin-right:24px}
+  .s4 .per{left:70px;top:660px;font-size:72px;z-index:7}
+  .s4 .card{position:absolute;left:70px;top:820px;width:600px;background:var(--ink);color:#fff;border-radius:34px;padding:40px 44px;z-index:9;box-shadow:0 20px 0 rgba(7,7,13,.3)}
+  .s4 .card h3{font-family:Montserrat;font-weight:900;font-size:40px;letter-spacing:-0.02em;text-transform:uppercase}
+  .s4 .card table{margin-top:18px;width:100%;border-collapse:collapse;font-size:28px}
+  .s4 .card td{padding:12px 0;border-bottom:2px solid rgba(255,255,255,.12)}
+  .s4 .card td:last-child{text-align:right;color:var(--cyan);font-weight:700}
+  .s4 .card p{margin-top:16px;font-size:22px;color:#a6a6c0}
+  .s4 .sticker{right:70px;top:860px;background:var(--magenta);color:#fff;font-size:46px;transform:rotate(-8deg);text-align:center;line-height:1}
+  .s4 .sticker small{display:block;font-size:24px;margin-top:6px}
+  .s4 .polaroid{right:80px;top:1010px;width:250px;height:290px;transform:rotate(6deg);padding:12px 12px 12px}
+
+  /* ---------- 5 ---------- */
+  .s5 .t5{left:70px;top:170px;font-size:104px;z-index:7}
+  .s5 .bagx{position:absolute;left:300px;top:470px;width:480px;height:760px;border-radius:40px 40px 80px 80px;z-index:6;
+     background:linear-gradient(160deg,rgba(255,255,255,.98),rgba(214,248,255,.85) 45%,rgba(255,255,255,.95));box-shadow:0 40px 80px rgba(10,40,130,.45),inset 0 0 60px rgba(255,255,255,.8);color:#1f37d6;display:flex;flex-direction:column;align-items:center;text-align:center;padding:90px 30px 40px}
+  .s5 .bagx::before{content:"";position:absolute;top:34px;left:50%;transform:translateX(-50%);width:170px;height:52px;border-radius:999px;background:var(--icebg)}
+  .s5 .lg{margin-top:20px;width:170px;height:170px;border-radius:50%;border:10px solid #1f37d6;display:grid;place-items:center;font-family:Montserrat;font-weight:900;font-size:44px}
+  .s5 .nm{margin-top:20px;font-family:Montserrat;font-weight:900;font-size:58px;letter-spacing:-0.03em}
+  .s5 .wa{margin-top:16px;font-family:Montserrat;font-weight:800;font-size:28px}
+  .s5 .kg{margin-top:16px;font-family:Montserrat;font-weight:900;font-size:84px;line-height:1}
+  .s5 .leg{margin-top:auto;font-size:17px;font-weight:700;line-height:1.5}
+  .s5 .call{position:absolute;z-index:12;display:flex;align-items:center;gap:12px;font-family:Montserrat;font-weight:900;font-size:28px;text-transform:uppercase;background:var(--ink);color:#fff;padding:14px 22px;border-radius:16px;box-shadow:0 10px 0 rgba(7,7,13,.25)}
+  .s5 .call b{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--ink);font-size:22px}
+  .s5 .note{position:absolute;left:70px;right:70px;bottom:40px;font-size:20px;font-weight:700;z-index:12;opacity:.8}
+
+  /* ---------- 6 ---------- */
+  .s6 .t6{left:70px;top:170px;font-size:110px;z-index:7;color:#fff}
+  .s6 .cal{position:absolute;left:50%;top:470px;transform:translateX(-50%) rotate(-3deg);width:560px;height:600px;background:#fff;border-radius:40px;box-shadow:0 26px 0 rgba(7,7,13,.9);border:6px solid var(--ink);overflow:hidden;z-index:8;text-align:center}
+  .s6 .cal .top{height:150px;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:Montserrat;font-weight:900;font-size:54px;letter-spacing:.04em}
+  .s6 .cal .n{font-family:Montserrat;font-weight:900;font-size:330px;letter-spacing:-0.06em;line-height:1;margin-top:10px}
+  .s6 .cal .d{font-family:Montserrat;font-weight:900;font-size:44px;text-transform:uppercase;margin-top:-10px}
+  .s6 .rings{position:absolute;left:50%;top:440px;transform:translateX(-50%) rotate(-3deg);display:flex;gap:300px;z-index:9}
+  .s6 .rings i{width:40px;height:80px;border-radius:20px;background:var(--ink);border:6px solid #fff}
+  .s6 .sub{position:absolute;left:70px;right:70px;top:1100px;text-align:center;font-family:Montserrat;font-weight:900;font-size:46px;color:#fff;text-transform:uppercase;letter-spacing:-0.02em;z-index:8}
+
+  /* ---------- 7 ---------- */
+  .s7 .t7{left:70px;top:190px;font-size:140px;z-index:7}
+  .s7 .t7 .out{color:#fff;-webkit-text-stroke:5px var(--ink);paint-order:stroke fill}
+  .s7 .wa{position:absolute;left:70px;right:70px;top:860px;z-index:9;display:flex;align-items:center;justify-content:center;gap:24px;background:var(--wa);color:#04140a;border-radius:999px;padding:38px 40px;font-family:Montserrat;font-weight:900;font-size:62px;border:6px solid var(--ink);box-shadow:0 18px 0 var(--ink)}
+  .s7 .wa svg{width:70px;height:70px}
+  .s7 .alt{position:absolute;left:70px;right:70px;top:1050px;text-align:center;font-family:Montserrat;font-weight:900;font-size:40px;text-transform:uppercase;z-index:9}
+  .s7 .alt span{background:var(--ink);color:#fff;padding:4px 18px;border-radius:12px}
+  .s7 .links{position:absolute;left:70px;right:70px;bottom:60px;display:flex;justify-content:space-between;font-family:Montserrat;font-weight:800;font-size:26px;z-index:20}
+  .s7 .sticker{right:80px;top:680px;background:var(--yellow);font-size:40px;transform:rotate(8deg);padding:14px 26px}
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide ice-bg s1" id="s1">
+  <div class="brand"><img src="../img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div>
+  <div class="tape"><span>⚠ ATENCIÓN FÁBRICAS DE HIELO ⚠ ATENCIÓN FÁBRICAS DE HIELO ⚠ ATENCIÓN FÁBRICAS DE HIELO ⚠</span></div>
+  <figure class="polaroid"><img src="../img/thomas-grande.webp" alt="" style="object-position:center 62%"><figcaption>THOMAS HIELO ✔</figcaption></figure>
+  <div class="cube" style="width:180px;height:180px;left:800px;top:330px;transform:rotate(18deg)"></div>
+  <div class="cube" style="width:120px;height:120px;left:120px;top:820px;transform:rotate(-22deg)"></div>
+  <div class="cube" style="width:150px;height:150px;left:-30px;top:1150px;transform:rotate(12deg)"></div>
+  <h1 class="X abs t1">Todo<br>el hielo<br><span class="out">es igual.</span></h1>
+  <div class="sticker">Menos el tuyo.</div>
+  <div class="swipe">Deslizá <i>→</i></div>
+  <div class="rbar"></div>
+</section>
+
+<!-- 2 -->
+<section class="slide heat-bg s2" id="s2">
+  <svg class="drip" viewBox="0 0 1080 260" preserveAspectRatio="none"><path fill="#bff3ff" d="M0 0H1080V70c-30 0-34 40-60 40s-30-40-60-40-20 120-55 120-26-120-60-120-30 60-62 60-28-60-60-60-22 160-60 160-24-160-58-160-30 50-62 50-28-50-60-50-24 110-58 110-28-110-62-110-30 40-60 40-26-40-58-40-22 180-60 180-26-180-62-180-30 60-62 60-26-60-58-60-24 90-60 90S38 70 0 70Z"/></svg>
+  <div class="brand" style="top:150px"></div>
+  <div class="pg">02 / 07</div>
+  <div class="X abs deg">40<sup>°</sup></div>
+  <h2 class="X abs t2">Y tu hielo<br>en bolsa lisa<br><em>no lo reconoce nadie.</em></h2>
+  <ul>
+    <li><b>✕</b> El cliente agarra la primera que ve.</li>
+    <li><b>✕</b> Se termina el hielo y no sabe a quién llamar.</li>
+    <li><b>✕</b> El almacén te cambia por otro proveedor y nadie se da cuenta.</li>
+  </ul>
+  <div class="rbar"></div>
+</section>
+
+<!-- 3 -->
+<section class="slide dark-bg s3" id="s3">
+  <div class="brand"><img src="../img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div>
+  <div class="pg" style="background:#fff;color:var(--ink)">03 / 07</div>
+  <h2 class="X abs t3">¿Cuál<br><span class="grad">se lleva?</span></h2>
+  <div class="fz">
+    <div class="bag"><span>HIELO</span></div>
+    <div class="bag"><span>HIELO</span></div>
+    <div class="bag me"><div><img src="../img/logo-512.png" alt=""><b>TU MARCA</b><small>📞 Pedidos</small></div></div>
+    <div class="bag"><span>HIELO</span></div>
+  </div>
+  <div class="sticker">¡Esta!</div>
+  <p class="cap">Tu bolsa impresa <b>se ve primero</b> y lleva <b>tu WhatsApp</b> a cada asado.</p>
+  <div class="rbar"></div>
+</section>
+
+<!-- 4 -->
+<section class="slide ice-bg s4" id="s4">
+  <div class="brand"><img src="../img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div>
+  <div class="pg">04 / 07</div>
+  <div class="cube" style="width:170px;height:170px;right:60px;top:200px;transform:rotate(20deg)"></div>
+  <div class="cube" style="width:110px;height:110px;right:250px;top:560px;transform:rotate(-14deg)"></div>
+  <div class="abs lbl">Tu marca por menos de</div>
+  <div class="X abs price"><sup>$</sup>410</div>
+  <div class="X abs per">por bolsa.</div>
+  <div class="card">
+    <h3>Pack ×1500 · 3 medidas</h3>
+    <table>
+      <tr><td>26 × 40 cm · 40 mic</td><td>500 u.</td></tr>
+      <tr><td>28 × 50 cm · 50 mic</td><td>500 u.</td></tr>
+      <tr><td>35 × 75 cm · 60 mic</td><td>500 u.</td></tr>
+    </table>
+    <p>Baja densidad virgen · apta alimentos · cristal · 1 cara 1 color</p>
+  </div>
+  <div class="sticker">$610.000<small>el pack completo</small></div>
+  <figure class="polaroid"><img src="../img/vg-cristal.webp" alt=""></figure>
+  <div class="rbar"></div>
+</section>
+
+<!-- 5 -->
+<section class="slide heat-bg s5" id="s5">
+  <div class="brand"><img src="../img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div>
+  <div class="pg">GUARDALO 📌</div>
+  <h2 class="X abs t5">Lo que tu bolsa<br><span style="color:#fff">tiene que decir</span></h2>
+  <div class="bagx">
+    <div class="lg">LOGO</div>
+    <div class="nm">TU HIELO</div>
+    <div class="wa">📞 Pedidos 11 0000-0000</div>
+    <div class="kg">5 KG</div>
+    <div class="leg">RNE N° 00-000000 · RNPA N° 00-000000<br>Lote · Vencimiento · Mantener congelado</div>
+  </div>
+  <div class="call" style="left:60px;top:600px"><b style="background:var(--cyan)">1</b>Logo grande</div>
+  <div class="call" style="right:50px;top:760px"><b style="background:var(--yellow)">2</b>Tu nombre</div>
+  <div class="call" style="left:60px;top:860px"><b style="background:var(--wa)">3</b>WhatsApp</div>
+  <div class="call" style="right:50px;top:960px"><b style="background:var(--orange)">4</b>Peso</div>
+  <div class="call" style="left:60px;top:1110px"><b style="background:var(--magenta);color:#fff">5</b>Rótulo</div>
+  <p class="note">*Los datos obligatorios dependen de tu habilitación. Consultalo con bromatología.</p>
+</section>
+
+<!-- 6 -->
+<section class="slide heat-bg s6" id="s6" style="background:radial-gradient(900px 800px at 50% 40%,#ff7a1c 0%,#ff2e93 55%,#9b33f5 100%)">
+  <div class="brand" style="color:#fff"><img src="../img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div>
+  <div class="pg">06 / 07</div>
+  <h2 class="X abs t6">Se viene<br>el calor.</h2>
+  <div class="rings"><i></i><i></i></div>
+  <div class="cal">
+    <div class="top">DICIEMBRE</div>
+    <div class="n">1</div>
+    <div class="d">Arranca la temporada</div>
+  </div>
+  <p class="sub">Pedí hoy y llegá con tu marca<br>en cada freezer.</p>
+  <div class="tape" style="bottom:20px;transform:rotate(-3deg)"><span>☀ TEMPORADA DE HIELO ☀ TEMPORADA DE HIELO ☀ TEMPORADA DE HIELO ☀ TEMPORADA DE HIELO ☀</span></div>
+  <div class="rbar"></div>
+</section>
+
+<!-- 7 -->
+<section class="slide ice-bg s7" id="s7">
+  <div class="brand"><img src="../img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div>
+  <div class="cube" style="width:180px;height:180px;right:70px;top:170px;transform:rotate(16deg)"></div>
+  <div class="cube" style="width:130px;height:130px;left:-20px;top:1130px;transform:rotate(-18deg)"></div>
+  <div class="cube" style="width:100px;height:100px;right:120px;top:1110px;transform:rotate(28deg)"></div>
+  <h2 class="X abs t7">Que te<br>pidan por<br><span class="out">nombre.</span></h2>
+  <div class="sticker">Prueba de diseño gratis</div>
+  <div class="wa"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.8-2.7-1.1-4.4-3.9-4.5-4.1-.1-.2-1.1-1.4-1.1-2.7s.7-1.9.9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>3364 62-2890</div>
+  <p class="alt">o mandá <span>“HIELO”</span> por DM 🧊</p>
+  <div class="links"><span>vgtubolsaimpresa.store</span><span>@visualgraf.tubolsaimpresa</span></div>
+  <div class="rbar"></div>
+</section>
+
+</body>
+</html>

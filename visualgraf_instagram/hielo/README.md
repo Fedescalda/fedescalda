@@ -79,3 +79,9 @@ Baja densidad virgen, apta alimentos, cristal, impresas 1 cara 1 color.
 - **Precio** del pack ($610.000, sale de `catalog.ts`): que siga vigente.
 - **Permiso de Thomas Hielo** para usar su bolsa (placas 1 y 3).
 - **RNPE:** los envases en contacto con alimentos tienen registro propio (RNPE). Si las bolsas de Visual Graf (o de tu proveedor de film) lo tienen, sumalo al post: es un argumento de venta muy fuerte para este rubro. Si no, no lo menciones. La placa 5 solo habla de los registros del **fabricante de hielo**.
+
+## Versión 2 (más llamativa): `v2/`
+Misma estrategia y textos, con diseño de alto impacto: concepto **hielo vs. calor** con fondos a sangre celeste
+y naranja/magenta, tipografía gigante, stickers inclinados, cinta de advertencia, cubos de hielo en 3D y un “40°” que
+se derrite. Placas: `v2/slide-01.png` → `v2/slide-07.png`. Fuente: `v2/carrusel-hielo-v2.html`.
+La placa 6 (“1 de diciembre, arranca la temporada”) sirve para publicar antes de diciembre. Después, cambiá el texto.
