@@ -58,7 +58,7 @@ Baja densidad virgen, apta alimentos, cristal, impresas 1 cara 1 color.
 📲 WhatsApp 3364 62-2890 o escribinos "HIELO" por DM
 🌐 vgtubolsaimpresa.store · envíos a toda la Argentina 🇦🇷
 
-📌 Guardá la placa 5: todo lo que tiene que decir tu bolsa de hielo.
+📌 Guardá la placa 6: todo lo que tiene que decir tu bolsa de hielo.
 
 #BolsasParaHielo #FabricaDeHielo #Hielo #HieloEnCubos #HieloRolito #DistribuidoraDeHielo #BolsasPersonalizadas #BolsasConLogo #HieloEnBolsa #VentaDeHielo #HieloPicado #Verano2027 #VisualGraf #TuBolsaImpresa
 ```
@@ -78,7 +78,7 @@ Baja densidad virgen, apta alimentos, cristal, impresas 1 cara 1 color.
 ## 5. A confirmar antes de publicar
 - **Precio** del pack ($610.000, sale de `catalog.ts`): que siga vigente.
 - **Permiso de Thomas Hielo** para usar su bolsa (placas 1 y 3).
-- **RNPE:** los envases en contacto con alimentos tienen registro propio (RNPE). Si las bolsas de Visual Graf (o de tu proveedor de film) lo tienen, sumalo al post: es un argumento de venta muy fuerte para este rubro. Si no, no lo menciones. La placa 5 solo habla de los registros del **fabricante de hielo**.
+- **RNPE:** los envases en contacto con alimentos tienen registro propio (RNPE). Si las bolsas de Visual Graf (o de tu proveedor de film) lo tienen, sumalo al post: es un argumento de venta muy fuerte para este rubro. Si no, no lo menciones. La placa 6 solo habla de los registros del **fabricante de hielo**.
 
 ## Versión 2 (más llamativa): `v2/`
 Misma estrategia y textos, con diseño de alto impacto: concepto **hielo vs. calor** con fondos a sangre celeste
