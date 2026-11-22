@@ -19,7 +19,7 @@ const palette: Record<BagColorId, { base: string; edge: string; shade: string; l
 
 /**
  * Bolsa en SVG puro. `children` se dibuja dentro del área imprimible,
- * por debajo de los brillos, para que la impresión se vea "sobre el plástico".
+ * por encima de los brillos, para que textos y logo se lean nítidos.
  */
 export function BagMockup({
   model = "rinon",
@@ -88,10 +88,7 @@ export function BagMockup({
           <stop offset="0" stopColor="#000" stopOpacity="0.55" />
           <stop offset="1" stopColor="#000" stopOpacity="0" />
         </radialGradient>
-        <filter id={`${id}-wrinkle`} x="0" y="0" width="1" height="1">
-          <feTurbulence type="fractalNoise" baseFrequency="0.012 0.03" numOctaves="2" seed="7" />
-          <feDisplacementMap in="SourceGraphic" scale="5" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
+
       </defs>
 
       {/* sombra en el piso */}
@@ -110,8 +107,6 @@ export function BagMockup({
             </g>
           )}
 
-          {/* impresión */}
-          <g filter={`url(#${id}-wrinkle)`}>{children}</g>
 
           {/* volumen y brillos sobre la impresión */}
           <rect width="400" height="500" fill={`url(#${id}-side)`} />
@@ -152,6 +147,8 @@ export function BagMockup({
                 ))}
             </>
           )}
+          {/* impresión: arriba de brillos y costuras para que se lea nítida */}
+          <g style={{ mixBlendMode: "normal" }}>{children}</g>
         </g>
       </g>
 

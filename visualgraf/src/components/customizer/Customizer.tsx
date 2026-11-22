@@ -3,6 +3,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BagMockup, printArea, type BagModel } from "../BagMockup";
+import { computeLayout, type ContactKey, type FontDef } from "./layout";
+import { PrintContent } from "./PrintContent";
+import { PhotoMockup, fitPrint } from "./PhotoMockup";
+import { photoFor } from "@/lib/mockups";
 import { bagColors, inkColors, type BagColorId } from "@/lib/catalog";
 import { ACCEPTED, analyzeLogo, loadLogoFile, processLogo, svgToPng, type LoadedLogo, type LogoAnalysis, type ProcessedLogo } from "@/lib/logo-processing";
 import { blobToDataUrl, saveDesign, type DesignMeta } from "@/lib/design-store";
@@ -54,13 +58,12 @@ const models: ModelDef[] = [
   },
 ];
 
-const fonts = [
+const fonts: FontDef[] = [
   { id: "moderna", name: "Moderna", family: "'Arial Black', Arial, Helvetica, sans-serif", weight: 800 },
   { id: "clasica", name: "Clásica", family: "Georgia, 'Times New Roman', serif", weight: 700 },
   { id: "simple", name: "Simple", family: "Verdana, Tahoma, Arial, sans-serif", weight: 400 },
 ];
 
-type ContactKey = "instagram" | "whatsapp" | "web" | "address";
 const contactFields: { key: ContactKey; label: string; placeholder: string }[] = [
   { key: "instagram", label: "Instagram", placeholder: "@tuemprendimiento" },
   { key: "whatsapp", label: "WhatsApp / teléfono", placeholder: "336 000-0000" },
@@ -73,40 +76,6 @@ const swatchBg = (id: string, hex: string) =>
 
 const cm = (v: number) => v.toLocaleString("es-AR", { maximumFractionDigits: 1 });
 
-/** Íconos simples (en el color de impresión) para el bloque de contacto. */
-function ContactIcon({ kind, x, y, s, color }: { kind: ContactKey; x: number; y: number; s: number; color: string }) {
-  const t = `translate(${x} ${y}) scale(${s / 24})`;
-  const common = { fill: "none", stroke: color, strokeWidth: 2.2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-  if (kind === "instagram")
-    return (
-      <g transform={t} {...common}>
-        <rect x="3" y="3" width="18" height="18" rx="5" />
-        <circle cx="12" cy="12" r="4" />
-        <circle cx="17.3" cy="6.7" r="0.8" fill={color} />
-      </g>
-    );
-  if (kind === "whatsapp")
-    return (
-      <g transform={t} {...common}>
-        <path d="M4 20l1.3-4A8.5 8.5 0 1 1 8 18.8L4 20Z" />
-        <path d="M9 9.5c.3 2.2 2.3 4.3 4.6 4.8l1.1-1.1 1.8.9c-.2 1-1 1.7-2 1.7-3.4-.2-6.2-3-6.4-6.4 0-1 .7-1.8 1.7-2l.9 1.8L9 9.5Z" fill={color} stroke="none" />
-      </g>
-    );
-  if (kind === "web")
-    return (
-      <g transform={t} {...common}>
-        <circle cx="12" cy="12" r="9" />
-        <path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" />
-      </g>
-    );
-  return (
-    <g transform={t} {...common}>
-      <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z" />
-      <circle cx="12" cy="9" r="2.5" />
-    </g>
-  );
-}
-
 export function Customizer() {
   const params = useSearchParams();
   const router = useRouter();
@@ -117,6 +86,7 @@ export function Customizer() {
   const [bag, setBag] = useState<BagColorId>(paramBag && modelDef.colors.includes(paramBag) ? paramBag : modelDef.colors[0]);
   const [ink, setInk] = useState(inkColors.find((c) => c.id === params.get("tinta"))?.id ?? (bag === "negro" || bag === "rosa" ? "blanco" : "negro"));
   const [sizeIdx, setSizeIdx] = useState(model === "rinon" ? 1 : 0);
+  const [view, setView] = useState<"foto" | "ilustracion">("foto");
   const [original, setOriginal] = useState(false);
   const [removeWhite, setRemoveWhite] = useState(true);
   const [logo, setLogo] = useState<LoadedLogo | null>(null);
@@ -126,7 +96,7 @@ export function Customizer() {
   const [error, setError] = useState<string | null>(null);
   const [scale, setScale] = useState(0.75);
   const [rotation, setRotation] = useState(0);
-  const [pos, setPos] = useState({ x: 0.5, y: 0.38 });
+  const [pos, setPos] = useState({ x: 0.5, y: 0.4 });
   const [slogan, setSlogan] = useState("");
   const [contact, setContact] = useState<Record<ContactKey, string>>({ instagram: "", whatsapp: "", web: "", address: "" });
   const [fontId, setFontId] = useState(fonts[0].id);
@@ -134,18 +104,21 @@ export function Customizer() {
   const [busy, setBusy] = useState(false);
 
   const svgRef = useRef<SVGSVGElement>(null);
+  const printSvgRef = useRef<SVGSVGElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const dragRef = useRef<{ dx: number; dy: number } | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
-  const area = printArea[model];
   const size = modelDef.sizes[Math.min(sizeIdx, modelDef.sizes.length - 1)];
-  const printCm = { w: size.w * modelDef.printRatio[0], h: size.h * modelDef.printRatio[1] };
-  const cmPerUnit = printCm.w / area.w; // el área del SVG representa el área imprimible real
+  const printW = size.w * modelDef.printRatio[0];
+  const printH = size.h * modelDef.printRatio[1];
   const inkHex = inkColors.find((c) => c.id === ink)?.hex ?? "#111";
   const inkName = inkColors.find((c) => c.id === ink)?.name ?? ink;
   const bagName = bagColors.find((b) => b.id === bag)?.name ?? bag;
   const font = fonts.find((f) => f.id === fontId)!;
   const printColor = original ? (bag === "negro" ? "#ffffff" : "#111111") : inkHex;
+  const photo = photoFor(model, bag);
+  const usePhoto = view === "foto" && Boolean(photo);
 
   useEffect(() => {
     if (!modelDef.colors.includes(bag)) setBag(modelDef.colors[0]);
@@ -172,7 +145,7 @@ export function Customizer() {
       setLogo(l);
       setLogoFile(file);
       setAnalysis(analyzeLogo(l.img, file.type === "image/svg+xml"));
-      setPos({ x: 0.5, y: 0.38 });
+      setPos({ x: 0.5, y: 0.4 });
       setScale(0.75);
       setRotation(0);
       if (window.innerWidth < 1024) requestAnimationFrame(() => previewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
@@ -181,52 +154,59 @@ export function Customizer() {
     }
   }, []);
 
-  /* Bloque inferior: slogan + datos de contacto (anclado abajo del área) */
+  /* Diagramación en cm (igual para foto e ilustración) */
   const contactLines = contactFields.filter((f) => contact[f.key].trim()).map((f) => ({ key: f.key, text: contact[f.key].trim() }));
-  const lineH = model === "hielo" ? 19 : 22;
-  const fontSize = model === "hielo" ? 12.5 : 14.5;
-  const sloganH = slogan ? lineH + 8 : 0;
-  const blockH = sloganH + contactLines.length * lineH + (contactLines.length || slogan ? 10 : 0);
-  const blockTop = area.y + area.h - blockH;
-
-  /* Caja del logo dentro del espacio que queda arriba del bloque */
-  const box = useMemo(() => {
-    const ratio = processed ? processed.height / processed.width : 0.6;
-    const maxH = Math.max(40, area.h - blockH - 14);
-    let w = area.w * scale;
-    let h = w * ratio;
-    if (h > maxH * scale + 1) {
-      h = maxH * scale;
-      w = h / ratio;
-    }
-    const cx = area.x + area.w * pos.x;
-    const cy = Math.min(area.y + area.h * pos.y, blockTop - h / 2 - 6);
-    return { w, h, x: cx - w / 2, y: Math.max(area.y, cy - h / 2) };
-  }, [processed, area, scale, pos, blockH, blockTop]);
-
-  const logoCm = processed ? { w: box.w * cmPerUnit, h: box.h * cmPerUnit } : null;
+  const layout = useMemo(
+    () =>
+      computeLayout({
+        printW,
+        printH,
+        logoRatio: processed ? processed.height / processed.width : null,
+        scale,
+        pos,
+        slogan,
+        contact: contactLines,
+        font,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- contactLines se deriva de contact
+    [printW, printH, processed, scale, pos, slogan, contact, font],
+  );
+  const logoCm = layout.logo ? { w: layout.logo.w, h: layout.logo.h } : null;
   const dpi = analysis && logoCm && !analysis.vector ? Math.round(analysis.width / (logoCm.w / 2.54)) : null;
   const quality = !analysis ? null : analysis.vector ? "vector" : dpi! >= 200 ? "buena" : dpi! >= 120 ? "aceptable" : "baja";
 
-  const clampPos = (x: number, y: number) => ({ x: Math.min(0.95, Math.max(0.05, x)), y: Math.min(0.95, Math.max(0.05, y)) });
-  function toSvgPoint(e: React.PointerEvent) {
+  /* Ubicación del área en la ilustración SVG */
+  const area = printArea[model];
+  const svgS = Math.min(area.w / printW, area.h / printH);
+  const svgO = { x: area.x + (area.w - printW * svgS) / 2, y: area.y + (area.h - printH * svgS) / 2 };
+  /* Ubicación en la foto */
+  const fit = photo ? fitPrint(photo, printW, printH) : null;
+
+  const clampPos = (x: number, y: number) => ({ x: Math.min(0.97, Math.max(0.03, x)), y: Math.min(0.97, Math.max(0.03, y)) });
+
+  /** Arrastre común: punto en cm dentro del área */
+  function startDrag(cx: number, cy: number) {
+    const l = layout.logo;
+    if (!l) return false;
+    if (cx < l.x - 1 || cx > l.x + l.w + 1 || cy < l.y - 1 || cy > l.y + l.h + 1) return false;
+    dragRef.current = { dx: cx - (l.x + l.w / 2), dy: cy - (l.y + l.h / 2) };
+    return true;
+  }
+  function moveDrag(cx: number, cy: number) {
+    if (!dragRef.current) return;
+    setPos(clampPos((cx - dragRef.current.dx) / printW, (cy - dragRef.current.dy) / printH));
+  }
+  const endDrag = () => (dragRef.current = null);
+
+  function svgPointToCm(e: React.PointerEvent) {
     const svg = svgRef.current!;
     const pt = svg.createSVGPoint();
     pt.x = e.clientX;
     pt.y = e.clientY;
-    return pt.matrixTransform(svg.getScreenCTM()!.inverse());
+    const u = pt.matrixTransform(svg.getScreenCTM()!.inverse());
+    return [(u.x - svgO.x) / svgS, (u.y - svgO.y) / svgS] as const;
   }
-  function onPointerDown(e: React.PointerEvent<SVGGElement>) {
-    const p = toSvgPoint(e);
-    dragRef.current = { dx: p.x - (box.x + box.w / 2), dy: p.y - (box.y + box.h / 2) };
-    (e.currentTarget as Element).setPointerCapture(e.pointerId);
-  }
-  function onPointerMove(e: React.PointerEvent<SVGGElement>) {
-    if (!dragRef.current) return;
-    const p = toSvgPoint(e);
-    setPos(clampPos((p.x - dragRef.current.dx - area.x) / area.w, (p.y - dragRef.current.dy - area.y) / area.h));
-  }
-  const onPointerUp = () => (dragRef.current = null);
+
   function onKeyDown(e: React.KeyboardEvent) {
     const step = e.shiftKey ? 0.05 : 0.015;
     const map: Record<string, [number, number]> = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
@@ -237,11 +217,28 @@ export function Customizer() {
     else if (e.key === "-") setScale((s) => Math.max(0.2, s - 0.05));
   }
 
+  /** PNG de la vista actual (foto real o ilustración). */
+  async function renderPng(width = 1200): Promise<Blob> {
+    if (usePhoto && canvasRef.current) {
+      const c = canvasRef.current;
+      const out = document.createElement("canvas");
+      out.width = c.width;
+      out.height = c.height;
+      const x = out.getContext("2d")!;
+      x.drawImage(c, 0, 0);
+      x.fillStyle = "rgba(255,255,255,.75)";
+      x.font = `600 ${Math.round(c.width / 40)}px Arial, sans-serif`;
+      x.textAlign = "center";
+      x.fillText("Simulación · Visual Graf", c.width / 2, c.height - c.width / 30);
+      return new Promise((res, rej) => out.toBlob((b) => (b ? res(b) : rej(new Error("png"))), "image/png"));
+    }
+    return svgToPng(svgRef.current!, width);
+  }
+
   async function download() {
-    if (!svgRef.current) return;
     setBusy(true);
     try {
-      const blob = await svgToPng(svgRef.current);
+      const blob = await renderPng();
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = `mi-bolsa-visualgraf-${model}-${bag}.png`;
@@ -269,13 +266,10 @@ export function Customizer() {
     };
   }
 
-  /** Guarda simulación + logo original + datos técnicos y lleva a comprar la medida elegida. */
   async function addDesignToOrder() {
-    if (!svgRef.current) return;
     setBusy(true);
     try {
-      const png = await svgToPng(svgRef.current, 900);
-      const mockup = await blobToDataUrl(png);
+      const mockup = await blobToDataUrl(await renderPng(900));
       const logoData = logoFile && logoFile.size < 2.5 * 1024 * 1024 ? await blobToDataUrl(logoFile) : undefined;
       const meta = designMeta();
       saveDesign({
@@ -295,6 +289,8 @@ export function Customizer() {
   }
 
   const waMsg = `¡Hola Visual Graf! Probé mi logo en el simulador y quiero cotizar: bolsa ${modelDef.name} ${size.label}, color ${bagName}, impresión ${original ? "multicolor (consultar)" : inkName}${logoCm ? `, logo de ${cm(logoCm.w)} × ${cm(logoCm.h)} cm` : ""}. Les adjunto la imagen de la simulación y mi logo.`;
+  const printProps = { layout, logoUrl: processed?.url ?? null, rotation, color: printColor, font };
+  const photoVersion = JSON.stringify([bag, model, sizeIdx, layout, processed?.url.length, rotation, printColor, fontId]);
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-x-12">
@@ -323,7 +319,6 @@ export function Customizer() {
           <p className="mt-2 text-xs text-mute">Tu imagen se procesa en tu dispositivo hasta que decidís comprar.</p>
           {error && <p role="alert" className="mt-3 rounded-xl border border-brand-magenta/50 bg-brand-magenta/10 px-4 py-3 text-sm">{error}</p>}
 
-          {/* Chequeo de calidad para serigrafía */}
           {analysis && (
             <div className="card mt-4 space-y-2 p-4 text-sm" aria-live="polite">
               <p className="font-display font-bold">Chequeo de tu archivo</p>
@@ -349,93 +344,102 @@ export function Customizer() {
 
       {/* Vista previa */}
       <div ref={previewRef} className="scroll-mt-20 lg:sticky lg:top-24 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-start">
-        <div className="noise relative isolate overflow-hidden rounded-[2rem] border border-line p-4 sm:p-8" style={{ background: "radial-gradient(120% 80% at 50% 0%, #26246a 0%, #120f2b 55%, #0a0a14 100%)" }}>
+        <div className="noise relative isolate overflow-hidden rounded-[2rem] border border-line p-4 sm:p-6" style={{ background: "radial-gradient(120% 80% at 50% 0%, #26246a 0%, #120f2b 55%, #0a0a14 100%)" }}>
           <div className="glow top-10 -left-10 h-60 w-60 bg-brand-violet opacity-40" aria-hidden />
           <div className="glow -right-10 bottom-0 h-60 w-60 bg-brand-magenta opacity-30" aria-hidden />
-          <p className="relative mb-2 text-center text-xs font-semibold tracking-wide text-white/70">
-            {modelDef.name} · {size.label} · área de impresión aprox. {cm(printCm.w)} × {cm(printCm.h)} cm
-          </p>
-          <BagMockup
-            id="sim"
-            model={model}
-            color={bag}
-            svgRef={svgRef}
-            className="relative mx-auto h-auto w-full max-w-[30rem] drop-shadow-[0_40px_50px_rgba(0,0,0,.55)]"
-            title={`Simulación: bolsa ${modelDef.name} ${size.label} color ${bagName} con impresión ${original ? "multicolor" : inkName}`}
-          >
-            {processed ? (
+
+          <div className="relative mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-semibold tracking-wide text-white/70">
+              {modelDef.name} · {size.label} · área de impresión aprox. {cm(printW)} × {cm(printH)} cm
+            </p>
+            {photo && (
+              <div className="flex rounded-full border border-line bg-ink/60 p-1 text-xs font-semibold" role="radiogroup" aria-label="Tipo de vista">
+                {(["foto", "ilustracion"] as const).map((v) => (
+                  <button key={v} type="button" role="radio" aria-checked={view === v} onClick={() => setView(v)} className={`rounded-full px-3 py-1.5 transition ${view === v ? "bg-white text-ink" : "text-white/75 hover:text-white"}`}>
+                    {v === "foto" ? "Foto real" : "Ilustración"}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {usePhoto && photo && fit ? (
+            <>
+              <PhotoMockup
+                photo={photo}
+                printSvg={printSvgRef}
+                version={photoVersion}
+                canvasRef={canvasRef}
+                interactive={Boolean(processed)}
+                label={`Foto de bolsa ${modelDef.name} ${size.label} color ${bagName} con tu diseño impreso en ${original ? "colores originales" : inkName}`}
+                onPointerDown={(px, py, e) => {
+                  if (startDrag((px - fit.ox) / fit.s, (py - fit.oy) / fit.s)) e.currentTarget.setPointerCapture(e.pointerId);
+                }}
+                onPointerMove={(px, py) => moveDrag((px - fit.ox) / fit.s, (py - fit.oy) / fit.s)}
+                onPointerUp={endDrag}
+                onKeyDown={onKeyDown}
+              />
+              {/* Capa de impresión (oculta) que se "imprime" sobre la foto */}
+              <svg
+                ref={printSvgRef}
+                aria-hidden
+                xmlns="http://www.w3.org/2000/svg"
+                width={photo.rect[2] * 2}
+                height={photo.rect[3] * 2}
+                viewBox={`0 0 ${photo.rect[2]} ${photo.rect[3]}`}
+                style={{ position: "absolute", left: -99999, top: 0, width: 1, height: 1 }}
+              >
+                <g transform={`translate(${fit.ox - photo.rect[0]} ${fit.oy - photo.rect[1]}) scale(${fit.s})`}>
+                  <PrintContent {...printProps} placeholder />
+                </g>
+              </svg>
+            </>
+          ) : (
+            <BagMockup
+              id="sim"
+              model={model}
+              color={bag}
+              svgRef={svgRef}
+              className="relative mx-auto h-auto w-full max-w-[30rem] drop-shadow-[0_40px_50px_rgba(0,0,0,.55)]"
+              title={`Ilustración: bolsa ${modelDef.name} ${size.label} color ${bagName} con impresión ${original ? "multicolor" : inkName}`}
+            >
               <g
-                tabIndex={0}
+                transform={`translate(${svgO.x} ${svgO.y}) scale(${svgS})`}
+                tabIndex={processed ? 0 : -1}
                 role="slider"
-                aria-label="Logo en la bolsa. Usá las flechas para moverlo y + o - para cambiar el tamaño"
+                aria-label="Diseño en la bolsa. Usá las flechas para mover el logo y + o - para cambiar el tamaño"
                 aria-valuenow={Math.round(scale * 100)}
                 aria-valuemin={20}
                 aria-valuemax={100}
                 aria-valuetext={logoCm ? `${cm(logoCm.w)} por ${cm(logoCm.h)} centímetros` : undefined}
-                onPointerDown={onPointerDown}
-                onPointerMove={onPointerMove}
-                onPointerUp={onPointerUp}
-                onPointerCancel={onPointerUp}
+                onPointerDown={(e) => {
+                  const [cx, cy] = svgPointToCm(e);
+                  if (startDrag(cx, cy)) (e.currentTarget as Element).setPointerCapture(e.pointerId);
+                }}
+                onPointerMove={(e) => {
+                  if (!dragRef.current) return;
+                  const [cx, cy] = svgPointToCm(e);
+                  moveDrag(cx, cy);
+                }}
+                onPointerUp={endDrag}
+                onPointerCancel={endDrag}
                 onKeyDown={onKeyDown}
-                style={{ cursor: "grab", touchAction: "none", outline: "none" }}
-                className="focus-visible:[&>rect]:opacity-100"
+                style={{ cursor: processed ? "grab" : "default", touchAction: processed ? "none" : "auto", outline: "none" }}
               >
-                <image
-                  href={processed.url}
-                  x={box.x}
-                  y={box.y}
-                  width={box.w}
-                  height={box.h}
-                  preserveAspectRatio="xMidYMid meet"
-                  opacity={0.96}
-                  transform={rotation ? `rotate(${rotation} ${box.x + box.w / 2} ${box.y + box.h / 2})` : undefined}
-                />
-                <rect data-ui x={box.x - 4} y={box.y - 4} width={box.w + 8} height={box.h + 8} fill="none" stroke="#34d3f3" strokeDasharray="6 5" strokeWidth="1.5" rx="6" opacity="0" />
-              </g>
-            ) : (
-              <g fill={printColor} textAnchor="middle" fontFamily={font.family} fontWeight={font.weight}>
-                <text x={area.x + area.w / 2} y={area.y + area.h * 0.36} fontSize="44" letterSpacing="-1">TU LOGO</text>
-                <text x={area.x + area.w / 2} y={area.y + area.h * 0.36 + 48} fontSize="44" letterSpacing="-1">AQUÍ</text>
-              </g>
-            )}
-
-            {/* Cotas en cm (solo en pantalla, no se exportan) */}
-            {processed && logoCm && (
-              <g data-ui pointerEvents="none" fontFamily="Arial, sans-serif" fontSize="11" fill="#34d3f3" stroke="none">
-                <line x1={box.x} y1={box.y - 10} x2={box.x + box.w} y2={box.y - 10} stroke="#34d3f3" strokeWidth="1" />
-                <text x={box.x + box.w / 2} y={box.y - 14} textAnchor="middle">{cm(logoCm.w)} cm</text>
-                <line x1={box.x + box.w + 10} y1={box.y} x2={box.x + box.w + 10} y2={box.y + box.h} stroke="#34d3f3" strokeWidth="1" />
-                <text x={box.x + box.w + 14} y={box.y + box.h / 2} transform={`rotate(90 ${box.x + box.w + 14} ${box.y + box.h / 2})`} textAnchor="middle">{cm(logoCm.h)} cm</text>
-              </g>
-            )}
-
-            {/* Slogan y datos de contacto */}
-            {(slogan || contactLines.length > 0) && (
-              <g fill={printColor} fontFamily={font.family}>
-                {slogan && (
-                  <text x={area.x + area.w / 2} y={blockTop + lineH} textAnchor="middle" fontWeight={font.weight} fontSize={fontSize * 1.15}>
-                    {slogan}
-                  </text>
+                <rect x={0} y={0} width={printW} height={printH} fill="transparent" />
+                <PrintContent {...printProps} placeholder />
+                {/* Cotas (solo en pantalla) */}
+                {layout.logo && (
+                  <g data-ui pointerEvents="none" fill="#34d3f3" fontFamily="Arial, sans-serif" fontSize={0.55}>
+                    <line x1={layout.logo.x} y1={layout.logo.y - 0.4} x2={layout.logo.x + layout.logo.w} y2={layout.logo.y - 0.4} stroke="#34d3f3" strokeWidth={0.05} />
+                    <text x={layout.logo.x + layout.logo.w / 2} y={layout.logo.y - 0.6} textAnchor="middle">{cm(layout.logo.w)} cm</text>
+                  </g>
                 )}
-                {contactLines.map((l, i) => {
-                  const y = blockTop + sloganH + (i + 1) * lineH;
-                  const textW = l.text.length * fontSize * 0.56;
-                  const iconS = fontSize * 1.05;
-                  const startX = area.x + area.w / 2 - (textW + iconS + 6) / 2;
-                  return (
-                    <g key={l.key}>
-                      <ContactIcon kind={l.key} x={startX} y={y - iconS * 0.85} s={iconS} color={printColor} />
-                      <text x={startX + iconS + 6} y={y} fontSize={fontSize} fontWeight={font.weight >= 700 ? 700 : 400}>
-                        {l.text}
-                      </text>
-                    </g>
-                  );
-                })}
               </g>
-            )}
-          </BagMockup>
-          <p className="relative mt-2 text-center text-xs text-white/60">
-            {processed ? "Arrastrá el logo para moverlo · Medidas aproximadas: se confirman en la prueba de diseño" : "Simulación ilustrativa"}
+            </BagMockup>
+          )}
+          <p className="relative mt-3 text-center text-xs text-white/60">
+            {processed ? "Arrastrá el logo para moverlo · Medidas aproximadas: se confirman en la prueba de diseño" : "Subí tu logo para verlo impreso"}
           </p>
         </div>
 
@@ -488,6 +492,7 @@ export function Customizer() {
               );
             })}
           </div>
+          {!photo && <p className="mt-2 text-xs text-mute">Para este color mostramos una ilustración (todavía no tenemos foto real).</p>}
         </section>
 
         <section aria-labelledby="paso3">
@@ -531,13 +536,13 @@ export function Customizer() {
             </div>
             <div>
               <label htmlFor="posy" className="label">Altura</label>
-              <input id="posy" type="range" min={0.05} max={0.95} step={0.01} value={pos.y} onChange={(e) => setPos((p) => ({ ...p, y: Number(e.target.value) }))} className="w-full accent-[#34d3f3]" disabled={!processed} />
+              <input id="posy" type="range" min={0.03} max={0.97} step={0.01} value={pos.y} onChange={(e) => setPos((p) => ({ ...p, y: Number(e.target.value) }))} className="w-full accent-[#34d3f3]" disabled={!processed} />
             </div>
             <div>
               <label htmlFor="rot" className="label">Rotación <span className="font-normal text-mute">({rotation}°)</span></label>
               <input id="rot" type="range" min={-45} max={45} step={1} value={rotation} onChange={(e) => setRotation(Number(e.target.value))} className="w-full accent-[#34d3f3]" disabled={!processed} />
             </div>
-            <button type="button" className="text-sm font-semibold text-brand-cyan underline-offset-4 hover:underline disabled:opacity-40" disabled={!processed} onClick={() => { setPos({ x: 0.5, y: 0.38 }); setRotation(0); }}>
+            <button type="button" className="text-sm font-semibold text-brand-cyan underline-offset-4 hover:underline disabled:opacity-40" disabled={!processed} onClick={() => { setPos({ x: 0.5, y: 0.4 }); setRotation(0); }}>
               Centrar y enderezar
             </button>
           </div>
@@ -545,7 +550,7 @@ export function Customizer() {
 
         <section aria-labelledby="paso5">
           <h2 id="paso5" className="mb-1 font-display text-lg font-extrabold"><span className="text-gradient">5.</span> Textos y datos de contacto</h2>
-          <p className="mb-3 text-sm text-mute">Opcional. Se imprimen abajo, en el mismo color, como en las bolsas de nuestros clientes.</p>
+          <p className="mb-3 text-sm text-mute">Opcional. Se imprimen abajo, en el mismo color, y se ajustan solos al ancho de la bolsa.</p>
           <div className="space-y-3">
             <div>
               <label htmlFor="slogan" className="label">Frase (opcional)</label>
@@ -555,7 +560,7 @@ export function Customizer() {
               {contactFields.map((f) => (
                 <div key={f.key}>
                   <label htmlFor={`c-${f.key}`} className="label">{f.label}</label>
-                  <input id={`c-${f.key}`} className="field" maxLength={36} placeholder={f.placeholder} value={contact[f.key]} onChange={(e) => setContact((c) => ({ ...c, [f.key]: e.target.value }))} />
+                  <input id={`c-${f.key}`} className="field" maxLength={50} placeholder={f.placeholder} value={contact[f.key]} onChange={(e) => setContact((c) => ({ ...c, [f.key]: e.target.value }))} />
                 </div>
               ))}
             </div>
