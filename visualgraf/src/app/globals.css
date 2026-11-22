@@ -274,3 +274,17 @@ body {
 .anim-drawer { animation: drawer-in-up 0.45s cubic-bezier(.2,.9,.25,1) both; }
 @media (min-width: 640px) { .anim-drawer { animation-name: drawer-in-right; } }
 .anim-check path { stroke-dasharray: 24; animation: check-draw 0.45s 0.25s ease-out both; }
+
+@keyframes ghost-out {
+  0% { opacity: 1; transform: none; max-height: var(--h); }
+  45% { opacity: 0; transform: translateX(40px); max-height: var(--h); }
+  100% { opacity: 0; transform: translateX(40px); max-height: 0; padding-top: 0; padding-bottom: 0; margin-top: -0.75rem; border-width: 0; }
+}
+.anim-ghost { animation: ghost-out 0.45s ease-in forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-cart-bump, .anim-badge-pop, .anim-item-in, .anim-fade-in, .anim-drawer, .anim-ghost, .anim-check path {
+    animation: none !important;
+  }
+  .anim-check path { stroke-dashoffset: 0; }
+}

@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 export type CartItem = {
   key: string; // producto + opciones
@@ -49,6 +49,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lastAdded, setLastAdded] = useState<CartItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [pulse, setPulse] = useState(0);
+  const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelOpen = useCallback(() => {
+    if (openTimer.current) clearTimeout(openTimer.current);
+    openTimer.current = null;
+  }, []);
+  const openDrawer = useCallback(() => {
+    cancelOpen();
+    setDrawerOpen(true);
+  }, [cancelOpen]);
+  const closeDrawer = useCallback(() => {
+    cancelOpen();
+    setDrawerOpen(false);
+  }, [cancelOpen]);
+  useEffect(() => cancelOpen, [cancelOpen]);
 
   useEffect(() => {
     try {
@@ -78,8 +92,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const key = itemKey(item);
     setLastAdded({ ...item, key });
     setPulse((n) => n + 1);
-    // el panel se abre cuando termina la animación "vuela al carrito"
-    if (!opts?.silent) setTimeout(() => setDrawerOpen(true), 650);
+    // el panel se abre cuando termina la animación "vuela al carrito" (o al instante sin animaciones)
+    if (!opts?.silent) {
+      if (openTimer.current) clearTimeout(openTimer.current);
+      const reduce = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      openTimer.current = setTimeout(() => {
+        openTimer.current = null;
+        setDrawerOpen(true);
+      }, reduce ? 0 : 720);
+    }
     setItems((prev) => {
       const found = prev.find((p) => p.key === key);
       if (found) return prev.map((p) => (p.key === key ? { ...p, quantity: p.quantity + item.quantity, unitPrice: item.unitPrice } : p));
@@ -106,10 +127,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       lastAdded,
       drawerOpen,
       pulse,
-      openDrawer: () => setDrawerOpen(true),
-      closeDrawer: () => setDrawerOpen(false),
+      openDrawer,
+      closeDrawer,
     }),
-    [items, ready, add, update, remove, clear, lastAdded, drawerOpen, pulse],
+    [items, ready, add, update, remove, clear, lastAdded, drawerOpen, pulse, openDrawer, closeDrawer],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

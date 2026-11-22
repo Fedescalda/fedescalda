@@ -64,3 +64,20 @@ test("Contacto: envío exitoso muestra confirmación", async ({ page }) => {
   await page.getByRole("button", { name: "Enviar consulta" }).click();
   await expect(page.getByRole("status")).toContainText(/(Recibimos|Casi listo)/);
 });
+
+test("Quitar un producto lo saca del pedido al instante y el panel atrapa el foco", async ({ page }) => {
+  await page.goto("/productos/bolsa-manija-rinon-personalizada?medida=0");
+  await page.getByRole("button", { name: /Agregar al pedido/ }).click();
+  const drawer = page.getByRole("dialog", { name: /Agregado a tu pedido/ });
+  await expect(drawer).toBeVisible();
+  // El foco queda dentro del panel aunque se tabule muchas veces
+  for (let i = 0; i < 6; i++) await page.keyboard.press("Tab");
+  expect(await drawer.evaluate((d) => d.contains(document.activeElement))).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(drawer).toBeHidden();
+
+  await page.goto("/carrito");
+  await page.getByRole("button", { name: /Quitar Bolsa manija riñón/ }).click();
+  // Sale del pedido sin esperar la animación
+  await expect(page.getByText("Tu pedido está vacío")).toBeVisible({ timeout: 1500 });
+});

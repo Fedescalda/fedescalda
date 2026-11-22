@@ -35,14 +35,15 @@ export function Checkout({ methods }: { methods: Methods }) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [waResult, setWaResult] = useState<WaResult | null>(null);
-  const [leaving, setLeaving] = useState<string[]>([]);
-  /** Quita con animación de salida */
-  const removeAnimated = (key: string) => {
-    setLeaving((l) => [...l, key]);
-    setTimeout(() => {
-      remove(key);
-      setLeaving((l) => l.filter((k) => k !== key));
-    }, 330);
+  // Al quitar, el ítem sale del pedido AL INSTANTE (totales y envío correctos) y en pantalla
+  // queda una copia "fantasma" que se desvanece y colapsa su altura.
+  const [ghosts, setGhosts] = useState<{ item: (typeof items)[number]; index: number; height: number }[]>([]);
+  const removeAnimated = (key: string, el?: HTMLElement | null) => {
+    const index = items.findIndex((i) => i.key === key);
+    if (index < 0) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce) setGhosts((g) => [...g.filter((x) => x.item.key !== key), { item: items[index], index, height: el?.offsetHeight ?? 120 }]);
+    remove(key);
   };
 
   useEffect(() => setDesign(loadDesign()), []);
@@ -187,8 +188,24 @@ export function Checkout({ methods }: { methods: Methods }) {
       <section aria-labelledby="items">
         <h2 id="items" className="sr-only">Productos</h2>
         <ul className="space-y-3">
-          {items.map((i, idx) => (
-            <li key={i.key} className={`card flex gap-4 p-4 ${leaving.includes(i.key) ? "anim-item-out" : "anim-item-in"}`} style={{ animationDelay: leaving.includes(i.key) ? "0ms" : `${idx * 70}ms` }}>
+          {[...items.map((i, idx) => ({ i, idx, ghost: null as null | { height: number } }))]
+            .concat(ghosts.map((g) => ({ i: g.item, idx: g.index - 0.5, ghost: { height: g.height } })))
+            .sort((a, b) => a.idx - b.idx)
+            .map(({ i, idx, ghost }) =>
+              ghost ? (
+                <li
+                  key={`ghost-${i.key}`}
+                  aria-hidden
+                  inert
+                  className="anim-ghost card pointer-events-none flex gap-4 overflow-hidden p-4"
+                  style={{ "--h": `${ghost.height}px` } as React.CSSProperties}
+                  onAnimationEnd={() => setGhosts((g) => g.filter((x) => x.item.key !== i.key))}
+                >
+                  <div className="h-24 w-24 shrink-0 rounded-2xl bg-ink-3" />
+                  <p className="font-display font-extrabold">{i.name}</p>
+                </li>
+              ) : (
+            <li key={i.key} className="anim-item-in card flex gap-4 p-4" style={{ animationDelay: `${Math.min(idx, 6) * 70}ms` }}>
               <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-ink-3">
                 {i.image && <Image src={i.image} alt="" fill sizes="96px" className="object-cover" />}
               </div>
@@ -197,7 +214,7 @@ export function Checkout({ methods }: { methods: Methods }) {
                 <p className="text-sm text-mute">{i.size} · bolsa {i.bagColor} · impresión {i.inkColor}</p>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                   <div className="inline-flex items-center rounded-full border border-line" role="group" aria-label={`Cantidad de packs de ${i.name} ${i.size}`}>
-                    <button type="button" className="grid h-10 w-10 place-items-center rounded-full hover:bg-white/10" aria-label="Restar un pack" onClick={() => (i.quantity > 1 ? update(i.key, i.quantity - 1) : removeAnimated(i.key))}>
+                    <button type="button" className="grid h-10 w-10 place-items-center rounded-full hover:bg-white/10" aria-label="Restar un pack" onClick={(e) => (i.quantity > 1 ? update(i.key, i.quantity - 1) : removeAnimated(i.key, e.currentTarget.closest("li")))}>
                       <IconMinus width={16} height={16} />
                     </button>
                     <span key={i.quantity} className="anim-badge-pop w-24 text-center text-sm" aria-live="polite">{i.quantity} × {i.packSize} u.</span>
@@ -208,11 +225,12 @@ export function Checkout({ methods }: { methods: Methods }) {
                   <p className="font-display font-extrabold"><AnimatedNumber value={i.quantity * i.unitPrice} format={formatARS} /></p>
                 </div>
               </div>
-              <button type="button" onClick={() => removeAnimated(i.key)} className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-mute hover:bg-white/10 hover:text-white" aria-label={`Quitar ${i.name} ${i.size}`}>
+              <button type="button" onClick={(e) => removeAnimated(i.key, e.currentTarget.closest("li"))} className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-mute hover:bg-white/10 hover:text-white" aria-label={`Quitar ${i.name} ${i.size}`}>
                 <IconTrash width={18} height={18} />
               </button>
             </li>
-          ))}
+              ),
+            )}
         </ul>
 
         {/* Logo / diseño */}
