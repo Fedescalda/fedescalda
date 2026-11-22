@@ -116,8 +116,11 @@ export async function findPromoCode(code: string) {
   if (!c) return null;
   const sb = createAdminClient();
   if (!sb) return samplePromotions.filter(isCurrent).find((p) => p.code?.toUpperCase() === c && p.discountPercent) ?? null;
-  const { data } = await sb.from("promotions").select("*").eq("active", true).ilike("code", c).limit(1).maybeSingle();
-  if (!data) return null;
-  const promo = mapPromotion(data as PromotionRow);
-  return isCurrent(promo) && promo.discountPercent ? promo : null;
+  // ilike trata % _ * como comodines: se escapan y además se exige coincidencia exacta del código
+  const pattern = c.replace(/[\\%_*]/g, "\\$&");
+  const { data } = await sb.from("promotions").select("*").eq("active", true).ilike("code", pattern).limit(50);
+  const promos = ((data as PromotionRow[] | null) ?? [])
+    .filter((r) => r.code?.trim().toUpperCase() === c)
+    .map(mapPromotion);
+  return promos.find((p) => isCurrent(p) && p.discountPercent) ?? null;
 }

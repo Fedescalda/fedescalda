@@ -74,10 +74,14 @@ export type OrderInput = z.infer<typeof orderSchema>;
 
 /** Rate limit muy simple en memoria (best effort por instancia). */
 const hits = new Map<string, number[]>();
+const MAX_WINDOW_MS = 60 * 60_000;
+
+/** Límite por instancia (en memoria): frena abusos simples; no es un límite global. */
 export function rateLimited(key: string, max = 5, windowMs = 60_000) {
   if (process.env.RATE_LIMIT_OFF === "1") return false; // solo para tests e2e
   const now = Date.now();
-  if (hits.size > 5000) for (const [k, v] of hits) if (!v.length || now - v[v.length - 1] > windowMs) hits.delete(k);
+  // limpieza con la ventana más larga que se usa (10 min), para no borrar contadores vigentes
+  if (hits.size > 5000) for (const [k, v] of hits) if (!v.length || now - v[v.length - 1] > MAX_WINDOW_MS) hits.delete(k);
   const list = (hits.get(key) ?? []).filter((t) => now - t < windowMs);
   list.push(now);
   hits.set(key, list);

@@ -83,16 +83,20 @@ export async function uploadProof(id: string, _state: ActionResult, form: FormDa
   }
 
   const version = (order.proof_version ?? 0) + 1;
-  const saved = await setOrderStatus(id, "diseno", {
+  // Un pedido sin pagar sigue "pendiente": la prueba se envía igual, pero no se saltea el pago.
+  const next = order.status === "pendiente" ? "pendiente" : "diseno";
+  const saved = await setOrderStatus(id, next, {
     note: `Prueba de diseño v${version} enviada`,
     patch: { proof_path: path, proof_status: "enviada", proof_feedback: null, proof_version: version },
+    from: order.status,
+    match: { proof_version: order.proof_version ?? 0 },
   });
-  if (!saved) return { error: "No pudimos guardar la prueba en el pedido. Intentá de nuevo." };
+  if (!saved) return { error: "No pudimos guardar la prueba (¿cambió el estado del pedido mientras tanto?). Recargá e intentá de nuevo." };
 
-  // El cambio de estado no genera un email cuando se reemplaza una prueba en diseño.
-  if (order.status === "diseno") {
+  // Sin cambio de estado no sale el email automático: se manda el de la prueba.
+  if (order.status === next) {
     const updated = await getOrderById(id);
-    if (updated?.proof_path === path && updated.status === "diseno") await sendCustomerEmail(updated, "prueba");
+    if (updated?.proof_path === path && updated.status === next) await sendCustomerEmail(updated, "prueba");
   }
 
   refreshOrder(id);
@@ -170,12 +174,15 @@ export async function sendMockupAsProof(id: string): Promise<ActionResult> {
   if (error) return { error: "No pudimos copiar la muestra." };
 
   const version = (order.proof_version ?? 0) + 1;
-  const saved = await setOrderStatus(id, "diseno", {
+  const next = order.status === "pendiente" ? "pendiente" : "diseno";
+  const saved = await setOrderStatus(id, next, {
     note: `Muestra digital del simulador enviada como prueba v${version}`,
     patch: { proof_path: path, proof_status: "enviada", proof_feedback: null, proof_version: version },
+    from: order.status,
+    match: { proof_version: order.proof_version ?? 0 },
   });
-  if (!saved) return { error: "No pudimos guardar la prueba." };
-  if (order.status === "diseno") {
+  if (!saved) return { error: "No pudimos guardar la prueba (¿cambió el estado del pedido mientras tanto?). Recargá e intentá de nuevo." };
+  if (order.status === next) {
     const updated = await getOrderById(id);
     if (updated) await sendCustomerEmail(updated, "prueba");
   }

@@ -44,19 +44,30 @@ export async function getOrderByToken(token: string) {
 export async function setOrderStatus(
   id: string,
   status: OrderStatus,
-  opts: { note?: string; patch?: Record<string, unknown>; email?: boolean; notifyOwner?: string } = {},
+  opts: {
+    note?: string;
+    patch?: Record<string, unknown>;
+    email?: boolean;
+    notifyOwner?: string;
+    /** Solo aplica si el pedido sigue en este estado (evita pisar un pago que llegó en paralelo). */
+    from?: OrderStatus;
+    /** Condiciones extra que tienen que seguir valiendo (ej. la versión de la prueba). */
+    match?: Record<string, string | number>;
+  } = {},
 ) {
   const sb = createAdminClient();
   if (!sb) return false;
   const order = await getOrderById(id);
   if (!order) return false;
+  if (opts.from && order.status !== opts.from) return false;
   const history = [...(order.history ?? []), { status, at: new Date().toISOString(), ...(opts.note && { note: opts.note }) }];
-  const { data, error } = await sb
+  let query = sb
     .from("orders")
     .update({ status, history, updated_at: new Date().toISOString(), ...opts.patch })
-    .eq("id", id)
-    .select("*")
-    .single();
+    .eq("id", id);
+  if (opts.from) query = query.eq("status", opts.from);
+  for (const [col, val] of Object.entries(opts.match ?? {})) query = query.eq(col, val);
+  const { data, error } = await query.select("*").maybeSingle();
   if (error || !data) return false;
   const updated = data as OrderRow;
   if (opts.email !== false && status !== order.status) await sendCustomerEmail(updated, status);

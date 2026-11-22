@@ -42,6 +42,7 @@ export function ApproveProof({ approve, changes, version }: { approve: A; change
       <Msg s={aState} />
       {showChanges && (
         <form action={cSubmit} className="mt-4 space-y-3">
+          <input type="hidden" name="version" value={version} />
           <label htmlFor="feedback" className="label">¿Qué querés cambiar?</label>
           <textarea id="feedback" name="feedback" required minLength={5} maxLength={1500} rows={3} className="field" placeholder="Ej: el logo más grande, cambiar el color de impresión a dorado…" />
           <button className="btn btn-ghost" disabled={cPending}>{cPending ? "Enviando…" : "Enviar cambios"}</button>

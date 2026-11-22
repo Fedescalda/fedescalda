@@ -1,5 +1,6 @@
 import "server-only";
 import { getProducts, findPromoCode } from "./data";
+import { bagColors, inkColors } from "./catalog";
 import { formatARS } from "./site";
 import type { OrderInput } from "./validation";
 import { quoteShipping } from "./settings";
@@ -37,6 +38,9 @@ export async function priceOrder(input: OrderInput) {
     const p = products.find((x) => x.id === it.productId);
     const v = p?.variants.find((x) => x.size === it.size);
     if (!p || !v || v.price == null) throw new Error(`El producto "${it.size}" ya no está disponible. Actualizá tu pedido.`);
+    const bagOk = p.colors.some((id) => bagColors.find((b) => b.id === id)?.name === it.bagColor);
+    const inkOk = inkColors.some((c) => c.name === it.inkColor);
+    if (!bagOk || !inkOk) throw new Error(`Revisá los colores de "${p.name}": elegilos de nuevo desde la ficha del producto.`);
     lines.push({
       productId: p.id,
       slug: p.slug,

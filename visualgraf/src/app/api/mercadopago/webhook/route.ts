@@ -55,7 +55,7 @@ export async function POST(req: Request) {
   const orderId = payment.external_reference;
   if (!orderId) return NextResponse.json({ ok: true });
 
-  const { data: order, error } = await sb.from("orders").select("id,total,status,payment_method,mp_payment_id").eq("id", orderId).maybeSingle();
+  const { data: order, error } = await sb.from("orders").select("id,total,status,payment_method,mp_payment_id,proof_status").eq("id", orderId).maybeSingle();
   if (error) return NextResponse.json({ ok: false }, { status: 500 });
   if (!order) return NextResponse.json({ ok: true }); // pedido inexistente: no reintentar
   if (order.payment_method !== "mercadopago") return NextResponse.json({ ok: true });
@@ -69,12 +69,20 @@ export async function POST(req: Request) {
       console.error(`[mp-webhook] importe no coincide para pedido ${orderId}: ${paidCents} vs ${expectedCents}`);
       return NextResponse.json({ ok: true });
     }
-    if (order.status === "pendiente" || order.status === "cancelado") {
+    let status = order.status;
+    if (status === "pendiente" || status === "cancelado") {
       const ok = await setOrderStatus(orderId, "pagado", {
         note: `Pago acreditado en Mercado Pago (#${payment.id})`,
         patch: { mp_payment_id: String(payment.id) },
         notifyOwner: "✅ Pago acreditado con Mercado Pago",
+        from: status,
       });
+      if (!ok) return NextResponse.json({ ok: false }, { status: 500 }); // MP reintenta
+      status = "pagado";
+    }
+    // El cliente ya había aprobado el diseño antes de pagar: directo a producción (también en reintentos)
+    if (status === "pagado" && order.proof_status === "aprobada") {
+      const ok = await setOrderStatus(orderId, "en_produccion", { note: "Pago acreditado con el diseño ya aprobado", from: "pagado" });
       if (!ok) return NextResponse.json({ ok: false }, { status: 500 });
     }
   } else if ((payment.status === "refunded" || payment.status === "charged_back") && order.mp_payment_id === String(payment.id)) {
