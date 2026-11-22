@@ -117,6 +117,7 @@
   const guardar = () => { try { localStorage.setItem("adf-pedido", JSON.stringify(carrito)); } catch (_) {} };
   const lineasCarrito = () => Object.entries(carrito).filter(([n]) => n in indice).map(([n, q]) => [PRODUCTOS[indice[n]], q]);
 
+  let yaMostrados = new Set(); // solo se anima el producto recién agregado
   function renderCarrito() {
     const items = lineasCarrito();
     const unidades = items.reduce((n, [, q]) => n + q, 0);
@@ -130,7 +131,7 @@
     $("#cart-items").innerHTML = items
       .map(
         ([p, q]) => `
-      <li class="cart__item">
+      <li class="cart__item${yaMostrados.has(p.nombre) ? "" : " is-new"}">
         <div><strong>${escapar(p.nombre)}</strong><small>${p.precio ? pesos.format(p.precio) + " c/u" : "Consultar precio"}</small></div>
         <div class="qty">
           <button type="button" data-dec="${escapar(p.nombre)}" aria-label="Quitar uno de ${escapar(p.nombre)}">−</button>
@@ -140,19 +141,26 @@
       </li>`
       )
       .join("");
+    yaMostrados = new Set(items.map(([p]) => p.nombre));
     linkPedido();
   }
 
   const cart = $("#cart");
   let volverA = null;
+  let cierre = null;
   function abrirCarrito() {
     volverA = document.activeElement;
+    clearTimeout(cierre);
+    cart.classList.remove("is-closing");
     cart.hidden = false;
     document.body.style.overflow = "hidden";
     $(".cart__close").focus();
   }
   function cerrarCarrito() {
-    cart.hidden = true;
+    if (cart.hidden || cart.classList.contains("is-closing")) return;
+    const terminar = () => { cart.hidden = true; cart.classList.remove("is-closing"); };
+    if (sinMovimiento) terminar();
+    else { cart.classList.add("is-closing"); cierre = setTimeout(terminar, 200); }
     document.body.style.overflow = "";
     if (volverA) volverA.focus();
   }
@@ -180,7 +188,7 @@
         { transform: "translate(0, 0) scale(1)", opacity: 1 },
         { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 120}px) scale(.45) rotate(-8deg)`, opacity: 1, offset: 0.5 },
         { transform: `translate(${dx}px, ${dy}px) scale(.08) rotate(-20deg)`, opacity: 0.4 },
-      ], { duration: 750, easing: "cubic-bezier(.5, 0, .7, 1)" }).finished.then(() => { clon.remove(); saltar(); }, () => clon.remove());
+      ], { duration: 600, easing: "cubic-bezier(.645, .045, .355, 1)" }).finished.then(() => { clon.remove(); saltar(); }, () => clon.remove());
     } else saltar();
     b.textContent = "Agregado";
     b.classList.add("is-added");
