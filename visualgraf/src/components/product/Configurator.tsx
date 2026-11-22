@@ -70,8 +70,6 @@ export function Configurator({ product }: { product: Product }) {
     <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
       <Gallery
         images={product.images}
-        variantImage={variant.image}
-        variantImages={product.variants.map((v) => v.image).filter((x): x is string => Boolean(x))}
         selection={{
           color: bag,
           colorName: bagName,

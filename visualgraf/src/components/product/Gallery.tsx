@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { BagColorId } from "@/lib/catalog";
 import type { BagShape, BagTexture } from "@/lib/bag-render";
 import { ProductPreview } from "./ProductPreview";
@@ -9,34 +9,26 @@ type Img = { src: string; alt: string; color?: BagColorId };
 export type GallerySelection = { color: BagColorId; colorName: string; inkHex: string; inkName: string; shape: BagShape; wCm: number; hCm: number; sizeLabel: string };
 
 /**
- * Galería de la ficha: muestra la foto real si hay una del color elegido (y de la medida elegida
- * cuando la foto es de una medida específica); si no, una vista previa generada en ese color.
+ * Galería de la ficha: muestra la foto de ejemplo del color de bolsa elegido (sin importar la medida);
+ * si no hay foto de ese color, una vista previa generada en ese color.
  */
 export function Gallery({
   images,
-  variantImage,
-  variantImages,
   selection,
 }: {
   images: Img[];
-  /** foto asociada a la medida elegida */
-  variantImage?: string;
-  /** todas las fotos que pertenecen a alguna medida (muestran la medida impresa) */
-  variantImages: string[];
   selection: GallerySelection;
 }) {
-  // -1 = vista previa generada
+  // -1 = vista previa generada. Las fotos son de ejemplo: se elige por color, no por medida.
   const auto = useMemo(() => {
-    const current = images.findIndex((i) => i.src === variantImage);
-    if (current >= 0 && images[current].color === selection.color) return current;
-    const generic = images.findIndex((i) => i.color === selection.color && !variantImages.includes(i.src));
-    return generic >= 0 ? generic : -1;
-  }, [images, variantImage, variantImages, selection.color]);
+    const byColor = images.findIndex((i) => i.color === selection.color);
+    return byColor >= 0 ? byColor : -1;
+  }, [images, selection.color]);
 
-  const [manual, setManual] = useState<number | null>(null);
-  // Al cambiar color o medida, vuelve a la imagen automática
-  useEffect(() => setManual(null), [selection.color, variantImage, selection.wCm, selection.hCm]);
-  const index = manual ?? auto;
+  // Selección manual (miniaturas) atada al color: al cambiar de color se ignora sin parpadeo
+  const [manualSel, setManualSel] = useState<{ color: BagColorId; index: number } | null>(null);
+  const setManual = (index: number) => setManualSel({ color: selection.color, index });
+  const index = manualSel && manualSel.color === selection.color ? manualSel.index : auto;
   const current = index >= 0 ? images[index] : null;
   const previewLabel = `Vista previa: bolsa ${selection.sizeLabel} color ${selection.colorName} con impresión ${selection.inkName}`;
 
@@ -49,7 +41,7 @@ export function Gallery({
           <ProductPreview shape={selection.shape} color={selection.color as BagTexture} ink={selection.inkHex} wCm={selection.wCm} hCm={selection.hCm} label={previewLabel} />
         )}
         <span className="absolute top-3 left-3 rounded-full bg-ink/80 px-3 py-1 text-xs font-semibold backdrop-blur">
-          {current ? (current.color === selection.color ? `Foto real · ${selection.colorName}` : "Foto real") : `Vista previa · ${selection.colorName}`}
+          {current ? (current.color === selection.color ? `Foto de ejemplo · ${selection.colorName}` : "Foto de ejemplo") : `Vista previa · ${selection.colorName}`}
         </span>
       </div>
       <ul className="mt-3 grid grid-cols-5 gap-2.5" aria-label="Imágenes del producto">
