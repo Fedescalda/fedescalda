@@ -71,10 +71,18 @@ tests/                        Playwright: smoke, flujos, compra
 public/img/                   Fotos webp (productos/, clientes/) y logo
 ```
 
-## Trabajo con Codex
-Este proyecto se construye con Claude Code + Codex CLI (`codex exec`). Codex escribió la suite Playwright y el
-panel admin, e hizo revisiones de código y seguridad. Al delegar: asignar archivos exclusivos y pedir que no corra
-`npm run build` en paralelo (comparten `.next/`).
+## Trabajo con Codex (OBLIGATORIO)
+**Siempre dividir el trabajo con Codex CLI** (`codex exec`, logueado con la cuenta de ChatGPT del dueño). En cada pedido:
+1. Partir la tarea en piezas independientes. Darle a Codex una pieza propia (ej. panel admin, tests, una página,
+   un endpoint) mientras Claude hace otra en paralelo: `codex exec -s workspace-write "<spec>" &`.
+2. La spec para Codex tiene que listar los **archivos exclusivos** que puede tocar, los archivos a leer antes,
+   requisitos concretos y cómo verificar (`npx tsc --noEmit`, `npx eslint <archivos>`).
+3. Codex NO corre `npm run build` ni `next dev` (comparten `.next/` con Claude).
+4. Al terminar cada etapa, Codex hace una **revisión de solo lectura** (`codex exec -s read-only`) buscando bugs,
+   accesibilidad y seguridad; Claude corrige los hallazgos reales y avisa cuáles.
+5. Contarle al usuario qué hizo cada uno.
+Historial: Codex escribió la suite Playwright, el panel admin, el panel de pedidos/configuración y el newsletter,
+e hizo 4 revisiones (código, seguridad, animaciones del carrito).
 
 ## Convenciones
 - Textos en español de Argentina con voseo. Precios en ARS con `formatARS`.
