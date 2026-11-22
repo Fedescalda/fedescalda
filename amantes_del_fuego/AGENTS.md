@@ -3,7 +3,8 @@
 Sitio estático para "Amantes del Fuego" (artículos para el asado). Idioma: español rioplatense ("vos", "necesitás").
 
 - Sin build ni dependencias: HTML + CSS + JS vanilla.
-- Los productos viven **solo** en `js/productos.js` (array `PRODUCTOS`, número en `NUMERO_WHATSAPP`). No hardcodear productos en el HTML.
+- Datos: la fuente principal es la planilla de Google (`js/config.js` → `PLANILLA`), leída por `js/datos.js` (pestañas Productos, Promos, Ajustes). `js/productos.js` es el respaldo y lo usa el video. No hardcodear productos en el HTML.
+- Orden de scripts: productos.js, config.js, main.js (define `window.iniciarSitio`), datos.js (carga y llama). `/admin.html` + `js/admin.js` validan la planilla. Plantillas CSV en `plantilla/`.
 - Paleta tomada del logo: negro puro `#000`, rojo brasa `#CB3127`. Tipografía Archivo: ancha (wdth 125) en títulos, normal en texto. Variables en `:root` de `css/styles.css`.
 - Sin emojis en la interfaz; íconos en SVG inline. Un solo movimiento automático (brasa del hero), respetando prefers-reduced-motion.
 - Video: `video-src/reel.html` + `node video-src/render.js [vertical]` regeneran img/video/*.mp4 desde productos.js. Chispas del hero en canvas (js/main.js), se pausan fuera de pantalla.

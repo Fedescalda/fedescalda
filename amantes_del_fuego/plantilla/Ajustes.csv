@@ -1,0 +1,6 @@
+clave,valor,para qué sirve
+descuento_transferencia,,Porcentaje de descuento pagando con transferencia (ej: 10). Vacío = no se muestra.
+aviso_pagos,,"Ej: Transferencia, efectivo y Mercado Pago."
+aviso_envios,,Ej: Enviamos a todo el país por Andreani.
+aviso_retiro,,"Ej: Retiro sin cargo en Arroyo Seco, coordinando por WhatsApp."
+aviso_garantia,,Ej: Garantía por defectos de fabricación.

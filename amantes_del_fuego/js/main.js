@@ -1,8 +1,16 @@
-(function () {
+// Lo llama js/datos.js cuando terminó de cargar la planilla (o el respaldo)
+window.iniciarSitio = function (DATOS) {
+  const PRODUCTOS = DATOS.productos;
+  const AJUSTES = DATOS.ajustes || {};
+  const PROMOS = DATOS.promos || [];
   const $ = (sel) => document.querySelector(sel);
   const pesos = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
   const waUrl = (texto) => `https://wa.me/${NUMERO_WHATSAPP}${texto ? `?text=${encodeURIComponent(texto)}` : ""}`;
   const escapar = (t) => String(t).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  // Descuento por pagar con transferencia (pestaña Ajustes de la planilla)
+  const descuento = Math.max(0, Math.min(50, parseFloat(String(AJUSTES.descuento_transferencia || "").replace(",", ".")) || 0));
+  const conTransferencia = (n) => Math.round(n * (1 - descuento / 100));
+  const sinTildes = (t) => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const avisar = (t) => { $("#aviso").textContent = ""; setTimeout(() => ($("#aviso").textContent = t), 30); };
 
   // Links generales de WhatsApp
@@ -69,20 +77,50 @@
       .join("");
   }
 
+  function bloquePrecio(p, grande) {
+    if (!p.precio) return `<span class="item__price item__price--consultar">Consultar precio</span>`;
+    const antes = p.precioAnterior && p.precioAnterior > p.precio ? `<s class="item__before">${pesos.format(p.precioAnterior)}</s>` : "";
+    const transf = descuento ? `<span class="item__transfer">${pesos.format(conTransferencia(p.precio))} con transferencia</span>` : "";
+    return `<span class="item__prices${grande ? " is-big" : ""}">${antes}<span class="item__price">${pesos.format(p.precio)}</span>${transf}</span>`;
+  }
+  function etiquetaDe(p) {
+    if (p.etiqueta) return p.etiqueta;
+    if (p.precio && p.precioAnterior > p.precio) return `-${Math.round((1 - p.precio / p.precioAnterior) * 100)}%`;
+    return "";
+  }
+
   function tarjeta(p, i, n) {
-    const precio = p.precio
-      ? `<span class="item__price">${pesos.format(p.precio)}</span>`
-      : `<span class="item__price item__price--consultar">Consultar precio</span>`;
+    const etiqueta = etiquetaDe(p);
+    const media = p.imagen
+      ? `<img src="${escapar(p.imagen)}" alt="" width="480" height="480" loading="lazy" decoding="async">`
+      : `<span class="item__noimg" aria-hidden="true">Sin foto</span>`;
     return `
       <li class="item" style="--n:${n}">
-        <div class="item__media"><img src="${escapar(p.imagen)}" alt="${escapar(p.nombre)}" width="480" height="480" loading="lazy" decoding="async"></div>
+        <button type="button" class="item__open" data-ver="${i}" aria-label="Ver detalle de ${escapar(p.nombre)}">
+          <span class="item__media">${media}${etiqueta ? `<span class="item__tag">${escapar(etiqueta)}</span>` : ""}</span>
+        </button>
         <h4>${escapar(p.nombre)}</h4>
-        <p>${escapar(p.descripcion)}</p>
-        <div class="item__foot">${precio}<button type="button" class="item__add" data-add="${i}" aria-label="Agregar ${escapar(p.nombre)} al pedido">Agregar al pedido</button></div>
+        ${p.medidas ? `<p class="item__specs">${escapar(p.medidas)}</p>` : ""}
+        ${p.incluye.length ? `<p class="item__incluye">Incluye: ${p.incluye.map(escapar).join(" + ")}</p>` : `<p>${escapar(p.descripcion)}</p>`}
+        <div class="item__foot">${bloquePrecio(p)}<button type="button" class="item__add" data-add="${i}" aria-label="Agregar ${escapar(p.nombre)} al pedido">Agregar al pedido</button></div>
       </li>`;
   }
 
+  let busqueda = "";
   function renderProductos() {
+    if (busqueda) {
+      const q = sinTildes(busqueda);
+      const items = PRODUCTOS.map((p, i) => [p, i]).filter(([p]) => sinTildes(`${p.nombre} ${p.categoria} ${p.descripcion} ${p.medidas}`).includes(q));
+      $("#products").innerHTML = items.length
+        ? `<section class="group" aria-labelledby="g-resultados">
+            <h3 class="group__title" id="g-resultados">Resultados <small>${items.length} ${items.length === 1 ? "producto" : "productos"}</small></h3>
+            <ul class="grid">${items.map(([p, i], n) => tarjeta(p, i, n)).join("")}</ul>
+          </section>`
+        : `<div class="vacio"><p>No encontramos “${escapar(busqueda)}”. Probá con otra palabra, como “disco” o “mechero”, o consultanos por WhatsApp.</p></div>`;
+      observarGrupos();
+      avisar(items.length ? `${items.length} resultados` : "Sin resultados");
+      return;
+    }
     const visibles = filtro === "Todos" ? categorias : [filtro];
     $("#products").innerHTML = visibles
       .map((c) => {
@@ -109,10 +147,17 @@
     if (observador) document.querySelectorAll(".group").forEach((g) => observador.observe(g));
   }
 
+  let esperaBusqueda;
+  $("#buscar").addEventListener("input", (e) => {
+    clearTimeout(esperaBusqueda);
+    esperaBusqueda = setTimeout(() => { busqueda = e.target.value.trim(); renderProductos(); }, 180);
+  });
+
   $("#filters").addEventListener("click", (e) => {
     const b = e.target.closest("[data-cat]");
     if (!b) return;
     filtro = b.dataset.cat;
+    busqueda = ""; $("#buscar").value = "";
     const url = new URL(location.href);
     if (filtro === "Todos") url.searchParams.delete("cat");
     else url.searchParams.set("cat", filtro);
@@ -139,7 +184,10 @@
     $(".cart-btn").classList.toggle("has-items", unidades > 0);
     $(".cart-btn").setAttribute("aria-label", `Ver pedido, ${unidades} ${unidades === 1 ? "producto" : "productos"}`);
     $("#cart-empty").hidden = items.length > 0;
-    $("#cart-total").innerHTML = total ? `<span>Total${consultar ? " (sin los de consultar)" : ""}</span><span>${pesos.format(total)}</span>` : "";
+    $("#cart-total").innerHTML = total
+      ? `<span>Total${consultar ? " (sin los productos a consultar)" : ""}</span><span>${pesos.format(total)}</span>` +
+        (descuento ? `<small class="cart__transfer"><span>Con transferencia (${descuento}% off)</span><span>${pesos.format(conTransferencia(total))}</span></small>` : "")
+      : "";
     $("#cart-items").innerHTML = items
       .map(
         ([p, q]) => `
@@ -242,7 +290,7 @@
     const items = lineasCarrito();
     const lineas = items.map(([p, q]) => `• ${q} x ${p.nombre}${p.precio ? ` (${pesos.format(p.precio)} c/u)` : ""}`);
     const total = items.reduce((t, [p, q]) => t + (p.precio || 0) * q, 0);
-    const texto = `¡Hola Amantes del Fuego!${nombre ? ` Soy ${nombre}.` : ""}\nQuiero hacer este pedido:\n${lineas.join("\n")}${total ? `\n\nTotal aprox.: ${pesos.format(total)}` : ""}`;
+    const texto = `¡Hola Amantes del Fuego!${nombre ? ` Soy ${nombre}.` : ""}\nQuiero hacer este pedido:\n${lineas.join("\n")}${total ? `\n\nTotal aprox.: ${pesos.format(total)}` : ""}${total && descuento ? `\nCon transferencia (${descuento}% off): ${pesos.format(conTransferencia(total))}` : ""}`;
     const envio = $("#cart-send");
     envio.href = items.length ? waUrl(texto) : "#";
     envio.setAttribute("aria-disabled", String(!items.length));
@@ -398,6 +446,72 @@
 
   aplicarPausa();
 
+  // Ficha de producto (se abre al tocar la foto)
+  const ficha = $("#ficha");
+  function abrirFicha(i) {
+    const p = PRODUCTOS[i];
+    const etiqueta = etiquetaDe(p);
+    $("#ficha-contenido").innerHTML = `
+      <div class="ficha__media">${p.imagen ? `<img src="${escapar(p.imagen)}" alt="${escapar(p.nombre)}" width="480" height="480">` : ""}${etiqueta ? `<span class="item__tag">${escapar(etiqueta)}</span>` : ""}</div>
+      <div class="ficha__info">
+        <p class="ficha__cat">${escapar(p.categoria)}</p>
+        <h3 id="ficha-titulo">${escapar(p.nombre)}</h3>
+        ${p.medidas ? `<p class="item__specs">${escapar(p.medidas)}</p>` : ""}
+        ${p.descripcion ? `<p class="ficha__desc">${escapar(p.descripcion)}</p>` : ""}
+        ${p.incluye.length ? `<div class="ficha__incluye"><h4>Incluye</h4><ul>${p.incluye.map((x) => `<li>${escapar(x)}</li>`).join("")}</ul></div>` : ""}
+        ${bloquePrecio(p, true)}
+        <div class="ficha__acciones">
+          <button type="button" class="btn btn--primary" data-add-ficha="${i}">Agregar al pedido</button>
+          <a class="btn btn--ghost" target="_blank" rel="noopener" href="${waUrl(`¡Hola Amantes del Fuego! Quería consultar por: ${p.nombre}`)}">Consultar por WhatsApp</a>
+        </div>
+      </div>`;
+    ficha.showModal();
+  }
+  $("#products").addEventListener("click", (e) => { const b = e.target.closest("[data-ver]"); if (b) abrirFicha(+b.dataset.ver); });
+  ficha.addEventListener("click", (e) => {
+    if (e.target === ficha || e.target.closest("[data-cerrar-ficha]")) { ficha.close(); return; }
+    const b = e.target.closest("[data-add-ficha]");
+    if (!b) return;
+    const p = PRODUCTOS[b.dataset.addFicha];
+    carrito[p.nombre] = (carrito[p.nombre] || 0) + 1;
+    guardar();
+    renderCarrito();
+    avisar(`${p.nombre} agregado al pedido`);
+    b.textContent = "Agregado";
+    const btnCarrito = $(".cart-btn");
+    btnCarrito.classList.remove("bump"); void btnCarrito.offsetWidth; btnCarrito.classList.add("bump");
+    setTimeout(() => { if (ficha.open) b.textContent = "Agregar otro"; }, 1200);
+  });
+
+  // Barra de promoción (pestaña Promos: la primera vigente)
+  const promo = PROMOS[0];
+  if (promo) {
+    const barra = $("#anuncio");
+    barra.innerHTML = `<p><strong>${escapar(promo.titulo)}</strong>${promo.texto ? ` <span>${escapar(promo.texto)}</span>` : ""}</p>` +
+      (promo.categoria && categorias.includes(promo.categoria) ? `<button type="button" class="anuncio__ver" data-ir="${escapar(promo.categoria)}">Ver ${escapar(promo.categoria)}</button>` : "");
+    barra.hidden = false;
+    barra.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-ir]");
+      if (!b) return;
+      const f = document.querySelector(`.filter[data-cat="${CSS.escape(b.dataset.ir)}"]`);
+      if (f) f.click();
+      $("#catalogo").scrollIntoView({ behavior: sinMovimiento ? "auto" : "smooth" });
+    });
+  }
+
+  // Cómo pagar y recibir (pestaña Ajustes). Solo se muestra lo que esté cargado.
+  const avisos = [
+    ["aviso_pagos", "Pagos", '<path d="M3 7h18v10H3zM3 11h18" fill="none" stroke="currentColor" stroke-width="2"/>'],
+    ["aviso_envios", "Envíos", '<path d="M3 7h11v8H3zM14 10h4l3 3v2h-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7" cy="18" r="1.6" fill="currentColor"/><circle cx="17" cy="18" r="1.6" fill="currentColor"/>'],
+    ["aviso_retiro", "Retiro", '<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.5" fill="currentColor"/>'],
+    ["aviso_garantia", "Garantía", '<path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'],
+  ].filter(([k]) => AJUSTES[k]);
+  if (descuento) avisos.unshift(["", "Transferencia", '<path d="M4 9h13l-3-3M20 15H7l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>', `${descuento}% de descuento pagando con transferencia.`]);
+  if (avisos.length) {
+    $("#info").innerHTML = avisos.map(([k, t, icono, texto]) => `<li><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">${icono}</svg><div><strong>${t}</strong><span>${escapar(texto || AJUSTES[k])}</span></div></li>`).join("");
+    $("#info").hidden = false;
+  }
+
   // Datos estructurados (schema.org): URLs absolutas, horarios y catálogo desde productos.js
   try {
     const nodo = $("#schema-negocio");
@@ -432,4 +546,4 @@
   renderFiltros();
   renderProductos();
   renderCarrito();
-})();
+};

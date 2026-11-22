@@ -41,6 +41,19 @@ Con `precio: null` se muestra "Consultar precio". Las categorías de los filtros
 
 > Precios cargados desde el catálogo de WhatsApp (noviembre 2026). Actualizarlos en `js/productos.js` cuando cambien.
 
+## Administración (Google Sheets)
+
+Los productos, las promociones y los ajustes se pueden manejar desde una **planilla de Google**, sin tocar código:
+
+1. Crear una planilla con tres pestañas: `Productos`, `Promos` y `Ajustes`, e importar en cada una el archivo de `plantilla/` (ya trae el catálogo actual).
+2. Compartirla como "Cualquier persona con el enlace: Lector".
+3. Pegar el link en `js/config.js` (`PLANILLA: "..."`).
+4. Revisarla en **`/admin.html`**: muestra un resumen, avisa errores (productos sin foto, nombres repetidos, ofertas mal cargadas, promos vencidas) y una vista previa.
+
+La tienda lee la planilla al abrirse. Si la planilla no responde, usa el respaldo de `js/productos.js`.
+
+Qué se puede hacer desde la planilla: agregar/ocultar productos, cambiar precios, ofertas con precio tachado, etiquetas ("Nuevo"), combos (`incluye`), medidas, promociones con fecha de inicio y fin (barra superior), descuento por transferencia y avisos de pagos, envíos, retiro y garantía.
+
 ## Video del catálogo
 
 `img/video/reel.mp4` (web, 1280x720) y `img/video/reel-vertical.mp4` (Reels/Historias, 1080x1920) se generan solos a partir de `video-src/reel.html`, que toma los productos, fotos y precios de `js/productos.js`.

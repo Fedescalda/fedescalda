@@ -1,0 +1,23 @@
+nombre,categoria,precio,precio_anterior,medidas,descripcion,imagen,etiqueta,incluye,activo
+Disco de arado,Discos,80340,,,"Tradición, sabor y calidad en un solo producto.",img/productos/disco-arado.jpg,,,si
+Disco de arado con tapa,Discos,105600,,,Prepará tus mejores comidas al fuego.,img/productos/disco-tapa.jpg,,,si
+Disco de arado con tapa bifera,Discos,130500,,,"Disco de arado con tapa bifera, ideal para cocinar de todo.",img/productos/disco-tapa-bifera.jpg,,,si
+Disco de arado enlozado,Discos,142850,,,Disco de acero enlozado de gran resistencia.,img/productos/disco-enlozado.jpg,,,si
+Disco de arado enlozado con tapa,Discos,173450,,,"Disco de acero enlozado de gran resistencia, con tapa.",img/productos/disco-enlozado-tapa.jpg,,,si
+Disco de arado enlozado con tapa bifera,Discos,251000,,,✔ Disco de arado enlozado. ✔ Tapa bifera.,img/productos/disco-enlozado-tapa-bifera.jpg,,,si
+Disco paellero plano Ø25,Discos,72950,,,Disco paellero plano fabricado en acero.,img/productos/disco-paellero-25.jpg,,,si
+Disco paellero plano Ø25 con tapa,Discos,,,,Disfrutá de la auténtica cocina al aire libre.,img/productos/disco-paellero-25-tapa.jpg,,,si
+Canasto para disco,Discos,31950,,,Canasto freidor para disco.,img/productos/canasto-disco.jpg,,,si
+Espumadera,Discos,15200,,,"Espumadera para disco, imprescindible para freír.",img/productos/espumadera.jpg,,,si
+Mechero simple un aro Ø19cm,Mecheros,95340,,,Mechero a gas de aro simple de 19 cm.,img/productos/mechero-simple-19.jpg,,,si
+Mechero doble hornalla una llave Ø32cm,Mecheros,148560,,,"Potencia, resistencia y eficiencia en un solo equipo.",img/productos/mechero-doble-una-llave-32.jpg,,,si
+Mechero simple un comando Ø52cm,Mecheros,167380,,,La máxima potencia para grandes volúmenes.,img/productos/mechero-simple-52.jpg,,,si
+Mechero doble comando Ø32cm,Mecheros,189720,,,Máxima potencia y control para cocinar.,img/productos/mechero-doble-32.jpg,,,si
+Mechero doble comando Ø52cm,Mecheros,232990,,,Potencia y capacidad para grandes preparaciones.,img/productos/mechero-doble-52.jpg,,,si
+Mechero triple hornalla 3 comandos Ø32cm,Mecheros,249900,,,Potencia superior para los trabajos más exigentes.,img/productos/mechero-triple-32.jpg,,,si
+Pie para mechero Ø32cm,Mecheros,99750,,,"Mayor comodidad, estabilidad y seguridad.",img/productos/pie-mechero-32.jpg,,,si
+Estaca cruz de hierro,Estacas,158510,,,La opción ideal para los amantes del asado a la cruz.,img/productos/estaca-cruz-hierro.jpg,,,si
+Estaca cruz acero inoxidable,Estacas,402370,,,Llevá tus asados a otro nivel.,img/productos/estaca-cruz-inox.jpg,,,si
+Cuna leñero hierro 46x26 Ø8,Cunitas / Leñeros,51230,,,Combina resistencia y practicidad.,img/productos/cuna-hierro-46x26.jpg,,,si
+Cuna leñero hierro 50x30 Ø10,Cunitas / Leñeros,86280,,,Combina funcionalidad y durabilidad.,img/productos/cuna-hierro-50x30.jpg,,,si
+Cuna leñero acero inoxidable 50x30 Ø8,Cunitas / Leñeros,285460,,,Estructura robusta en acero inoxidable.,img/productos/cuna-inox-50x30.jpg,,,si

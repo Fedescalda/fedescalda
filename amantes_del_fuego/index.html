@@ -74,6 +74,7 @@
 <body>
   <a href="#catalogo" class="skip">Ir al catálogo</a>
   <div class="progress" id="progreso" aria-hidden="true"></div>
+  <div class="anuncio" id="anuncio" role="region" aria-label="Promoción" hidden></div>
 
   <header class="nav">
     <a href="#inicio" class="nav__brand" translate="no">Amantes del Fuego</a>
@@ -148,6 +149,12 @@
         <div class="catalog__head">
           <h2 id="catalogo-titulo" class="bar-h">Catálogo</h2>
           <p>Elegí tus productos y mandanos el pedido por WhatsApp. Te confirmamos disponibilidad y entrega.</p>
+        </div>
+        <ul class="info" id="info" aria-label="Pagos y entregas" hidden></ul>
+        <div class="buscador">
+          <label class="sr-only" for="buscar">Buscar en el catálogo</label>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="buscar" name="buscar" type="search" autocomplete="off" placeholder="Buscar: disco, mechero, leñero…">
         </div>
         <div class="filters" id="filters" role="group" aria-label="Filtrar por categoría"></div>
         <div id="products"></div>
@@ -231,9 +238,18 @@
     </div>
   </div>
 
+  <dialog class="ficha" id="ficha" aria-labelledby="ficha-titulo">
+    <button class="ficha__cerrar" type="button" aria-label="Cerrar detalle" data-cerrar-ficha>
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <div class="ficha__contenido" id="ficha-contenido"></div>
+  </dialog>
+
   <p class="sr-only" id="aviso" aria-live="polite"></p>
 
   <script src="js/productos.js"></script>
+  <script src="js/config.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/datos.js"></script>
 </body>
 </html>

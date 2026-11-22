@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Administración | Amantes del Fuego</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="img/logo.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .admin { padding-block: 2.5rem 4rem; display: grid; gap: 2.5rem; }
+    .admin h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+    .admin h2 { font-size: clamp(1.3rem, 3vw, 1.7rem); margin-bottom: 1rem; }
+    .admin p, .admin li { color: var(--ceniza); }
+    .admin strong { color: var(--blanco); }
+    .panel { border: 1px solid var(--hierro-2); border-radius: 8px; background: var(--hierro); padding: 1.5rem; }
+    .pasos-admin { display: grid; gap: 1rem; padding-left: 1.25rem; }
+    .pasos-admin li::marker { color: var(--brasa-viva); font-weight: 800; }
+    .fila { display: flex; gap: .75rem; flex-wrap: wrap; align-items: end; }
+    .fila label { display: grid; gap: .4rem; flex: 1 1 380px; color: var(--blanco); font-weight: 600; }
+    .fila input { min-height: 48px; padding: 0 1rem; border-radius: var(--radio); border: 1px solid var(--borde-control); background: var(--carbon); color: var(--blanco); font: inherit; }
+    .resumen { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .75rem; margin: 1rem 0; }
+    .resumen div { border: 1px solid var(--hierro-2); border-radius: var(--radio); padding: 1rem; background: var(--carbon); }
+    .resumen b { display: block; font-size: 1.8rem; font-variant-numeric: tabular-nums; color: var(--blanco); }
+    .avisos-admin { list-style: none; display: grid; gap: .5rem; }
+    .avisos-admin li { padding: .7rem 1rem; border-radius: var(--radio); background: var(--carbon); border-left: 4px solid var(--borde-control); }
+    .avisos-admin .error { border-left-color: var(--brasa-viva); }
+    .avisos-admin .ok { border-left-color: var(--verde); }
+    .tabla { overflow-x: auto; border: 1px solid var(--hierro-2); border-radius: var(--radio); }
+    .tabla table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+    .tabla th, .tabla td { padding: .6rem .8rem; text-align: left; border-bottom: 1px solid var(--hierro-2); vertical-align: middle; }
+    .tabla th { color: var(--ceniza); font-weight: 600; background: var(--carbon); position: sticky; top: 0; }
+    .tabla td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .tabla img { width: 48px; height: 48px; object-fit: contain; background: #fff; border-radius: 4px; }
+    .estado { color: var(--ceniza); min-height: 1.6em; }
+    .descargas { display: flex; flex-wrap: wrap; gap: .6rem; }
+    code { background: var(--carbon); padding: .1rem .4rem; border-radius: 4px; color: var(--blanco); }
+    .campos { display: grid; grid-template-columns: max-content 1fr; gap: .4rem 1rem; }
+    .campos dt { color: var(--blanco); font-weight: 700; }
+    @media (max-width: 760px) { .nav .nav__links { position: static; display: flex; flex-direction: row; background: none; border: 0; margin-left: auto; } .nav .nav__links a { border: 0; padding: .5rem 0; } }
+    @media (max-width: 640px) { .campos { grid-template-columns: 1fr; } .campos dd { margin-bottom: .5rem; } }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <a href="index.html" class="nav__brand" translate="no">Amantes del Fuego</a>
+    <nav class="nav__links" aria-label="Administración"><a href="index.html">Volver a la tienda</a></nav>
+  </header>
+
+  <main class="container admin">
+    <section>
+      <h1>Administración</h1>
+      <p>Los productos, las promociones y los ajustes se manejan desde una planilla de Google. Cuando la editás, la tienda se actualiza sola en uno o dos minutos. Esta página sirve para revisar la planilla antes de que la vean los clientes.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="revisar-titulo">
+      <h2 id="revisar-titulo">Revisar la planilla</h2>
+      <form class="fila" id="form-revisar">
+        <label for="link">Link de la planilla
+          <input id="link" name="link" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://docs.google.com/spreadsheets/d/…/edit">
+        </label>
+        <button class="btn btn--primary" type="submit">Revisar planilla</button>
+      </form>
+      <p class="estado" id="estado" aria-live="polite"></p>
+      <div id="resultado" hidden>
+        <div class="resumen" id="resumen"></div>
+        <h3>Revisión</h3>
+        <ul class="avisos-admin" id="avisos"></ul>
+        <h3 style="margin-top:1.5rem">Así se va a ver el catálogo</h3>
+        <div class="tabla"><table>
+          <thead><tr><th>Foto</th><th>Producto</th><th>Categoría</th><th>Precio</th><th>Antes</th><th>Etiqueta</th><th>Estado</th></tr></thead>
+          <tbody id="filas"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="como-titulo">
+      <h2 id="como-titulo">Cómo se usa</h2>
+      <ol class="pasos-admin">
+        <li><strong>Crear la planilla (una sola vez).</strong> En Google Sheets creá una planilla nueva con tres pestañas llamadas exactamente <code>Productos</code>, <code>Promos</code> y <code>Ajustes</code>. En cada una importá el archivo de abajo (Archivo › Importar › Subir › "Reemplazar hoja actual"). Ya trae todo el catálogo actual.
+          <div class="descargas" style="margin-top:.75rem">
+            <a class="btn btn--ghost" href="plantilla/Productos.csv" download>Productos.csv</a>
+            <a class="btn btn--ghost" href="plantilla/Promos.csv" download>Promos.csv</a>
+            <a class="btn btn--ghost" href="plantilla/Ajustes.csv" download>Ajustes.csv</a>
+          </div>
+        </li>
+        <li><strong>Compartirla para lectura.</strong> Botón Compartir › Acceso general › "Cualquier persona con el enlace" › <strong>Lector</strong>. Así la tienda puede leerla; solo vos (y a quien invites como Editor) pueden cambiarla.</li>
+        <li><strong>Revisarla acá.</strong> Pegá el link arriba y tocá "Revisar planilla". Si está todo bien, pasale el link a quien mantiene la web para conectarla (es una sola vez).</li>
+        <li><strong>Editar cuando quieras.</strong> Cambiás un precio, agregás una fila o activás una promo desde el celular, y la tienda se actualiza sola.</li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="campos-titulo">
+      <h2 id="campos-titulo">Qué va en cada columna</h2>
+      <div class="panel">
+        <h3>Productos</h3>
+        <dl class="campos">
+          <dt>nombre</dt><dd>Nombre del producto. Es lo que se ve en la tarjeta y en el pedido.</dd>
+          <dt>categoria</dt><dd>Agrupa y crea los filtros (Discos, Mecheros, Combos…). Escribila siempre igual.</dd>
+          <dt>precio</dt><dd>Precio actual. Vale <code>142850</code> o <code>$ 142.850</code>. Vacío = "Consultar precio".</dd>
+          <dt>precio_anterior</dt><dd>Para ofertas: el precio de antes, se muestra tachado con el % de descuento.</dd>
+          <dt>medidas</dt><dd>Datos técnicos cortos: <code>Ø50 cm · 15 L · acero</code>.</dd>
+          <dt>descripcion</dt><dd>Una o dos oraciones.</dd>
+          <dt>imagen</dt><dd>Link a la foto. Podés subirla a Google Drive, compartirla como "Cualquier persona con el enlace" y pegar ese link. Cuadrada y con fondo blanco queda mejor.</dd>
+          <dt>etiqueta</dt><dd>Opcional: <code>Nuevo</code>, <code>Más vendido</code>, <code>Últimas unidades</code>…</dd>
+          <dt>incluye</dt><dd>Para combos: los productos separados con <code>+</code>. Ej: <code>Disco de arado + Mechero Ø32cm</code>.</dd>
+          <dt>activo</dt><dd><code>si</code> o <code>no</code>. Con <code>no</code> el producto se oculta sin borrarlo.</dd>
+        </dl>
+        <h3 style="margin-top:1.25rem">Promos</h3>
+        <dl class="campos">
+          <dt>titulo / texto</dt><dd>Lo que dice la barra roja de arriba de la tienda.</dd>
+          <dt>desde / hasta</dt><dd>Fechas <code>dd/mm/aaaa</code>. Se muestra solo en ese período (vacío = siempre).</dd>
+          <dt>activa</dt><dd><code>si</code> o <code>no</code>.</dd>
+          <dt>categoria</dt><dd>Opcional: muestra un botón "Ver Discos" que lleva a esa categoría.</dd>
+        </dl>
+        <h3 style="margin-top:1.25rem">Ajustes</h3>
+        <dl class="campos">
+          <dt>descuento_transferencia</dt><dd>Porcentaje (ej: <code>10</code>). Muestra el precio con transferencia en cada producto y en el pedido.</dd>
+          <dt>aviso_pagos, aviso_envios, aviso_retiro, aviso_garantia</dt><dd>Textos cortos que aparecen arriba del catálogo. Vacío = no se muestra.</dd>
+        </dl>
+      </div>
+    </section>
+  </main>
+
+  <script>window.ADF_SIN_ARRANQUE = true;</script>
+  <script src="js/productos.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/datos.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
