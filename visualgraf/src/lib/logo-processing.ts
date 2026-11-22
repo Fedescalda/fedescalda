@@ -171,14 +171,28 @@ export function analyzeLogo(img: HTMLImageElement, isSvg: boolean): LogoAnalysis
       transparentPx++;
       continue;
     }
-    if (Math.min(d[i], d[i + 1], d[i + 2]) > 232) continue; // fondo blanco
+    const mn = Math.min(d[i], d[i + 1], d[i + 2]);
+    const mx = Math.max(d[i], d[i + 1], d[i + 2]);
+    if (mn > 232) continue; // fondo blanco
+    if (mx - mn < 40 && mn > 90) continue; // grises de borde (mezcla de la tinta con el fondo)
     opaque++;
     const key = ((d[i] >> 5) << 6) | ((d[i + 1] >> 5) << 3) | (d[i + 2] >> 5); // 8 niveles por canal
     buckets.set(key, (buckets.get(key) ?? 0) + 1);
   }
-  // Un "color" cuenta si ocupa al menos 2% de la tinta (descarta bordes antialias)
-  const significant = [...buckets.values()].filter((n) => n / Math.max(1, opaque) > 0.02).length;
-  const gradient = buckets.size > 40 && significant > 5;
+  // Agrupamos tonos parecidos (artefactos JPG, bordes suavizados) en colores "de tinta"
+  const centers: { r: number; g: number; b: number; n: number }[] = [];
+  const sorted = [...buckets.entries()].sort((a, b) => b[1] - a[1]);
+  for (const [key, n] of sorted) {
+    const r = ((key >> 6) & 7) * 32 + 16, g = ((key >> 3) & 7) * 32 + 16, b = (key & 7) * 32 + 16;
+    const near = centers.find((c) => (c.r - r) ** 2 + (c.g - g) ** 2 + (c.b - b) ** 2 < 80 ** 2);
+    if (near) near.n += n;
+    else centers.push({ r, g, b, n });
+  }
+  // Un color cuenta si ocupa al menos 5% de la tinta
+  const significant = centers.filter((c) => c.n / Math.max(1, opaque) >= 0.05).length;
+  // Degradado/foto: la tinta se reparte en muchos tonos sin ninguno dominante
+  const top = centers.slice(0, 4).reduce((s, c) => s + c.n, 0) / Math.max(1, opaque);
+  const gradient = top < 0.85 && centers.length > 12;
   return {
     width: w0,
     height: h0,

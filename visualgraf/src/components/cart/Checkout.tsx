@@ -30,7 +30,7 @@ export function Checkout({ methods }: { methods: Methods }) {
   const [logo, setLogo] = useState<File | null>(null);
   const [logoLater, setLogoLater] = useState(false);
   const [terms, setTerms] = useState(false);
-  const [newsletter, setNewsletter] = useState(true);
+  const [newsletter, setNewsletter] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [waResult, setWaResult] = useState<WaResult | null>(null);
