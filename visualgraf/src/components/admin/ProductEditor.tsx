@@ -7,7 +7,7 @@ import { bagColors, type Product } from "@/lib/catalog";
 
 type Action = (state: ActionResult, formData: FormData) => Promise<ActionResult>;
 type Row = { key: number; size: string; price: string; kilos: string; volumen: string };
-type NewImage = { key: number; file: File; url: string };
+type NewImage = { key: number; file: File; url: string; color: string };
 
 const categories = [
   { id: "manija-rinon", label: "Manija riñón" },
@@ -68,8 +68,15 @@ export function ProductEditor({
   );
   const [existing, setExisting] = useState(() => (product?.images ?? []).map((img) => ({ ...img, remove: false })));
   const [added, setAdded] = useState<NewImage[]>([]);
+  const previewUrls = useRef(new Set<string>());
 
-  useEffect(() => () => added.forEach((a) => URL.revokeObjectURL(a.url)), [added]);
+  useEffect(() => {
+    const urls = previewUrls.current;
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+      urls.clear();
+    };
+  }, []);
 
   const visibleCount = existing.filter((e) => !e.remove).length + added.length;
 
@@ -77,7 +84,12 @@ export function ProductEditor({
     if (!list) return;
     const room = MAX_IMAGES - visibleCount;
     const files = Array.from(list).filter((f) => f.type.startsWith("image/")).slice(0, Math.max(0, room));
-    setAdded((prev) => [...prev, ...files.map((file) => ({ key: nextKey(), file, url: URL.createObjectURL(file) }))]);
+    const newImages = files.map((file) => {
+      const url = URL.createObjectURL(file);
+      previewUrls.current.add(url);
+      return { key: nextKey(), file, url, color: "" };
+    });
+    setAdded((prev) => [...prev, ...newImages]);
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -87,11 +99,20 @@ export function ProductEditor({
     setCompressing(true);
     const files = await Promise.all(added.map((a) => compress(a.file)));
     setCompressing(false);
-    files.forEach((f) => data.append("new_images", f));
+    files.forEach((file, i) => {
+      data.append("new_images", file);
+      data.append("new_image_color", added[i].color);
+    });
     startTransition(() => submit(data));
   }
 
   const busy = pending || compressing;
+  const photoColorOptions = (
+    <>
+      <option value="">Sin color</option>
+      {bagColors.map((color) => <option key={color.id} value={color.id}>{color.name}</option>)}
+    </>
+  );
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
@@ -217,23 +238,43 @@ export function ProductEditor({
                 {i === 0 && !img.remove && <span className="absolute top-1 left-1 rounded-full bg-ink/80 px-2 py-0.5 text-xs">Principal</span>}
               </div>
               <input className="field !min-h-9 !py-1.5 text-xs" name="image_alt" defaultValue={img.alt} aria-label={`Descripción de la foto ${i + 1}`} />
+              <label className="block">
+                <span className="label">Color de la bolsa en la foto {i + 1}</span>
+                <select className="field" name="image_color" defaultValue={img.color ?? ""}>
+                  {photoColorOptions}
+                </select>
+              </label>
               <label className="flex items-center gap-2 text-xs">
                 <input type="checkbox" name="image_remove" value={img.src} checked={img.remove} onChange={(e) => setExisting((list) => list.map((x) => (x.src === img.src ? { ...x, remove: e.target.checked } : x)))} />
                 Quitar
               </label>
             </li>
           ))}
-          {added.map((img) => (
+          {added.map((img, i) => (
             <li key={img.key} className="space-y-2 rounded-xl border border-brand-cyan/50 p-2">
               <div className="relative aspect-square overflow-hidden rounded-lg bg-ink-3">
                 {/* eslint-disable-next-line @next/next/no-img-element -- vista previa local (blob) */}
                 <img src={img.url} alt="" className="h-full w-full object-cover" />
                 <span className="absolute top-1 left-1 rounded-full bg-brand-cyan px-2 py-0.5 text-xs text-ink">Nueva</span>
               </div>
-              <button type="button" className="text-xs underline" onClick={() => setAdded((l) => l.filter((x) => x.key !== img.key))}>Quitar</button>
+              <label className="block">
+                <span className="label">Color de la bolsa en la foto {existing.length + i + 1}</span>
+                <select className="field" value={img.color} onChange={(e) => {
+                  const color = e.target.value;
+                  setAdded((list) => list.map((photo) => photo.key === img.key ? { ...photo, color } : photo));
+                }}>
+                  {photoColorOptions}
+                </select>
+              </label>
+              <button type="button" className="text-xs underline" onClick={() => {
+                URL.revokeObjectURL(img.url);
+                previewUrls.current.delete(img.url);
+                setAdded((list) => list.filter((photo) => photo.key !== img.key));
+              }}>Quitar</button>
             </li>
           ))}
         </ul>
+        <p className="text-sm text-mute">Si una foto muestra la bolsa en un color, elegilo: en la tienda se muestra al elegir ese color. Si no hay foto del color elegido, se muestra una vista previa generada.</p>
         {visibleCount < MAX_IMAGES && (
           <label className="btn btn-ghost cursor-pointer">
             + Agregar fotos

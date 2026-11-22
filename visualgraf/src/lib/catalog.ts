@@ -46,7 +46,8 @@ export type Product = {
   short: string;
   description: string;
   category: "manija-rinon" | "hielo" | "ecommerce";
-  images: { src: string; alt: string }[];
+  /** color: color de bolsa que muestra la foto (para mostrarla al elegir ese color) */
+  images: { src: string; alt: string; color?: BagColorId }[];
   /** Unidades por pack (el precio de cada variante es por pack) */
   packSize: number;
   variants: Variant[];
@@ -88,11 +89,11 @@ export const sampleProducts: Product[] = [
       "La bolsa que lleva tu marca a cada lugar. Bolsas manija riñón de alta densidad, personalizadas con el logo, nombre o diseño de tu marca e impresas en serigrafía a 1 cara 1 color. Una presentación profesional para comercios, emprendimientos, tiendas online y marcas que quieren estar presentes en cada compra.",
     category: "manija-rinon",
     images: [
-      { src: "/img/productos/manija-rinon-20x30.webp", alt: "Bolsa manija riñón blanca 20 × 30 cm con la leyenda Tu logo aquí" },
-      { src: "/img/productos/manija-rinon-25x35.webp", alt: "Bolsa manija riñón negra 25 × 35 cm con la leyenda Tu logo aquí" },
-      { src: "/img/productos/manija-rinon-30x40.webp", alt: "Bolsa manija riñón cristal 30 × 40 cm con la leyenda Tu logo aquí" },
-      { src: "/img/productos/manija-rinon-35x45.webp", alt: "Bolsa manija riñón negra 35 × 45 cm con impresión naranja" },
-      { src: "/img/productos/manija-rinon-40x50.webp", alt: "Bolsa manija riñón lila 40 × 50 cm con la leyenda Tu logo aquí" },
+      { src: "/img/productos/manija-rinon-20x30.webp", alt: "Bolsa manija riñón blanca 20 × 30 cm con la leyenda Tu logo aquí", color: "blanco" },
+      { src: "/img/productos/manija-rinon-25x35.webp", alt: "Bolsa manija riñón negra 25 × 35 cm con la leyenda Tu logo aquí", color: "negro" },
+      { src: "/img/productos/manija-rinon-30x40.webp", alt: "Bolsa manija riñón cristal 30 × 40 cm con la leyenda Tu logo aquí", color: "cristal" },
+      { src: "/img/productos/manija-rinon-35x45.webp", alt: "Bolsa manija riñón negra 35 × 45 cm con impresión naranja", color: "negro" },
+      { src: "/img/productos/manija-rinon-40x50.webp", alt: "Bolsa manija riñón lila 40 × 50 cm con la leyenda Tu logo aquí", color: "lila" },
     ],
     packSize: 100,
     variants: [
@@ -116,9 +117,9 @@ export const sampleProducts: Product[] = [
       "Un pack de 1.500 bolsas para hielo personalizadas, con impresión a una cara y un color: 500 de 26 × 40 cm (40 mic), 500 de 28 × 50 cm (50 mic) y 500 de 35 × 75 cm (60 mic). Material de baja densidad virgen, apto para contacto con alimentos. Ideal para fábricas de hielo, distribuidoras y almacenes.",
     category: "hielo",
     images: [
-      { src: "/img/clientes/thomas.webp", alt: "Bolsa transparente para hielo impresa para Thomas Hielo" },
+      { src: "/img/clientes/thomas.webp", alt: "Bolsa transparente para hielo impresa para Thomas Hielo", color: "cristal" },
       { src: "/img/promo-hielo.webp", alt: "Promoción de 1.500 bolsas para hielo personalizadas por 610.000 pesos" },
-      { src: "/img/clientes/thomas-grande.webp", alt: "Bolsa grande para hielo de Thomas Hielo, 8 y 10 kg" },
+      { src: "/img/clientes/thomas-grande.webp", alt: "Bolsa grande para hielo de Thomas Hielo, 8 y 10 kg", color: "cristal" },
     ],
     packSize: 1500,
     variants: [{ size: "Pack 3 medidas (26×40 · 28×50 · 35×75)", price: 610000, detail: "500 + 500 + 500 unidades" }],
@@ -136,9 +137,9 @@ export const sampleProducts: Product[] = [
       "Bolsa cristal para hielo con manija riñón, pensada para fábricas de hielo, distribuidoras, almacenes y estaciones de servicio. 26 × 50 cm en 60 micrones, resistente al peso y al frío, con tu marca bien visible en cada bolsa. Consultanos cantidades y precio.",
     category: "hielo",
     images: [
-      { src: "/img/bolsa-hielo.webp", alt: "Bolsa cristal para hielo con manija riñón y logo azul impreso" },
+      { src: "/img/bolsa-hielo.webp", alt: "Bolsa cristal para hielo con manija riñón y logo azul impreso", color: "cristal" },
       { src: "/img/manija-rinon.webp", alt: "Detalle de la manija riñón de la bolsa para hielo" },
-      { src: "/img/tu-logo-aca.webp", alt: "Bolsa para hielo con la leyenda Tu logo acá impresa en azul" },
+      { src: "/img/tu-logo-aca.webp", alt: "Bolsa para hielo con la leyenda Tu logo acá impresa en azul", color: "cristal" },
     ],
     packSize: 1,
     variants: [{ size: "26 × 50 cm · 60 micrones", price: null }],
@@ -156,7 +157,7 @@ export const sampleProducts: Product[] = [
       "Dale a cada envío una presentación que se recuerde. Bolsas para ecommerce resistentes y seguras, ideales para envíos, disponibles en rosa y negro. Consultá medidas disponibles y la impresión de tu logo.",
     category: "ecommerce",
     images: [
-      { src: "/img/ecommerce-rosa.webp", alt: "Bolsa rosa para ecommerce impresa con la marca Visual Graf" },
+      { src: "/img/ecommerce-rosa.webp", alt: "Bolsa rosa para ecommerce impresa con la marca Visual Graf", color: "rosa" },
       { src: "/img/promo-ecommerce.webp", alt: "Nuevas bolsas para ecommerce en rosa y negro" },
     ],
     packSize: 1,

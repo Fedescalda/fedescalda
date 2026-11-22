@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { ActionResult } from "@/components/admin/ActionForm";
-import type { Variant } from "@/lib/catalog";
+import { bagColors, type Product, type Variant } from "@/lib/catalog";
 import { createAdminClient, createSessionClient } from "@/lib/supabase/server";
 import { orderStatuses } from "./display";
 import { getAdminClient } from "./session";
@@ -129,16 +129,24 @@ function parseProduct(form: FormData) {
 async function uploadImages(productId: string, form: FormData, altBase: string) {
   const storage = createAdminClient()?.storage;
   if (!storage) throw new Error("Falta SUPABASE_SERVICE_ROLE_KEY para subir fotos.");
-  const files = form.getAll("new_images").filter((f): f is File => f instanceof File && f.size > 0);
-  const out: { src: string; alt: string }[] = [];
-  for (const [i, file] of files.entries()) {
+  const files = form.getAll("new_images")
+    .map((file, index) => ({ file, index }))
+    .filter((entry): entry is { file: File; index: number } => entry.file instanceof File && entry.file.size > 0);
+  const colors = form.getAll("new_image_color");
+  const out: Product["images"] = [];
+  for (const [i, { file, index }] of files.entries()) {
     if (!["image/webp", "image/jpeg", "image/png"].includes(file.type)) throw new Error("Formato de foto no soportado.");
     if (file.size > 5 * 1024 * 1024) throw new Error("Cada foto tiene que pesar menos de 5 MB.");
     const ext = file.type === "image/webp" ? "webp" : file.type === "image/png" ? "png" : "jpg";
     const path = `${productId}/${crypto.randomUUID()}.${ext}`;
     const { error } = await storage.from(BUCKET).upload(path, file, { contentType: file.type, cacheControl: "31536000" });
     if (error) throw new Error("No pudimos subir una foto.");
-    out.push({ src: storage.from(BUCKET).getPublicUrl(path).data.publicUrl, alt: `${altBase}${files.length > 1 ? ` (foto ${i + 1})` : ""}` });
+    const color = bagColors.find((option) => option.id === colors[index])?.id;
+    out.push({
+      src: storage.from(BUCKET).getPublicUrl(path).data.publicUrl,
+      alt: `${altBase}${files.length > 1 ? ` (foto ${i + 1})` : ""}`,
+      ...(color && { color }),
+    });
   }
   return out;
 }
@@ -164,7 +172,7 @@ export async function createProduct(_state: ActionResult, form: FormData): Promi
   if (clash) return { error: `Ya existe un producto con el link "${slug}". Cambiá el nombre o el link.` };
 
   const id = `${slug.slice(0, 40)}-${crypto.randomUUID().slice(0, 6)}`;
-  let images: { src: string; alt: string }[];
+  let images: Product["images"];
   try {
     images = await uploadImages(id, form, parsed.data.name);
   } catch (e) {
@@ -199,16 +207,20 @@ export async function updateProduct(id: string, _state: ActionResult, form: Form
     return { error: "El producto cambió. Recargá la página antes de editarlo." };
   }
 
-  // Fotos existentes: se conservan en el orden del formulario, con su texto alternativo editado
-  const current = (product.images ?? []) as { src: string; alt: string }[];
+  // Conserva el orden del formulario y actualiza el texto alternativo y el color.
+  const current = (product.images ?? []) as Product["images"];
   const keepSrc = form.getAll("image_src").map(String);
   const keepAlt = form.getAll("image_alt").map((a) => String(a).trim().slice(0, 200));
+  const keepColors = form.getAll("image_color");
   const remove = new Set(form.getAll("image_remove").map(String));
   const kept = keepSrc
-    .map((src, i) => ({ src, alt: keepAlt[i] || parsed.data.name }))
+    .map((src, i) => {
+      const color = bagColors.find((option) => option.id === keepColors[i])?.id;
+      return { src, alt: keepAlt[i] || parsed.data.name, ...(color && { color }) };
+    })
     .filter((img) => current.some((c) => c.src === img.src) && !remove.has(img.src));
 
-  let added: { src: string; alt: string }[];
+  let added: Product["images"];
   try {
     added = await uploadImages(id, form, parsed.data.name);
   } catch (e) {
@@ -226,8 +238,9 @@ export async function updateProduct(id: string, _state: ActionResult, form: Form
 
   // Conserva datos extra de cada medida (foto asociada, detalle) si la medida sigue existiendo
   const oldVariants = (product.variants ?? []) as Variant[];
-  const variants = parsed.data.variants.map((v) => {
-    const old = oldVariants.find((o) => o.size === v.size);
+  const variants = parsed.data.variants.map((v, i) => {
+    // misma medida por nombre; si se renombró, la de la misma posición
+    const old = oldVariants.find((o) => o.size === v.size) ?? (oldVariants.length === parsed.data.variants.length ? oldVariants[i] : undefined);
     const image = old?.image && images.some((i) => i.src === old.image) ? old.image : undefined;
     return { ...v, ...(image && { image }), ...(old?.detail && { detail: old.detail }) };
   });

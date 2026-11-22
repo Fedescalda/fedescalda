@@ -7,6 +7,7 @@ import { formatARS, waLink } from "@/lib/site";
 import { useCart } from "../cart/CartProvider";
 import { flyToCart } from "@/lib/fly-to-cart";
 import { Gallery } from "./Gallery";
+import { parseSize } from "./ProductPreview";
 import { IconBag, IconBrush, IconCheck, IconMinus, IconPlus, IconWhatsApp } from "../Icons";
 
 function Swatch({ hex, id }: { hex: string; id: string }) {
@@ -27,6 +28,13 @@ export function Configurator({ product }: { product: Product }) {
   const [bag, setBag] = useState(paramBag && product.colors.includes(paramBag) ? paramBag : product.colors[0]);
   const [ink, setInk] = useState(paramInk && inkColors.some((c) => c.id === paramInk) ? paramInk : product.colors[0] === "negro" ? "blanco" : "negro");
   const [packs, setPacks] = useState(1);
+  /** Cambia el color de bolsa y evita tinta invisible (negro sobre negro, blanco sobre blanco) */
+  const chooseBag = (id: typeof bag) => {
+    if (id === bag) return;
+    setBag(id);
+    if (id === "negro" && ink === "negro") setInk("blanco");
+    else if ((id === "blanco" || id === "cristal") && ink === "blanco") setInk("negro");
+  };
   const [added, setAdded] = useState(false);
 
   useEffect(() => setVi(initial), [initial]);
@@ -60,7 +68,20 @@ export function Configurator({ product }: { product: Product }) {
 
   return (
     <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
-      <Gallery images={product.images} activeSrc={variant.image} />
+      <Gallery
+        images={product.images}
+        variantImage={variant.image}
+        variantImages={product.variants.map((v) => v.image).filter((x): x is string => Boolean(x))}
+        selection={{
+          color: bag,
+          colorName: bagName,
+          inkHex: inkColors.find((c) => c.id === ink)?.hex ?? "#111",
+          inkName,
+          shape: product.category === "manija-rinon" ? "rinon" : product.category === "ecommerce" ? "ecommerce" : /riñ/i.test(product.name) ? "hielo-rinon" : "hielo",
+          ...(parseSize(variant.size) ? { wCm: parseSize(variant.size)!.w, hCm: parseSize(variant.size)!.h } : product.category === "ecommerce" ? { wCm: 30, hCm: 40 } : { wCm: 28, hCm: 50 }),
+          sizeLabel: parseSize(variant.size) ? `${parseSize(variant.size)!.w} × ${parseSize(variant.size)!.h} cm` : "estándar",
+        }}
+      />
 
       <div>
         <h1 className="font-display text-3xl leading-tight font-black md:text-5xl">{product.name}</h1>
@@ -115,7 +136,7 @@ export function Configurator({ product }: { product: Product }) {
               {product.colors.map((id) => {
                 const c = bagColors.find((b) => b.id === id)!;
                 return (
-                  <button key={id} type="button" aria-pressed={bag === id} onClick={() => setBag(id)} className={`flex min-h-11 items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition ${bag === id ? "border-white bg-white/10" : "border-line hover:border-white/40"}`}>
+                  <button key={id} type="button" aria-pressed={bag === id} onClick={() => chooseBag(id)} className={`flex min-h-11 items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition ${bag === id ? "border-white bg-white/10" : "border-line hover:border-white/40"}`}>
                     <Swatch hex={c.hex} id={id} /> {c.name}
                   </button>
                 );
