@@ -8,7 +8,7 @@ import { ORDER_STATUSES, statusLabel } from "@/lib/order-status";
 import { formatARS } from "@/lib/site";
 import type { OrderInput } from "@/lib/validation";
 import { formatDate, orderStatusColors, orderWhatsApp, paymentLabels } from "../../../display";
-import { changeOrderStatus, uploadProof } from "../../../order-actions";
+import { changeOrderStatus, sendMockupAsProof, uploadProof } from "../../../order-actions";
 import { getPanelClient } from "../../../session";
 
 type PanelOrder = OrderRow & {
@@ -113,6 +113,12 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <div><h3 className="font-semibold">Cambios que pidió el cliente</h3><p className="whitespace-pre-wrap break-words">{order.proof_feedback}</p></div>
           )}
           <OrderFile title="Prueba actual" path={order.proof_path} empty="Todavía no subiste una prueba." />
+          {order.mockup_path && order.proof_status !== "aprobada" && (
+            <div className="rounded-xl border border-brand-cyan/40 bg-brand-cyan/5 p-3 text-sm">
+              <p className="mb-2">¿El diseño del cliente está listo para imprimir? Mandale su <strong>muestra digital</strong> como prueba, sin diseñar nada.</p>
+              <ActionForm action={sendMockupAsProof.bind(null, id)} label="Enviar la muestra digital como prueba" confirm="Se le envía al cliente la muestra del simulador para que la apruebe. ¿Seguimos?" />
+            </div>
+          )}
           <ActionForm action={uploadProof.bind(null, id)} label="Subir y enviar prueba" resetOnSuccess>
             <label className="block">
               <span className="label">Archivo de la prueba</span>

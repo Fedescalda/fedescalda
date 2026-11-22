@@ -5,8 +5,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BagMockup, printArea, type BagModel } from "../BagMockup";
 import { computeLayout, type ContactKey, type FontDef } from "./layout";
 import { PrintContent } from "./PrintContent";
-import { PhotoMockup, fitPrint } from "./PhotoMockup";
-import { photoFor } from "@/lib/mockups";
+import { RealisticMockup, type BagSpec } from "./RealisticMockup";
+import { svgToImage, type BagTexture } from "@/lib/bag-render";
+import { renderMuestra } from "@/lib/muestra";
 import { bagColors, inkColors, type BagColorId } from "@/lib/catalog";
 import { ACCEPTED, analyzeLogo, loadLogoFile, processLogo, svgToPng, type LoadedLogo, type LogoAnalysis, type ProcessedLogo } from "@/lib/logo-processing";
 import { blobToDataUrl, saveDesign, type DesignMeta } from "@/lib/design-store";
@@ -86,7 +87,9 @@ export function Customizer() {
   const [bag, setBag] = useState<BagColorId>(paramBag && modelDef.colors.includes(paramBag) ? paramBag : modelDef.colors[0]);
   const [ink, setInk] = useState(inkColors.find((c) => c.id === params.get("tinta"))?.id ?? (bag === "negro" || bag === "rosa" ? "blanco" : "negro"));
   const [sizeIdx, setSizeIdx] = useState(model === "rinon" ? 1 : 0);
-  const [view, setView] = useState<"foto" | "ilustracion">("foto");
+  const [view, setView] = useState<"realista" | "ilustracion">("realista");
+  const [brand, setBrand] = useState("");
+  const [muestraUrl, setMuestraUrl] = useState<string | null>(null);
   const [original, setOriginal] = useState(false);
   const [removeWhite, setRemoveWhite] = useState(true);
   const [logo, setLogo] = useState<LoadedLogo | null>(null);
@@ -106,6 +109,7 @@ export function Customizer() {
   const svgRef = useRef<SVGSVGElement>(null);
   const printSvgRef = useRef<SVGSVGElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rectRef = useRef<{ x: number; y: number; w: number; h: number } | null>(null);
   const dragRef = useRef<{ dx: number; dy: number } | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
@@ -117,8 +121,16 @@ export function Customizer() {
   const bagName = bagColors.find((b) => b.id === bag)?.name ?? bag;
   const font = fonts.find((f) => f.id === fontId)!;
   const printColor = original ? (bag === "negro" ? "#ffffff" : "#111111") : inkHex;
-  const photo = photoFor(model, bag);
-  const usePhoto = view === "foto" && Boolean(photo);
+  const spec: BagSpec = useMemo(
+    () => ({
+      shape: model === "rinon" ? "rinon" : model === "ecommerce" ? "ecommerce" : /riñón/.test(size.label) ? "hielo-rinon" : "hielo",
+      texture: bag as BagTexture,
+      wCm: size.w,
+      hCm: size.h,
+    }),
+    [model, bag, size],
+  );
+  const realistic = view === "realista";
 
   useEffect(() => {
     if (!modelDef.colors.includes(bag)) setBag(modelDef.colors[0]);
@@ -179,8 +191,6 @@ export function Customizer() {
   const area = printArea[model];
   const svgS = Math.min(area.w / printW, area.h / printH);
   const svgO = { x: area.x + (area.w - printW * svgS) / 2, y: area.y + (area.h - printH * svgS) / 2 };
-  /* Ubicación en la foto */
-  const fit = photo ? fitPrint(photo, printW, printH) : null;
 
   const clampPos = (x: number, y: number) => ({ x: Math.min(0.97, Math.max(0.03, x)), y: Math.min(0.97, Math.max(0.03, y)) });
 
@@ -219,7 +229,7 @@ export function Customizer() {
 
   /** PNG de la vista actual (foto real o ilustración). */
   async function renderPng(width = 1200): Promise<Blob> {
-    if (usePhoto && canvasRef.current) {
+    if (realistic && canvasRef.current) {
       const c = canvasRef.current;
       const out = document.createElement("canvas");
       out.width = c.width;
@@ -229,7 +239,7 @@ export function Customizer() {
       x.fillStyle = "rgba(255,255,255,.75)";
       x.font = `600 ${Math.round(c.width / 40)}px Arial, sans-serif`;
       x.textAlign = "center";
-      x.fillText("Simulación · Visual Graf", c.width / 2, c.height - c.width / 30);
+      x.fillText("Simulación · Visual Graf", c.width / 2, c.height - c.width / 40);
       return new Promise((res, rej) => out.toBlob((b) => (b ? res(b) : rej(new Error("png"))), "image/png"));
     }
     return svgToPng(svgRef.current!, width);
@@ -246,6 +256,33 @@ export function Customizer() {
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     } catch {
       setError("No se pudo descargar la imagen. Probá con otro navegador.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /** Genera la "Muestra digital" (JPG) con el estilo de Visual Graf. */
+  async function buildMuestra() {
+    const ink = printSvgRef.current ? await svgToImage(printSvgRef.current) : null;
+    const canvas = await renderMuestra({
+      title: brand.trim() || "Tu marca",
+      printCm: logoCm ? { w: Math.round(logoCm.w * 100) / 100, h: Math.round(logoCm.h * 100) / 100 } : null,
+      bags: [{ ...spec, ink }],
+      tipo: model === "rinon" ? "Bolsa manija riñón" : model === "hielo" ? "Bolsa de hielo" : "Bolsa ecommerce",
+      material: bagName,
+      impresion: original ? "Multicolor" : inkName,
+      medidas: size.label.replace(/\s*\(.*\)/, "").replace(/\s/g, " "),
+      web: "www.vgtubolsaimpresa.store",
+    });
+    return canvas.toDataURL("image/jpeg", 0.88);
+  }
+
+  async function showMuestra() {
+    setBusy(true);
+    try {
+      setMuestraUrl(await buildMuestra());
+    } catch {
+      setError("No pudimos generar la muestra. Probá de nuevo.");
     } finally {
       setBusy(false);
     }
@@ -269,7 +306,8 @@ export function Customizer() {
   async function addDesignToOrder() {
     setBusy(true);
     try {
-      const mockup = await blobToDataUrl(await renderPng(900));
+      // La muestra digital viaja con el pedido (sirve como base de la prueba de diseño)
+      const mockup = await buildMuestra().catch(async () => blobToDataUrl(await renderPng(900)));
       const logoData = logoFile && logoFile.size < 2.5 * 1024 * 1024 ? await blobToDataUrl(logoFile) : undefined;
       const meta = designMeta();
       saveDesign({
@@ -290,7 +328,7 @@ export function Customizer() {
 
   const waMsg = `¡Hola Visual Graf! Probé mi logo en el simulador y quiero cotizar: bolsa ${modelDef.name} ${size.label}, color ${bagName}, impresión ${original ? "multicolor (consultar)" : inkName}${logoCm ? `, logo de ${cm(logoCm.w)} × ${cm(logoCm.h)} cm` : ""}. Les adjunto la imagen de la simulación y mi logo.`;
   const printProps = { layout, logoUrl: processed?.url ?? null, rotation, color: printColor, font };
-  const photoVersion = JSON.stringify([bag, model, sizeIdx, layout, processed?.url.length, rotation, printColor, fontId]);
+  const renderVersion = JSON.stringify([bag, model, sizeIdx, layout, processed?.url.length, rotation, printColor, fontId]);
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-x-12">
@@ -352,46 +390,47 @@ export function Customizer() {
             <p className="text-xs font-semibold tracking-wide text-white/70">
               {modelDef.name} · {size.label} · área de impresión aprox. {cm(printW)} × {cm(printH)} cm
             </p>
-            {photo && (
-              <div className="flex rounded-full border border-line bg-ink/60 p-1 text-xs font-semibold" role="radiogroup" aria-label="Tipo de vista">
-                {(["foto", "ilustracion"] as const).map((v) => (
-                  <button key={v} type="button" role="radio" aria-checked={view === v} onClick={() => setView(v)} className={`rounded-full px-3 py-1.5 transition ${view === v ? "bg-white text-ink" : "text-white/75 hover:text-white"}`}>
-                    {v === "foto" ? "Foto real" : "Ilustración"}
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="flex rounded-full border border-line bg-ink/60 p-1 text-xs font-semibold" role="radiogroup" aria-label="Tipo de vista">
+              {(["realista", "ilustracion"] as const).map((v) => (
+                <button key={v} type="button" role="radio" aria-checked={view === v} onClick={() => setView(v)} className={`rounded-full px-3 py-1.5 transition ${view === v ? "bg-white text-ink" : "text-white/75 hover:text-white"}`}>
+                  {v === "realista" ? "Realista" : "Ilustración"}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {usePhoto && photo && fit ? (
+          {realistic ? (
             <>
-              <PhotoMockup
-                photo={photo}
+              <RealisticMockup
+                spec={spec}
                 printSvg={printSvgRef}
-                version={photoVersion}
+                version={renderVersion}
                 canvasRef={canvasRef}
+                rectRef={rectRef}
                 interactive={Boolean(processed)}
-                label={`Foto de bolsa ${modelDef.name} ${size.label} color ${bagName} con tu diseño impreso en ${original ? "colores originales" : inkName}`}
+                label={`Bolsa ${modelDef.name} ${size.label} color ${bagName} con tu diseño impreso en ${original ? "colores originales" : inkName}`}
                 onPointerDown={(px, py, e) => {
-                  if (startDrag((px - fit.ox) / fit.s, (py - fit.oy) / fit.s)) e.currentTarget.setPointerCapture(e.pointerId);
+                  const r = rectRef.current;
+                  if (r && startDrag(((px - r.x) / r.w) * printW, ((py - r.y) / r.h) * printH)) e.currentTarget.setPointerCapture(e.pointerId);
                 }}
-                onPointerMove={(px, py) => moveDrag((px - fit.ox) / fit.s, (py - fit.oy) / fit.s)}
+                onPointerMove={(px, py) => {
+                  const r = rectRef.current;
+                  if (r) moveDrag(((px - r.x) / r.w) * printW, ((py - r.y) / r.h) * printH);
+                }}
                 onPointerUp={endDrag}
                 onKeyDown={onKeyDown}
               />
-              {/* Capa de impresión (oculta) que se "imprime" sobre la foto */}
+              {/* Capa de impresión en cm (oculta): se "imprime" sobre la bolsa realista */}
               <svg
                 ref={printSvgRef}
                 aria-hidden
                 xmlns="http://www.w3.org/2000/svg"
-                width={photo.rect[2] * 2}
-                height={photo.rect[3] * 2}
-                viewBox={`0 0 ${photo.rect[2]} ${photo.rect[3]}`}
+                width={1400}
+                height={Math.round((1400 * printH) / printW)}
+                viewBox={`0 0 ${printW} ${printH}`}
                 style={{ position: "absolute", left: -99999, top: 0, width: 1, height: 1 }}
               >
-                <g transform={`translate(${fit.ox - photo.rect[0]} ${fit.oy - photo.rect[1]}) scale(${fit.s})`}>
-                  <PrintContent {...printProps} placeholder />
-                </g>
+                <PrintContent {...printProps} placeholder />
               </svg>
             </>
           ) : (
@@ -456,6 +495,9 @@ export function Customizer() {
           <a href={waLink(waMsg)} target="_blank" rel="noopener noreferrer" className="btn btn-whatsapp">
             <IconWhatsApp /> Pedir presupuesto
           </a>
+          <button type="button" onClick={showMuestra} disabled={busy || !realistic} className="btn btn-ghost sm:col-span-2" title={realistic ? undefined : "Disponible en la vista realista"}>
+            Ver muestra digital
+          </button>
           <button type="button" onClick={addDesignToOrder} disabled={busy || !processed} className="btn btn-primary sm:col-span-2">
             <IconBag /> {processed ? "Usar este diseño y comprar" : "Subí tu logo para comprar con este diseño"}
           </button>
@@ -492,7 +534,6 @@ export function Customizer() {
               );
             })}
           </div>
-          {!photo && <p className="mt-2 text-xs text-mute">Para este color mostramos una ilustración (todavía no tenemos foto real).</p>}
         </section>
 
         <section aria-labelledby="paso3">
@@ -548,6 +589,11 @@ export function Customizer() {
           </div>
         </section>
 
+        <div>
+          <label htmlFor="marca" className="label">Nombre de tu marca <span className="font-normal text-mute">(para la muestra digital)</span></label>
+          <input id="marca" className="field" maxLength={40} placeholder="Ej: Hielo Cubitos" value={brand} onChange={(e) => setBrand(e.target.value)} />
+        </div>
+
         <section aria-labelledby="paso5">
           <h2 id="paso5" className="mb-1 font-display text-lg font-extrabold"><span className="text-gradient">5.</span> Textos y datos de contacto</h2>
           <p className="mb-3 text-sm text-mute">Opcional. Se imprimen abajo, en el mismo color, y se ajustan solos al ancho de la bolsa.</p>
@@ -581,6 +627,22 @@ export function Customizer() {
           La simulación es una referencia. Antes de imprimir te enviamos la <strong className="text-white">prueba de diseño final</strong> y solo producimos cuando la aprobás.
         </p>
       </div>
+      {muestraUrl && (
+        <div role="dialog" aria-modal="true" aria-label="Muestra digital" className="fixed inset-0 z-[60] grid place-items-center bg-black/80 p-4 backdrop-blur" onClick={() => setMuestraUrl(null)}>
+          <div className="max-h-full w-full max-w-xl overflow-auto rounded-2xl bg-ink-2 p-3" onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- imagen generada en el navegador */}
+            <img src={muestraUrl} alt="Muestra digital de tu bolsa" className="w-full rounded-xl" />
+            <div className="mt-3 flex flex-wrap justify-end gap-2">
+              <a href={muestraUrl} download={`muestra-digital-${(brand || "visualgraf").toLowerCase().replace(/\W+/g, "-")}.jpg`} className="btn btn-primary">
+                <IconDownload /> Descargar muestra
+              </a>
+              <button type="button" className="btn btn-ghost" onClick={() => setMuestraUrl(null)} autoFocus>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

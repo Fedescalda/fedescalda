@@ -10,6 +10,7 @@ import { isOrderStatus } from "@/lib/order-status";
 import type { ShippingConfig } from "@/lib/settings";
 import { provinces } from "@/lib/validation";
 import { getAdminClient } from "./session";
+import { createAdminClient } from "@/lib/supabase/server";
 
 const denied = { error: "No tenés permisos para hacer este cambio." };
 
@@ -150,4 +151,34 @@ export async function saveShipping(_state: ActionResult, form: FormData): Promis
   revalidatePath("/carrito");
   revalidatePath("/admin/configuracion");
   return { success: "Configuración guardada." };
+}
+
+/** Envía la muestra digital que generó el cliente en el simulador como prueba de diseño. */
+export async function sendMockupAsProof(id: string): Promise<ActionResult> {
+  const supabase = await getAdminClient();
+  if (!supabase) return denied;
+  const order = await getOrderById(id);
+  if (!order) return { error: "No pudimos abrir el pedido." };
+  if (!order.mockup_path) return { error: "Este pedido no tiene una muestra del simulador." };
+  if (order.proof_status === "aprobada") return { error: "El cliente ya aprobó una prueba." };
+
+  const storage = createAdminClient()?.storage;
+  if (!storage) return { error: "Storage no configurado." };
+  const ext = order.mockup_path.split(".").pop() || "jpg";
+  const path = `${id}/prueba-muestra-${Date.now()}.${ext}`;
+  const { error } = await storage.from("pedidos").copy(order.mockup_path, path);
+  if (error) return { error: "No pudimos copiar la muestra." };
+
+  const version = (order.proof_version ?? 0) + 1;
+  const saved = await setOrderStatus(id, "diseno", {
+    note: `Muestra digital del simulador enviada como prueba v${version}`,
+    patch: { proof_path: path, proof_status: "enviada", proof_feedback: null, proof_version: version },
+  });
+  if (!saved) return { error: "No pudimos guardar la prueba." };
+  if (order.status === "diseno") {
+    const updated = await getOrderById(id);
+    if (updated) await sendCustomerEmail(updated, "prueba");
+  }
+  refreshOrder(id);
+  return { success: "Muestra enviada al cliente para aprobar." };
 }

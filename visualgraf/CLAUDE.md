@@ -58,11 +58,14 @@ src/
     settings.ts               Envío: Andreani en vivo o por zona (tabla settings) y datos de transferencia
     andreani.ts andreani-core.ts  Cotizador Andreani (GET /v1/tarifas, sin login) + lógica pura (CP, bultos)
     design-store.ts           Diseño del simulador guardado en el navegador para el checkout
+    bag-render.ts             Bolsas realistas en canvas (texturas propias) + "impresión" con luces/pliegues
+    muestra.ts                Genera la "Muestra digital" (JPG) con el estilo de Visual Graf
     supabase/                 Clientes browser/server/admin + config
   middleware.ts               Sesión Supabase para /admin
 supabase/schema.sql seed.sql  Tablas, RLS, datos base
 supabase/migrations/          Cambios posteriores (correr en orden)
 scripts/seed-sql.ts           Genera seed.sql
+scripts/generate-bag-textures.py  Genera public/img/bags/*.webp (plástico arrugado, sin fotos de terceros)
 tests/                        Playwright: smoke, flujos, compra
 public/img/                   Fotos webp (productos/, clientes/) y logo
 ```
@@ -88,6 +91,12 @@ cliente aprueba en /pedido/[token] → en_produccion → admin carga envío → 
 Todo cambio de estado pasa por `setOrderStatus()` para que quede en el historial y se avise al cliente.
 Correr SQL contra Supabase desde la nube de Claude: no hay acceso directo al puerto de Postgres; usar un deploy
 temporal de Vercel con un endpoint protegido por token y borrarlo después.
+
+## Simulador
+- Diagramación en cm (components/customizer/layout.ts): igual para la vista realista y la ilustración.
+- Vista realista: texturas propias + compositeInk. NO usar fotos de clientes ni mockups de stock (licencias
+  de Freepik/Rebrandy/Envato prohíben uso en webs/apps).
+- La muestra digital se adjunta al pedido como mockup; el admin la puede enviar como prueba con un clic.
 
 ## Pendientes conocidos
 - Confirmar precios de bolsas para hielo con manija riñón y ecommerce (hoy "a cotizar").
