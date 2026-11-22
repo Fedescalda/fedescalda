@@ -95,7 +95,7 @@ export function RealisticMockup({
       role="img"
       aria-label={label}
       tabIndex={interactive ? 0 : -1}
-      className="mx-auto block h-auto w-full max-w-[30rem] rounded-2xl focus-visible:outline-2 focus-visible:outline-brand-cyan"
+      className="relative z-10 mx-auto block h-auto w-full max-w-[30rem] rounded-2xl focus-visible:outline-2 focus-visible:outline-brand-cyan"
       style={{ aspectRatio: `${CW} / ${CH}`, touchAction: interactive ? "none" : "auto", cursor: interactive ? "grab" : "default" }}
       onPointerDown={(e) => {
         if (!onPointerDown) return;

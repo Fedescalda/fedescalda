@@ -82,7 +82,7 @@ export async function drawBag(
   ctx.drawImage(tex, x + (w - tw) / 2, y + (h - th) / 2, tw, th);
 
   // Sellos y detalles
-  const sealLight = isClear ? "rgba(255,255,255,0.35)" : texture === "negro" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
+  const sealLight = isClear ? "rgba(255,255,255,0.35)" : texture === "negro" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.06)";
   ctx.fillStyle = sealLight;
   if (shape === "rinon") {
     ctx.fillRect(x, y + h - h * 0.018, w, h * 0.018);
@@ -94,7 +94,7 @@ export async function drawBag(
     ctx.fillRect(x, y + h * 0.15, w, h * 0.012);
     ctx.fillRect(x, y + h - h * 0.02, w, h * 0.02);
   } else if (shape === "ecommerce") {
-    ctx.fillStyle = texture === "negro" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.1)";
+    ctx.fillStyle = texture === "negro" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.1)";
     ctx.fillRect(x, y, w, h * 0.075);
     ctx.fillStyle = "rgba(255,255,255,0.78)";
     ctx.fillRect(x + w * 0.04, y + h * 0.075, w * 0.92, h * 0.022); // cinta adhesiva

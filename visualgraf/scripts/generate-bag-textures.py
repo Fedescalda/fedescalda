@@ -84,7 +84,10 @@ def opaque(base, k_diff, k_spec, k_soft):
     return rgb
 
 save("blanco", opaque([226, 229, 234], 0.085, 0.3, 0.04))
-save("negro", opaque([30, 30, 34], 0.16, 0.55, 0.06))
+# Negro: base profunda; el brillo solo en crestas (especular concentrado), sin velo gris general
+neg = np.array([14, 14, 17], np.float32) * (1 + d[..., None] * 0.22)
+neg += (spec[..., None] ** 1.5) * 255 * 0.62 + soft[..., None] * 255 * 0.03
+save("negro", neg)
 save("lila", opaque([201, 168, 240], 0.05, 0.32, 0.05))
 save("rosa", opaque([232, 62, 150], 0.06, 0.3, 0.04))
 # Cristal: casi transparente, con brillos y bordes de pliegues visibles
