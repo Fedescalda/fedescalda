@@ -73,6 +73,7 @@
 </head>
 <body>
   <a href="#catalogo" class="skip">Ir al catálogo</a>
+  <div class="progress" id="progreso" aria-hidden="true"></div>
 
   <header class="nav">
     <a href="#inicio" class="nav__brand" translate="no">Amantes del Fuego</a>
@@ -118,7 +119,7 @@
     <section class="reel" aria-labelledby="reel-titulo">
       <div class="container">
         <div class="reel__head">
-          <h2 id="reel-titulo">El catálogo en 15 segundos</h2>
+          <h2 id="reel-titulo" class="bar-h">El catálogo en 15 segundos</h2>
           <p>Discos, mecheros, estacas y leñeros, con sus precios.</p>
         </div>
         <div class="reel__frame">
@@ -133,12 +134,15 @@
       </div>
     </section>
 
-    <p class="motto" translate="no"><b>El fuego nos une</b> <span aria-hidden="true">/</span> <b>La pasión nos identifica</b></p>
+    <div class="motto" translate="no">
+      <p class="sr-only">El fuego nos une. La pasión nos identifica.</p>
+      <div class="motto__track" aria-hidden="true"><span>El fuego nos une</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg><span>La pasión nos identifica</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg><span>El fuego nos une</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg><span>La pasión nos identifica</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg><span>El fuego nos une</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg><span>La pasión nos identifica</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg><span>El fuego nos une</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg><span>La pasión nos identifica</span><svg class="motto__sep" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z" fill="currentColor"/></svg></div>
+    </div>
 
     <section id="catalogo" class="catalog" aria-labelledby="catalogo-titulo">
       <div class="container">
         <div class="catalog__head">
-          <h2 id="catalogo-titulo">Catálogo</h2>
+          <h2 id="catalogo-titulo" class="bar-h">Catálogo</h2>
           <p>Elegí tus productos y mandanos el pedido por WhatsApp. Te confirmamos disponibilidad y entrega.</p>
         </div>
         <div class="filters" id="filters" role="group" aria-label="Filtrar por categoría"></div>
@@ -146,10 +150,33 @@
       </div>
     </section>
 
+    <section class="steps" aria-labelledby="pasos-titulo">
+      <div class="container">
+        <h2 id="pasos-titulo" class="bar-h">Cómo comprar</h2>
+        <ol class="steps__list" id="pasos">
+          <li class="step">
+            <span class="step__num" aria-hidden="true">1</span>
+            <h3>Elegí tus productos</h3>
+            <p>Sumalos al pedido desde el catálogo y mirá el total al instante.</p>
+          </li>
+          <li class="step">
+            <span class="step__num" aria-hidden="true">2</span>
+            <h3>Mandá el pedido por WhatsApp</h3>
+            <p>El mensaje se arma solo, con cada producto y su precio.</p>
+          </li>
+          <li class="step">
+            <span class="step__num" aria-hidden="true">3</span>
+            <h3>Coordinamos pago y entrega</h3>
+            <p>Te confirmamos disponibilidad y acordamos cómo lo recibís.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
     <section id="contacto" class="contact">
       <div class="container contact__grid">
         <div>
-          <h2>Todo lo que necesitás para vivir tu pasión por el fuego.</h2>
+          <h2 class="bar-h">Todo lo que necesitás para vivir tu pasión por el fuego.</h2>
           <p class="contact__text">Estamos en Arroyo Seco, Santa Fe. Consultanos por productos, medidas, envíos y formas de pago.</p>
           <p class="contact__tel">WhatsApp: <a href="#" class="js-wa-link">+54 9 3402 48-7788</a></p>
           <div class="contact__actions">

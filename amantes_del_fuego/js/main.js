@@ -105,8 +105,9 @@
     if (filtro === "Todos") url.searchParams.delete("cat");
     else url.searchParams.set("cat", filtro);
     try { history.replaceState(null, "", url); } catch (_) {}
-    renderFiltros();
-    renderProductos();
+    const cambiar = () => { renderFiltros(); renderProductos(); };
+    if (document.startViewTransition && !sinMovimiento) document.startViewTransition(cambiar);
+    else cambiar();
   });
 
   // Pedido (carrito). Se guarda por nombre de producto para que no se mezcle si cambia el orden del catálogo.
@@ -165,9 +166,22 @@
     renderCarrito();
     avisar(`${p.nombre} agregado al pedido`);
     const btnCarrito = $(".cart-btn");
-    btnCarrito.classList.remove("bump");
-    void btnCarrito.offsetWidth;
-    btnCarrito.classList.add("bump");
+    const saltar = () => { btnCarrito.classList.remove("bump"); void btnCarrito.offsetWidth; btnCarrito.classList.add("bump"); };
+    const foto = b.closest(".item").querySelector("img");
+    if (foto && !sinMovimiento && foto.animate) {
+      const de = foto.getBoundingClientRect(), a = btnCarrito.getBoundingClientRect();
+      const clon = foto.cloneNode();
+      clon.removeAttribute("loading");
+      clon.className = "vuela";
+      Object.assign(clon.style, { left: de.left + "px", top: de.top + "px", width: de.width + "px", height: de.height + "px" });
+      document.body.appendChild(clon);
+      const dx = a.left + a.width / 2 - (de.left + de.width / 2), dy = a.top + a.height / 2 - (de.top + de.height / 2);
+      clon.animate([
+        { transform: "translate(0, 0) scale(1)", opacity: 1 },
+        { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 120}px) scale(.45) rotate(-8deg)`, opacity: 1, offset: 0.5 },
+        { transform: `translate(${dx}px, ${dy}px) scale(.08) rotate(-20deg)`, opacity: 0.4 },
+      ], { duration: 750, easing: "cubic-bezier(.5, 0, .7, 1)" }).finished.then(() => { clon.remove(); saltar(); }, () => clon.remove());
+    } else saltar();
     b.textContent = "Agregado";
     b.classList.add("is-added");
     setTimeout(() => { b.textContent = "Agregar al pedido"; b.classList.remove("is-added"); }, 1200);
@@ -259,6 +273,19 @@
       vida: 0.55 + Math.random() * 0.4,
     });
     const cantidad = () => Math.round(Math.min(70, w / 18));
+    const puntero = { x: -999, y: -999 };
+    const hero = canvas.closest(".hero");
+    const posicion = (e) => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    hero.addEventListener("pointermove", (e) => { [puntero.x, puntero.y] = posicion(e); });
+    hero.addEventListener("pointerleave", () => { puntero.x = puntero.y = -999; });
+    hero.addEventListener("pointerdown", (e) => {
+      if (e.target.closest("a, button")) return;
+      const [x, y] = posicion(e);
+      for (let i = 0; i < 22; i++) {
+        const ang = -Math.PI / 2 + (Math.random() - 0.5) * 2.2, vel = 60 + Math.random() * 160;
+        chispas.push({ x, y, r: 0.8 + Math.random() * 1.6, vx: Math.cos(ang) * vel, vy: -Math.sin(ang) * vel, fase: Math.random() * 6, vida: Math.min(1, 1 - y / h + 0.2 + Math.random() * 0.25), extra: true });
+      }
+    });
     medir();
     chispas = Array.from({ length: cantidad() }, () => nueva(true));
     addEventListener("resize", () => { medir(); chispas.length = Math.min(chispas.length, cantidad()); });
@@ -269,12 +296,21 @@
       ultimo = t;
       ctx.clearRect(0, 0, w, h);
       ctx.globalCompositeOperation = "lighter";
-      while (chispas.length < cantidad()) chispas.push(nueva(false));
-      chispas.forEach((c, i) => {
+      while (chispas.filter((c) => !c.extra).length < cantidad()) chispas.push(nueva(false));
+      for (let i = chispas.length - 1; i >= 0; i--) {
+        const c = chispas[i];
+        // El puntero sopla las brasas: las chispas cercanas se apartan
+        const px = c.x - puntero.x, py = c.y - puntero.y, d = Math.hypot(px, py);
+        if (d < 110 && d > 0) { const f = (110 - d) * 4 * dt; c.x += (px / d) * f; c.y += (py / d) * f; }
+        if (c.extra) { c.vx *= 1 - 1.2 * dt; c.vy = c.vy * (1 - 1.2 * dt) + 30 * dt; }
         c.y -= c.vy * dt;
         c.x += (c.vx + Math.sin(t / 600 + c.fase) * 12) * dt;
         const altura = 1 - c.y / h; // 0 abajo, 1 arriba
-        if (altura > c.vida || c.y < -10) { chispas[i] = nueva(false); return; }
+        if (altura > c.vida || c.y < -10 || c.x < -20 || c.x > w + 20) {
+          if (c.extra || chispas.length > cantidad()) chispas.splice(i, 1);
+          else chispas[i] = nueva(false);
+          continue;
+        }
         const alfa = Math.max(0, 1 - altura / c.vida) * (0.7 + 0.3 * Math.sin(t / 90 + c.fase));
         const g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r * 4);
         g.addColorStop(0, `rgba(255, 210, 140, ${alfa})`);
@@ -284,7 +320,7 @@
         ctx.beginPath();
         ctx.arc(c.x, c.y, c.r * 4, 0, Math.PI * 2);
         ctx.fill();
-      });
+      }
       requestAnimationFrame(cuadro);
     }
     // Pausar cuando la portada no se ve o la pestaña está oculta
@@ -293,6 +329,32 @@
     document.addEventListener("visibilitychange", () => (document.hidden ? (activo = false) : reanudar()));
     requestAnimationFrame(cuadro);
   }
+
+  // Barra de progreso y palabras de "Nosotros" que se encienden al bajar
+  const progreso = $("#progreso");
+  const frase = $(".about__statement");
+  frase.innerHTML = frase.textContent.trim().split(/\s+/).map((p) => `<span class="w">${escapar(p)}</span> `).join("");
+  const palabras = [...frase.querySelectorAll(".w")];
+  let pendiente = false;
+  function alDesplazar() {
+    pendiente = false;
+    const max = document.documentElement.scrollHeight - innerHeight;
+    progreso.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max) : 0})`;
+    if (sinMovimiento) { palabras.forEach((w) => w.classList.add("on")); return; }
+    const r = frase.getBoundingClientRect();
+    const avance = Math.min(1, Math.max(0, (innerHeight * 0.85 - r.top) / (r.height + innerHeight * 0.35)));
+    const encendidas = Math.round(avance * palabras.length);
+    palabras.forEach((w, i) => w.classList.toggle("on", i < encendidas));
+  }
+  addEventListener("scroll", () => { if (!pendiente) { pendiente = true; requestAnimationFrame(alDesplazar); } }, { passive: true });
+  addEventListener("resize", alDesplazar);
+  alDesplazar();
+
+  const pasos = $("#pasos");
+  if ("IntersectionObserver" in window) {
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { pasos.classList.add("is-in"); obs.disconnect(); } }, { threshold: 0.35 });
+    obs.observe(pasos);
+  } else pasos.classList.add("is-in");
 
   // Datos estructurados (schema.org): URLs absolutas, horarios y catálogo desde productos.js
   try {
