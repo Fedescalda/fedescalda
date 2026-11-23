@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Visual Graf Navidad</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=block" rel="stylesheet">
+<style>
+  :root{
+    --ink:#07070d; --ink3:#161629; --mute:#a6a6c0;
+    --cyan:#34d3f3; --blue:#3a64ff; --violet:#9b33f5; --magenta:#ff2e93; --orange:#ff7a1c; --yellow:#ffc61f; --green:#39c16a; --wa:#25d366;
+    --gold:linear-gradient(90deg,#ffe08a,#ffc61f 45%,#ff9a1c);
+    --rainbow:linear-gradient(90deg,#34d3f3 0%,#3a64ff 22%,#9b33f5 44%,#ff2e93 64%,#ff7a1c 82%,#ffc61f 100%);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#333;font-family:'DM Sans',sans-serif;display:flex;flex-direction:column;gap:40px;padding:40px;align-items:center}
+  .slide{width:1080px;height:1350px;position:relative;overflow:hidden;background:var(--ink);color:#f2f2f7;padding:90px}
+  .slide::before{content:"";position:absolute;inset:0;pointer-events:none;background:
+     radial-gradient(760px 560px at 100% 0%,rgba(255,46,147,.25),transparent 62%),
+     radial-gradient(700px 600px at 0% 100%,rgba(255,198,31,.16),transparent 60%)}
+  /* nieve */
+  .slide::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.55;background-image:
+     radial-gradient(circle at 10% 20%,#fff 0 2px,transparent 2.5px),
+     radial-gradient(circle at 70% 60%,#fff 0 1.6px,transparent 2px),
+     radial-gradient(circle at 40% 85%,rgba(255,255,255,.8) 0 1.2px,transparent 1.8px),
+     radial-gradient(circle at 85% 15%,rgba(255,255,255,.9) 0 2.4px,transparent 3px);
+     background-size:230px 230px,300px 300px,170px 170px,350px 350px}
+  .slide>*{position:relative;z-index:2}
+  h1,h2,h3{font-family:Montserrat,sans-serif;font-weight:900;letter-spacing:-0.035em;line-height:.98}
+  .grad{background:var(--rainbow);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .gold{background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .head{position:absolute!important;top:64px;left:90px;right:90px;display:flex;justify-content:space-between;align-items:center;z-index:8}
+  .brand{display:flex;align-items:center;gap:16px}
+  .brand img{width:62px;height:62px}
+  .brand b{font-family:Montserrat;font-weight:800;font-size:28px;letter-spacing:.02em;line-height:1}
+  .brand small{display:block;font-family:Montserrat;font-weight:600;font-size:14px;letter-spacing:.32em;color:var(--mute);margin-top:6px}
+  .tag{font-family:Montserrat;font-weight:800;font-size:20px;letter-spacing:.16em;color:var(--ink);background:var(--yellow);border-radius:999px;padding:10px 20px}
+  .rbar{position:absolute!important;left:0;right:0;bottom:0;height:12px;background:var(--rainbow)}
+  .eyebrow{font-family:Montserrat;font-weight:800;font-size:24px;letter-spacing:.22em;text-transform:uppercase;color:var(--yellow)}
+  .swipe{position:absolute!important;right:90px;bottom:62px;font-family:Montserrat;font-weight:700;font-size:24px;display:flex;align-items:center;gap:14px;z-index:8}
+  .swipe i{display:inline-block;width:60px;height:4px;background:var(--rainbow);position:relative}
+  .swipe i::after{content:"";position:absolute;right:-4px;top:-8px;border:10px solid transparent;border-left:14px solid var(--yellow);border-right:0}
+  .photo{border-radius:32px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+  .photo img{width:100%;height:100%;object-fit:cover;display:block}
+  .chip{display:inline-flex;align-items:center;gap:12px;border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);border-radius:999px;padding:14px 26px;font-size:26px;font-weight:600}
+  .chip i{width:12px;height:12px;border-radius:50%;background:var(--yellow)}
+
+  /* adornos navideños colgantes en colores de marca */
+  .orn{position:absolute!important;top:0;display:flex;flex-direction:column;align-items:center;z-index:6}
+  .orn s{display:block;width:3px;background:linear-gradient(#ffe08a,#c9a03f)}
+  .orn u{display:block;width:30px;height:20px;border-radius:5px 5px 2px 2px;background:linear-gradient(#ffe08a,#c9a03f);margin-bottom:-4px;position:relative;z-index:2}
+  .orn b{display:block;border-radius:50%;position:relative;box-shadow:inset -14px -18px 30px rgba(0,0,0,.35),0 16px 40px rgba(0,0,0,.45)}
+  .orn b::before{content:"";position:absolute;left:20%;top:16%;width:30%;height:22%;border-radius:50%;background:rgba(255,255,255,.75);filter:blur(3px);transform:rotate(-25deg)}
+  .orn b::after{content:"";position:absolute;left:0;right:0;top:46%;height:12%;background:rgba(255,255,255,.22)}
+
+  /* 1 · Portada */
+  .s1 .photo{position:absolute!important;right:70px;top:150px;width:400px;height:470px;transform:rotate(5deg);border:10px solid #fff;border-radius:18px}
+  .s1 .bow{position:absolute!important;right:210px;top:110px;z-index:7;font-size:90px;transform:rotate(8deg);filter:drop-shadow(0 8px 12px rgba(0,0,0,.4))}
+  .s1 .copy{position:absolute!important;left:90px;bottom:160px;width:900px;z-index:7}
+  .s1 h1{font-size:96px;margin:22px 0 34px}
+  .s1 .shade{display:none}
+  .s1 .sticker{display:inline-flex;align-items:center;gap:16px;background:var(--magenta);color:#fff;font-family:Montserrat;font-weight:900;font-size:40px;text-transform:uppercase;padding:18px 30px;border-radius:18px;transform:rotate(-2deg);box-shadow:0 12px 0 rgba(255,46,147,.3)}
+
+  /* 2 · Por qué */
+  .s2 h2{margin-top:170px;font-size:96px}
+  .s2 .lead{margin-top:34px;font-size:38px;line-height:1.35;color:#d9d9e6;width:880px}
+  .s2 .lead b{color:#fff}
+  .s2 .dates{margin-top:70px;display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  .s2 .d{border-radius:30px;padding:40px 32px;background:var(--ink3);border:2px solid rgba(255,255,255,.08)}
+  .s2 .d b{display:block;font-family:Montserrat;font-weight:900;font-size:130px;letter-spacing:-0.05em;line-height:.9}
+  .s2 .d span{display:block;font-family:Montserrat;font-weight:800;font-size:26px;letter-spacing:.12em;color:var(--mute);margin-top:6px}
+  .s2 .d p{margin-top:18px;font-size:30px;font-weight:600;line-height:1.25}
+  .s2 .q{margin-top:80px;font-family:Montserrat;font-weight:900;font-size:56px;letter-spacing:-0.02em;line-height:1.08}
+
+  /* 3 · Línea de tiempo */
+  .s3 h2{margin-top:170px;font-size:96px}
+  .s3 .tl{margin-top:80px;position:relative;padding-left:70px}
+  .s3 .tl::before{content:"";position:absolute;left:24px;top:20px;bottom:20px;width:6px;border-radius:3px;background:linear-gradient(180deg,var(--cyan),var(--violet) 45%,var(--magenta) 70%,var(--yellow))}
+  .s3 .ev{position:relative;padding:34px 0 34px 30px}
+  .s3 .ev::before{content:"";position:absolute;left:-60px;top:46px;width:34px;height:34px;border-radius:50%;background:var(--ink);border:6px solid var(--c)}
+  .s3 .ev small{font-family:Montserrat;font-weight:800;font-size:24px;letter-spacing:.14em;color:var(--c)}
+  .s3 .ev h3{font-size:54px;margin-top:6px;letter-spacing:-0.02em}
+  .s3 .ev p{font-size:29px;color:#c9c9d8;margin-top:6px}
+  .s3 .ev.key{background:linear-gradient(90deg,rgba(255,46,147,.22),rgba(255,46,147,0));border-radius:24px;margin-left:-10px;padding-left:40px}
+  .s3 .ev.key h3{font-size:62px}
+
+  /* 4 · Productos */
+  .s4 h2{margin-top:170px;font-size:88px}
+  .s4 .cards{margin-top:44px;display:flex;flex-direction:column;gap:22px}
+  .s4 .c{display:grid;grid-template-columns:200px 1fr auto;gap:30px;align-items:center;background:var(--ink3);border:2px solid rgba(255,255,255,.08);border-radius:30px;padding:20px 34px 20px 20px}
+  .s4 .c img{width:200px;height:215px;object-fit:cover;border-radius:20px}
+  .s4 .c small{font-family:Montserrat;font-weight:800;font-size:20px;letter-spacing:.16em;color:var(--yellow)}
+  .s4 .c h3{font-size:42px;margin-top:6px;letter-spacing:-0.02em}
+  .s4 .c p{font-size:24px;color:#c9c9d8;margin-top:8px;line-height:1.3}
+  .s4 .c .pr{text-align:right;font-family:Montserrat;font-weight:900;font-size:40px;letter-spacing:-0.03em;line-height:1}
+  .s4 .c .pr span{display:block;font-family:'DM Sans';font-weight:600;font-size:20px;color:var(--mute);letter-spacing:0;margin-bottom:6px}
+
+  /* 5 · Marcas */
+  .s5 h2{margin-top:170px;font-size:78px}
+  .s5 .sub{margin-top:18px;font-size:30px;color:var(--mute)}
+  .s5 .grid{margin-top:44px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .s5 .cell{position:relative;height:380px;border-radius:26px;overflow:hidden}
+  .s5 .cell img{width:100%;height:100%;object-fit:cover}
+  .s5 .cell span{position:absolute;left:14px;bottom:14px;background:rgba(7,7,13,.82);border-radius:999px;padding:9px 18px;font-weight:700;font-size:21px}
+
+  /* 6 · CTA */
+  .s6{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+  .s6 .tear{width:440px;background:#fff;color:var(--ink);border-radius:34px;overflow:hidden;box-shadow:0 26px 0 rgba(255,46,147,.55);transform:rotate(-3deg);margin-top:120px}
+  .s6 .tear .top{background:var(--magenta);color:#fff;font-family:Montserrat;font-weight:900;font-size:40px;letter-spacing:.06em;padding:24px 0}
+  .s6 .tear .n{font-family:Montserrat;font-weight:900;font-size:230px;letter-spacing:-0.06em;line-height:1;margin-top:6px}
+  .s6 .tear .l{font-family:Montserrat;font-weight:800;font-size:28px;letter-spacing:.1em;padding-bottom:28px;text-transform:uppercase}
+  .s6 h2{margin-top:60px;font-size:84px}
+  .s6 .wa{margin-top:44px;display:inline-flex;align-items:center;gap:20px;background:var(--wa);color:#04140a;border-radius:999px;padding:28px 50px;font-family:Montserrat;font-weight:800;font-size:38px}
+  .s6 .wa svg{width:46px;height:46px}
+  .s6 .alt{margin-top:24px;font-size:30px;color:#d9d9e6}
+  .s6 .alt b{color:#fff}
+  .s6 .links{position:absolute!important;left:90px;right:90px;bottom:64px;display:flex;justify-content:space-between;font-size:26px;font-weight:600;color:#d9d9e6}
+</style>
+</head>
+<body>
+
+<!-- 1 · Portada -->
+<section class="slide s1" id="s1">
+  <div class="head"><div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div><span class="tag">🎄 PROMO FIESTAS</span></div>
+  <div class="orn" style="left:360px"><s style="height:250px"></s><u></u><b style="width:100px;height:100px;background:radial-gradient(circle at 35% 30%,#ff7cbc,#ff2e93 55%,#a3105a)"></b></div>
+  <div class="orn" style="left:480px"><s style="height:340px"></s><u></u><b style="width:76px;height:76px;background:radial-gradient(circle at 35% 30%,#9ce9fa,#34d3f3 55%,#0f7f99)"></b></div>
+  <div class="orn" style="left:-12px"><s style="height:190px"></s><u></u><b style="width:110px;height:110px;background:radial-gradient(circle at 35% 30%,#ffe08a,#ffc61f 55%,#b07c00)"></b></div>
+  <div class="photo"><img src="img/perfumate.webp" alt=""></div>
+  <div class="bow">🎀</div>
+  <div class="shade"></div>
+  <div class="copy">
+    <div class="eyebrow">Navidad · Año Nuevo · Reyes</div>
+    <h1>Cada regalo sale<br>en una bolsa.<br><span class="gold">Que sea la tuya.</span></h1>
+    <div class="sticker">⏰ Pedí antes del 10/12</div>
+  </div>
+  <div class="swipe">Deslizá <i></i></div>
+  <div class="rbar"></div>
+</section>
+
+<!-- 2 · Por qué -->
+<section class="slide s2" id="s2">
+  <div class="head"><div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div><span class="tag">02 / 06</span></div>
+  <h2>Se vienen<br><span class="grad">las fiestas.</span></h2>
+  <p class="lead">Es cuando más gente entra a tu local y <b>más bolsas salen a la calle.</b> Cada una puede llevar tu marca… o no decir nada.</p>
+  <div class="dates">
+    <div class="d"><b class="grad">24</b><span>DICIEMBRE</span><p>Nochebuena y regalos 🎁</p></div>
+    <div class="d"><b class="grad">31</b><span>DICIEMBRE</span><p>Brindis, fiestas y hielo 🥂</p></div>
+    <div class="d"><b class="grad">6</b><span>ENERO</span><p>Reyes y más regalos 👑</p></div>
+  </div>
+  <p class="q">Tu marca puede estar<br>en <span class="gold">cada mesa de las fiestas.</span></p>
+  <div class="rbar"></div>
+</section>
+
+<!-- 3 · Línea de tiempo -->
+<section class="slide s3" id="s3">
+  <div class="head"><div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div><span class="tag">03 / 06</span></div>
+  <h2>Anticipate<br><span class="grad">y llegá tranquilo.</span></h2>
+  <div class="tl">
+    <div class="ev" style="--c:var(--cyan)"><small>HOY</small><h3>Elegí y probá tu logo</h3><p>En el simulador de la web, en 5 minutos.</p></div>
+    <div class="ev key" style="--c:var(--magenta)"><small>10 DE DICIEMBRE</small><h3>Último día para pedir</h3><p>Para tenerlas a tiempo para las fiestas.</p></div>
+    <div class="ev" style="--c:var(--violet)"><small>DICIEMBRE</small><h3>Aprobás y producimos</h3><p>Te mandamos la prueba de diseño y la confirmás con un clic.</p></div>
+    <div class="ev" style="--c:var(--yellow)"><small>ANTES DE LAS FIESTAS</small><h3>Las recibís listas 🎄</h3><p>Envíos a toda la Argentina.</p></div>
+  </div>
+  <div class="rbar"></div>
+</section>
+
+<!-- 4 · Productos -->
+<section class="slide s4" id="s4">
+  <div class="head"><div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div><span class="tag">04 / 06</span></div>
+  <h2>Tus bolsas<br><span class="gold">para las fiestas</span></h2>
+  <div class="cards">
+    <div class="c"><img src="img/olivia.webp" alt=""><div><small>PARA REGALOS</small><h3>Manija riñón</h3><p>Ropa, perfumería, accesorios y regalería. Pack de 100, 5 medidas.</p></div><div class="pr"><span>desde</span>$44.000</div></div>
+    <div class="c"><img src="img/thomas-grande.webp" alt="" style="object-position:center 60%"><div><small>PARA EL BRINDIS</small><h3>Bolsas para hielo</h3><p>Pack ×1500 en 3 medidas, para la temporada más fuerte.</p></div><div class="pr"><span>pack</span>$610.000</div></div>
+    <div class="c"><img src="img/ecommerce-rosa.webp" alt=""><div><small>PARA TUS ENVÍOS</small><h3>Ecommerce</h3><p>Rosa o negro, resistentes y con tu logo.</p></div><div class="pr"><span>precio</span>Consultá</div></div>
+  </div>
+  <div class="rbar"></div>
+</section>
+
+<!-- 5 · Marcas -->
+<section class="slide s5" id="s5">
+  <div class="head"><div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div><span class="tag">05 / 06</span></div>
+  <h2>Marcas que ya salen<br><span class="grad">con su bolsa</span></h2>
+  <p class="sub">Trabajos reales, impresos en serigrafía.</p>
+  <div class="grid">
+    <div class="cell"><img src="img/perfumate.webp" alt=""><span>Perfúmate MG</span></div>
+    <div class="cell"><img src="img/olivia.webp" alt=""><span>Olivia Kids</span></div>
+    <div class="cell"><img src="img/thomas.webp" alt=""><span>Thomas Hielo</span></div>
+    <div class="cell"><img src="img/aromasol.webp" alt=""><span>Aromasol</span></div>
+    <div class="cell"><img src="img/dobleg-negra.webp" alt="" style="object-position:center 60%"><span>Doble G Sports</span></div>
+    <div class="cell"><img src="img/pame.webp" alt=""><span>Pame Megastore</span></div>
+  </div>
+  <div class="rbar"></div>
+</section>
+
+<!-- 6 · CTA -->
+<section class="slide s6" id="s6">
+  <div class="orn" style="left:110px"><s style="height:120px"></s><u></u><b style="width:84px;height:84px;background:radial-gradient(circle at 35% 30%,#ff7cbc,#ff2e93 55%,#a3105a)"></b></div>
+  <div class="orn" style="right:130px"><s style="height:200px"></s><u></u><b style="width:100px;height:100px;background:radial-gradient(circle at 35% 30%,#ffe08a,#ffc61f 55%,#b07c00)"></b></div>
+  <div class="orn" style="right:300px"><s style="height:60px"></s><u></u><b style="width:64px;height:64px;background:radial-gradient(circle at 35% 30%,#9ce9fa,#34d3f3 55%,#0f7f99)"></b></div>
+  <div class="tear"><div class="top">DICIEMBRE</div><div class="n">10</div><div class="l">Último día para pedir</div></div>
+  <h2>Que tus clientes brinden<br><span class="gold">con tu marca.</span></h2>
+  <div class="wa"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.8-2.7-1.1-4.4-3.9-4.5-4.1-.1-.2-1.1-1.4-1.1-2.7s.7-1.9.9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>3364 62-2890</div>
+  <p class="alt">o escribinos <b>“NAVIDAD”</b> por DM 🎄</p>
+  <div class="links"><span>vgtubolsaimpresa.store</span><span>@visualgraf.tubolsaimpresa</span></div>
+  <div class="rbar"></div>
+</section>
+
+</body>
+</html>
