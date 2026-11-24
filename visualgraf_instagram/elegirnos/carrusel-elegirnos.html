@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Visual Graf Elegirnos</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=block" rel="stylesheet">
+<style>
+  :root{
+    --ink:#07070d; --ink3:#161629; --mute:#a6a6c0;
+    --cyan:#34d3f3; --blue:#3a64ff; --violet:#9b33f5; --magenta:#ff2e93; --orange:#ff7a1c; --yellow:#ffc61f; --green:#39c16a; --wa:#25d366;
+    --rainbow:linear-gradient(90deg,#34d3f3 0%,#3a64ff 22%,#9b33f5 44%,#ff2e93 64%,#ff7a1c 82%,#ffc61f 100%);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#333;font-family:'DM Sans',sans-serif;display:flex;flex-direction:column;gap:40px;padding:40px;align-items:center}
+  .slide{width:1080px;height:1350px;position:relative;overflow:hidden;background:var(--ink);color:#f2f2f7;padding:90px}
+  .slide::before{content:"";position:absolute;inset:0;pointer-events:none;background:
+     radial-gradient(760px 560px at 100% 0%,rgba(155,51,245,.26),transparent 62%),
+     radial-gradient(700px 600px at 0% 100%,rgba(52,211,243,.16),transparent 60%)}
+  .slide>*{position:relative;z-index:2}
+  h1,h2,h3{font-family:Montserrat,sans-serif;font-weight:900;letter-spacing:-0.035em;line-height:.98}
+  .grad{background:var(--rainbow);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .head{position:absolute!important;top:64px;left:90px;right:90px;display:flex;justify-content:space-between;align-items:center;z-index:8}
+  .brand{display:flex;align-items:center;gap:16px}
+  .brand img{width:62px;height:62px}
+  .brand b{font-family:Montserrat;font-weight:800;font-size:28px;letter-spacing:.02em;line-height:1}
+  .brand small{display:block;font-family:Montserrat;font-weight:600;font-size:14px;letter-spacing:.32em;color:var(--mute);margin-top:6px}
+  .tag{font-family:Montserrat;font-weight:800;font-size:20px;letter-spacing:.16em;color:var(--ink);background:#fff;border-radius:999px;padding:10px 20px}
+  .rbar{position:absolute!important;left:0;right:0;bottom:0;height:12px;background:var(--rainbow)}
+  .eyebrow{font-family:Montserrat;font-weight:800;font-size:24px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan)}
+  .swipe{position:absolute!important;right:90px;bottom:62px;font-family:Montserrat;font-weight:700;font-size:24px;display:flex;align-items:center;gap:14px;z-index:8}
+  .swipe i{display:inline-block;width:60px;height:4px;background:var(--rainbow);position:relative}
+  .swipe i::after{content:"";position:absolute;right:-4px;top:-8px;border:10px solid transparent;border-left:14px solid var(--yellow);border-right:0}
+  .photo{border-radius:32px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+  .photo img{width:100%;height:100%;object-fit:cover;display:block}
+  .num{display:inline-grid;place-items:center;min-width:80px;height:80px;padding:0 14px;border-radius:999px;font-family:Montserrat;font-weight:900;font-size:30px;color:var(--ink);margin-bottom:22px}
+  .feat{display:grid;grid-template-columns:70px 1fr;gap:24px;align-items:start;padding:28px 0;border-bottom:2px solid rgba(255,255,255,.1)}
+  .feat:last-child{border-bottom:0}
+  .feat i{font-style:normal;width:70px;height:70px;border-radius:20px;display:grid;place-items:center;font-size:34px;background:var(--ink3);border:2px solid rgba(255,255,255,.1)}
+  .feat h3{font-size:40px;letter-spacing:-0.02em}
+  .feat p{font-size:26px;color:#c9c9d8;margin-top:8px;line-height:1.32}
+
+  /* 1 · Portada */
+  .s1 .photo{position:absolute!important;right:-30px;top:150px;width:560px;height:520px;transform:rotate(4deg)}
+  .s1 .shade{position:absolute!important;inset:0;z-index:3;background:linear-gradient(90deg,rgba(7,7,13,.9) 0%,rgba(7,7,13,0) 55%),linear-gradient(0deg,rgba(7,7,13,1) 0%,rgba(7,7,13,.95) 36%,rgba(7,7,13,0) 58%)}
+  .s1 .copy{position:absolute!important;left:90px;bottom:160px;width:900px;z-index:4}
+  .s1 h1{font-size:124px;margin:22px 0 30px}
+  .s1 .sub{font-size:34px;color:#d9d9e6;line-height:1.35}
+  .s1 .sub b{color:#fff}
+
+  /* 2 · Calidad */
+  .s2 h2{margin-top:160px;font-size:92px}
+  .s2 .wrap{margin-top:44px;display:grid;grid-template-columns:1fr 380px;gap:44px;align-items:start}
+  .s2 .photo{height:760px}
+
+  /* 3 · Ves tu bolsa antes */
+  .s3 h2{margin-top:160px;font-size:92px}
+  .s3 .wrap{margin-top:50px;display:grid;grid-template-columns:420px 1fr;gap:50px;align-items:center}
+  .s3 .phone{height:780px;border-radius:60px;background:#111120;border:10px solid #2a2a40;box-shadow:0 30px 80px rgba(0,0,0,.6);padding:40px 26px;display:flex;flex-direction:column;align-items:center;position:relative}
+  .s3 .phone::before{content:"";position:absolute;top:16px;left:50%;transform:translateX(-50%);width:120px;height:22px;border-radius:999px;background:#2a2a40}
+  .s3 .phone .t{font-family:Montserrat;font-weight:800;font-size:20px;letter-spacing:.14em;color:var(--mute);margin-top:10px}
+  .s3 .bagm{margin-top:24px;width:270px;height:380px;border-radius:20px 20px 34px 34px;background:linear-gradient(160deg,#ffffff,#ecebe6);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:0 20px 40px rgba(0,0,0,.4)}
+  .s3 .bagm::before{content:"";position:absolute;top:28px;width:110px;height:34px;border-radius:999px;background:#111120}
+  .s3 .bagm .lg{width:110px;height:110px;border-radius:50%;border:8px solid var(--magenta);display:grid;place-items:center;font-family:Montserrat;font-weight:900;font-size:28px;color:var(--magenta);margin-top:40px}
+  .s3 .bagm b{font-family:Montserrat;font-weight:900;font-size:30px;color:var(--magenta)}
+  .s3 .sw{margin-top:22px;display:flex;gap:12px}
+  .s3 .sw i{width:36px;height:36px;border-radius:50%;border:3px solid rgba(255,255,255,.25)}
+  .s3 .sw i.on{outline:3px solid #fff;outline-offset:3px}
+  .s3 .btn{margin-top:auto;width:100%;text-align:center;background:var(--rainbow);color:#fff;font-family:Montserrat;font-weight:900;font-size:26px;border-radius:999px;padding:20px}
+
+  /* 4 · Comprar fácil */
+  .s4 h2{margin-top:160px;font-size:92px}
+  .s4 .grid{margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .s4 .card{background:var(--ink3);border:2px solid rgba(255,255,255,.08);border-radius:32px;padding:44px 38px;min-height:410px}
+  .s4 .card h3{font-size:48px;letter-spacing:-0.02em}
+  .s4 .card p{font-size:28px;color:#c9c9d8;margin-top:12px;line-height:1.32}
+
+  /* 5 · A tu medida */
+  .s5 h2{margin-top:160px;font-size:92px}
+  .s5 .photo{margin-top:44px;height:420px}
+  .s5 .row{margin-top:40px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px}
+  .s5 .box{background:var(--ink3);border:2px solid rgba(255,255,255,.08);border-radius:28px;padding:30px 28px}
+  .s5 .box b{display:block;font-family:Montserrat;font-weight:900;font-size:96px;letter-spacing:-0.05em;line-height:.95}
+  .s5 .box p{font-size:25px;color:#d2d2e0;margin-top:8px}
+  .s5 .dots{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
+  .s5 .dots i{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.3)}
+
+  /* 6 · Especialistas */
+  .s6 .photo{position:absolute!important;left:90px;right:90px;top:150px;height:480px}
+  .s6 .photo img{object-position:center 40%}
+  .s6 .copy{position:absolute!important;left:90px;right:90px;top:680px}
+  .s6 h2{font-size:84px}
+  .s6 .quote{margin-top:30px;font-size:31px;line-height:1.4;color:#d9d9e6;border-left:6px solid var(--magenta);padding-left:26px}
+  .s6 .stats{margin-top:40px;display:flex;gap:50px}
+  .s6 .stats b{display:block;font-family:Montserrat;font-weight:900;font-size:80px;letter-spacing:-0.05em;line-height:1}
+  .s6 .stats span{font-size:23px;color:var(--mute)}
+
+  /* 7 · CTA */
+  .s7 h2{margin-top:160px;font-size:96px}
+  .s7 ul{margin-top:56px;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:26px 30px}
+  .s7 li{font-size:32px;font-weight:600;display:flex;gap:14px;align-items:center}
+  .s7 li::before{content:"✓";flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--rainbow);color:#fff;font-weight:900;font-size:22px}
+  .s7 .faces{margin-top:70px;display:flex;align-items:center}
+  .s7 .faces img{width:96px;height:96px;border-radius:50%;object-fit:cover;border:4px solid var(--ink);margin-right:-28px;box-shadow:0 0 0 3px rgba(255,255,255,.2)}
+  .s7 .faces span{margin-left:52px;font-size:27px;color:#d9d9e6;max-width:500px;line-height:1.35}
+  .s7 .faces b{color:#fff}
+  .s7 .wa{margin-top:70px;display:inline-flex;align-items:center;gap:20px;background:var(--wa);color:#04140a;border-radius:999px;padding:30px 52px;font-family:Montserrat;font-weight:800;font-size:40px}
+  .s7 .wa svg{width:48px;height:48px}
+  .s7 .alt{margin-top:22px;font-size:29px;color:#d9d9e6}
+  .s7 .links{position:absolute!important;left:90px;right:90px;bottom:64px;display:flex;justify-content:space-between;font-size:26px;font-weight:600;color:#d9d9e6}
+</style>
+</head>
+<body>
+
+<!-- 1 · Portada -->
+<section class="slide s1" id="s1">
+  <div class="head"><div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div><span class="tag">01 / 07</span></div>
+  <div class="photo"><img src="img/vg-marca.webp" alt="" style="object-position:center 48%"></div>
+  <div class="shade"></div>
+  <div class="copy">
+    <div class="eyebrow">Por qué elegirnos</div>
+    <h1>No es solo<br>una bolsa.<br><span class="grad">Es tu marca.</span></h1>
+    <p class="sub">Te contamos qué tienen nuestras bolsas<br>que las hace <b>distintas.</b></p>
+  </div>
+  <div class="swipe">Deslizá <i></i></div>
+  <div class="rbar"></div>
+</section>
+
+<!-- 2 · Calidad -->
+<section class="slide s2" id="s2">
+  <div class="head"><div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div><span class="tag">02 / 07</span></div>
+  <h2>Calidad<br><span class="grad">que se nota.</span></h2>
+  <div class="wrap">
+    <div>
+      <div class="feat"><i>🎨</i><div><h3>Serigrafía</h3><p>Tu logo nítido y resistente, que no se borra con el uso.</p></div></div>
+      <div class="feat"><i>💪</i><div><h3>Alta densidad</h3><p>Bolsas manija riñón firmes, que aguantan lo que vendés.</p></div></div>
+      <div class="feat"><i>🧊</i><div><h3>Apta alimentos</h3><p>Bolsas para hielo de baja densidad virgen, de 40 a 60 micrones.</p></div></div>
+      <div class="feat"><i>🤝</i><div><h3>Asesoramiento</h3><p>Te ayudamos a elegir la medida, el formato y la impresión.</p></div></div>
+    </div>
+    <div class="photo"><img src="img/perfumate.webp" alt=""></div>
+  </div>
+  <div class="rbar"></div>
+</section>
+
+<!-- 3 · Ves tu bolsa antes -->
+<section class="slide s3" id="s3">
+  <div class="head"><div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div><span class="tag">03 / 07</span></div>
+  <h2>Ves tu bolsa<br><span class="grad">antes de pagarla.</span></h2>
+  <div class="wrap">
+    <div class="phone">
+      <div class="t">SIMULADOR</div>
+      <div class="bagm"><div class="lg">LOGO</div><b>TU MARCA</b></div>
+      <div class="sw"><i style="background:#f5f5f2" class="on"></i><i style="background:#141416"></i><i style="background:#dfe7ee"></i><i style="background:#c9a7f3"></i><i style="background:#ec3f97"></i></div>
+      <div class="btn">✓ Aprobar diseño</div>
+    </div>
+    <div>
+      <div class="feat"><i>📱</i><div><h3>Simulador gratis</h3><p>Subís tu logo en la web y ves cómo queda en cada color de bolsa.</p></div></div>
+      <div class="feat"><i>✅</i><div><h3>Prueba de diseño</h3><p>Te la mandamos antes de producir y la aprobás con un clic.</p></div></div>
+      <div class="feat"><i>🖼️</i><div><h3>¿Solo tenés una foto del logo?</h3><p>Mandala igual: te ayudamos a adaptarla para imprimir.</p></div></div>
+    </div>
+  </div>
+  <div class="rbar"></div>
+</section>
+
+<!-- 4 · Comprar fácil -->
+<section class="slide s4" id="s4">
+  <div class="head"><div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div><span class="tag">04 / 07</span></div>
+  <h2>Comprar es<br><span class="grad">así de simple.</span></h2>
+  <div class="grid">
+    <div class="card"><span class="num" style="background:var(--cyan)">100</span><h3>Desde 100 unidades</h3><p>Packs pensados para emprendimientos que recién arrancan.</p></div>
+    <div class="card"><span class="num" style="background:var(--violet);color:#fff">$</span><h3>Pagás como quieras</h3><p>Mercado Pago o transferencia, todo desde la web.</p></div>
+    <div class="card"><span class="num" style="background:var(--magenta);color:#fff">✓</span><h3>Seguís tu pedido</h3><p>Un link privado te muestra en qué etapa está tu pedido.</p></div>
+    <div class="card"><span class="num" style="background:var(--yellow)">AR</span><h3>Envíos al país</h3><p>Vendemos a toda la Argentina. Estés donde estés, te llega.</p></div>
+  </div>
+  <div class="rbar"></div>
+</section>
+
+<!-- 5 · A tu medida -->
+<section class="slide s5" id="s5">
+  <div class="head"><div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div><span class="tag">05 / 07</span></div>
+  <h2>Hecha<br><span class="grad">a tu medida.</span></h2>
+  <div class="photo"><img src="img/bolsas-colores.webp" alt=""></div>
+  <div class="row">
+    <div class="box"><b class="grad">5</b><p>medidas, de 20×30 a 40×50 cm</p></div>
+    <div class="box"><b class="grad">5</b><p>colores de bolsa</p><div class="dots"><i style="background:#f5f5f2"></i><i style="background:#141416"></i><i style="background:#dfe7ee"></i><i style="background:#c9a7f3"></i><i style="background:#ec3f97"></i></div></div>
+    <div class="box"><b class="grad">11</b><p>colores de tinta, oro y plata incluidos</p></div>
+  </div>
+  <div class="rbar"></div>
+</section>
+
+<!-- 6 · Especialistas -->
+<section class="slide s6" id="s6">
+  <div class="head"><div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div><span class="tag">06 / 07</span></div>
+  <div class="photo"><img src="img/produccion.webp" alt=""></div>
+  <div class="copy">
+    <h2>No somos una imprenta más.<br><span class="grad">Hacemos bolsas.</span></h2>
+    <p class="quote">“Cuando un cliente me encarga una bolsa, para mí no se trata solamente de imprimir un logo. Se trata de ayudar a que su marca salga a la calle, llegue a más personas y sea recordada.”</p>
+    <div class="stats">
+      <div><b class="grad">8</b><span>años en el rubro</span></div>
+      <div><b class="grad">12</b><span>marcas ya confiaron</span></div>
+      <div><b class="grad">10</b><span>rubros distintos</span></div>
+    </div>
+  </div>
+  <div class="rbar"></div>
+</section>
+
+<!-- 7 · CTA -->
+<section class="slide s7" id="s7">
+  <div class="head"><div class="brand"><img src="img/logo-512.png" alt=""><div><b>VISUAL GRAF</b><small>TU BOLSA IMPRESA</small></div></div><span class="tag">07 / 07</span></div>
+  <h2>Elegí una bolsa<br><span class="grad">que hable por vos.</span></h2>
+  <ul>
+    <li>Serigrafía de calidad</li><li>Desde 100 unidades</li>
+    <li>Simulador gratis</li><li>Prueba de diseño</li>
+    <li>Mercado Pago</li><li>Seguimiento online</li>
+    <li>5 colores · 11 tintas</li><li>Envíos a todo el país</li>
+  </ul>
+  <div class="faces"><img src="img/perfumate.webp" alt=""><img src="img/olivia.webp" alt=""><img src="img/thomas.webp" alt=""><img src="img/aromasol.webp" alt=""><img src="img/dobleg-negra.webp" alt=""><span><b>Perfúmate MG, Olivia Kids, Thomas Hielo</b> y más marcas ya nos eligieron.</span></div>
+  <div class="wa"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.8-2.7-1.1-4.4-3.9-4.5-4.1-.1-.2-1.1-1.4-1.1-2.7s.7-1.9.9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>3364 62-2890</div>
+  <p class="alt">o escribinos <b>“QUIERO MIS BOLSAS”</b> por DM</p>
+  <div class="links"><span>vgtubolsaimpresa.store</span><span>@visualgraf.tubolsaimpresa</span></div>
+  <div class="rbar"></div>
+</section>
+
+</body>
+</html>
